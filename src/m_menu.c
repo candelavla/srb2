@@ -1081,7 +1081,7 @@ static menuitem_t OP_ChangeControlsMenu[] =
 	{IT_CALL | IT_STRING2, NULL, "Move Right",       M_ChangeControl, GC_STRAFERIGHT },
 	{IT_CALL | IT_STRING2, NULL, "Jump",             M_ChangeControl, GC_JUMP        },
 	{IT_CALL | IT_STRING2, NULL, "Spin",             M_ChangeControl, GC_SPIN        },
-	{IT_CALL | IT_STRING2, NULL, "Peelout / Shield",   M_ChangeControl, GC_SHIELD      },
+	{IT_CALL | IT_STRING2, NULL, "Peelout / Shield",   M_ChangeControl, GC_SHIELD    },
 	{IT_HEADER, NULL, "Camera", NULL, 0},
 	{IT_SPACE, NULL, NULL, NULL, 0}, // padding
 	{IT_CALL | IT_STRING2, NULL, "Look Up",        M_ChangeControl, GC_LOOKUP      },
@@ -13591,16 +13591,24 @@ static void M_ChangeControlResponse(event_t *ev)
 
 static void M_ChangeControl(INT32 choice)
 {
-	// This buffer assumes a 35-character message (per below) plus a max control name limit of 32 chars (per controltochangetext)
+	// This buffer assumes a 91-character message (per below) plus a max control name limit of 32 chars (per controltochangetext)
 	// If you change the below message, then change the size of this buffer!
-	static char tmp[68];
+	static char tmp[124];
 
 	if (tutorialmode && tutorialgcs) // don't allow control changes if temp control override is active
 		return;
 
 	controltochange = currentMenu->menuitems[choice].alphaKey;
-	sprintf(tmp, M_GetText("Hit the new key for\n%s\nESC for Cancel"),
-		currentMenu->menuitems[choice].text);
+	if (controltochange == GC_SHIELD)
+	{
+		sprintf(tmp, M_GetText("Press the new key/button for\n%s\n\nESCAPE to cancel\n\nBind to same key/button as Spin to disable"),
+			currentMenu->menuitems[choice].text);
+	}
+	else
+	{
+		sprintf(tmp, M_GetText("Press the new key/button for\n%s\n\nESCAPE to cancel"),
+			currentMenu->menuitems[choice].text);
+	}
 	strlcpy(controltochangetext, currentMenu->menuitems[choice].text, 33);
 
 	M_StartMessage(tmp, M_ChangeControlResponse, MM_EVENTHANDLER);
