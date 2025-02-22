@@ -18,7 +18,7 @@ SRB2 Cherry is a project containing the Reveries and Redberries source modificat
 
 ## Compiling
 
-See [SRB2 Wiki/Source code compiling/makefiles](http://wiki.srb2.org/wiki/Source_code_compiling/makefiles)
+See [SRB2 Wiki/Source code compiling/makefiles](http://wiki.srb2.org/wiki/Source_code_compiling/Makefiles)
 
 ## Disclaimer
 Sonic Team Junior is in no way affiliated with SEGA or Sonic Team. We do not claim ownership of any of SEGA's intellectual property used in SRB2.
