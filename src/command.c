@@ -2314,132 +2314,6 @@ static void CV_EnforceExecVersion(void)
 		CV_StealthSetValue(&cv_execversion, EXECVERSION);
 }
 
-static boolean CV_FilterJoyAxisVars(consvar_t *v, const char *valstr)
-{
-	// If ALL axis settings are previous defaults, set them to the new defaults
-	// EXECVERSION < 26 (2.1.21)
-
-	if (joyaxis_default)
-	{
-		if (!stricmp(v->name, "joyaxis_turn"))
-		{
-			if (joyaxis_count > 6) return false;
-			// we're currently setting the new defaults, don't interfere
-			else if (joyaxis_count == 6) return true;
-
-			if (!stricmp(valstr, "X-Axis")) joyaxis_count++;
-			else joyaxis_default = false;
-		}
-		if (!stricmp(v->name, "joyaxis_move"))
-		{
-			if (joyaxis_count > 6) return false;
-			else if (joyaxis_count == 6) return true;
-
-			if (!stricmp(valstr, "Y-Axis")) joyaxis_count++;
-			else joyaxis_default = false;
-		}
-		if (!stricmp(v->name, "joyaxis_side"))
-		{
-			if (joyaxis_count > 6) return false;
-			else if (joyaxis_count == 6) return true;
-
-			if (!stricmp(valstr, "Z-Axis")) joyaxis_count++;
-			else joyaxis_default = false;
-		}
-		if (!stricmp(v->name, "joyaxis_look"))
-		{
-			if (joyaxis_count > 6) return false;
-			else if (joyaxis_count == 6) return true;
-
-			if (!stricmp(valstr, "None")) joyaxis_count++;
-			else joyaxis_default = false;
-		}
-		if (!stricmp(v->name, "joyaxis_fire")
-			|| !stricmp(v->name, "joyaxis_firenormal"))
-		{
-			if (joyaxis_count > 6) return false;
-			else if (joyaxis_count == 6) return true;
-
-			if (!stricmp(valstr, "None")) joyaxis_count++;
-			else joyaxis_default = false;
-		}
-		// reset all axis settings to defaults
-		if (joyaxis_count == 6)
-		{
-			COM_BufInsertText(va("%s \"%s\"\n", cv_turnaxis.name, cv_turnaxis.defaultvalue));
-			COM_BufInsertText(va("%s \"%s\"\n", cv_moveaxis.name, cv_moveaxis.defaultvalue));
-			COM_BufInsertText(va("%s \"%s\"\n", cv_sideaxis.name, cv_sideaxis.defaultvalue));
-			COM_BufInsertText(va("%s \"%s\"\n", cv_lookaxis.name, cv_lookaxis.defaultvalue));
-			COM_BufInsertText(va("%s \"%s\"\n", cv_fireaxis.name, cv_fireaxis.defaultvalue));
-			COM_BufInsertText(va("%s \"%s\"\n", cv_firenaxis.name, cv_firenaxis.defaultvalue));
-			joyaxis_count++;
-			return false;
-		}
-	}
-
-	if (joyaxis2_default)
-	{
-		if (!stricmp(v->name, "joyaxis2_turn"))
-		{
-			if (joyaxis2_count > 6) return false;
-			// we're currently setting the new defaults, don't interfere
-			else if (joyaxis2_count == 6) return true;
-
-			if (!stricmp(valstr, "X-Axis")) joyaxis2_count++;
-			else joyaxis2_default = false;
-		}
-		if (!stricmp(v->name, "joyaxis2_move"))
-		{
-			if (joyaxis2_count > 6) return false;
-			else if (joyaxis2_count == 6) return true;
-
-			if (!stricmp(valstr, "Y-Axis")) joyaxis2_count++;
-			else joyaxis2_default = false;
-		}
-		if (!stricmp(v->name, "joyaxis2_side"))
-		{
-			if (joyaxis2_count > 6) return false;
-			else if (joyaxis2_count == 6) return true;
-
-			if (!stricmp(valstr, "Z-Axis")) joyaxis2_count++;
-			else joyaxis2_default = false;
-		}
-		if (!stricmp(v->name, "joyaxis2_look"))
-		{
-			if (joyaxis2_count > 6) return false;
-			else if (joyaxis2_count == 6) return true;
-
-			if (!stricmp(valstr, "None")) joyaxis2_count++;
-			else joyaxis2_default = false;
-		}
-		if (!stricmp(v->name, "joyaxis2_fire")
-			|| !stricmp(v->name, "joyaxis2_firenormal"))
-		{
-			if (joyaxis2_count > 6) return false;
-			else if (joyaxis2_count == 6) return true;
-
-			if (!stricmp(valstr, "None")) joyaxis2_count++;
-			else joyaxis2_default = false;
-		}
-
-		// reset all axis settings to defaults
-		if (joyaxis2_count == 6)
-		{
-			COM_BufInsertText(va("%s \"%s\"\n", cv_turnaxis2.name, cv_turnaxis2.defaultvalue));
-			COM_BufInsertText(va("%s \"%s\"\n", cv_moveaxis2.name, cv_moveaxis2.defaultvalue));
-			COM_BufInsertText(va("%s \"%s\"\n", cv_sideaxis2.name, cv_sideaxis2.defaultvalue));
-			COM_BufInsertText(va("%s \"%s\"\n", cv_lookaxis2.name, cv_lookaxis2.defaultvalue));
-			COM_BufInsertText(va("%s \"%s\"\n", cv_fireaxis2.name, cv_fireaxis2.defaultvalue));
-			COM_BufInsertText(va("%s \"%s\"\n", cv_firenaxis2.name, cv_firenaxis2.defaultvalue));
-			joyaxis2_count++;
-			return false;
-		}
-	}
-
-	// we haven't reached our counts yet, or we're not default
-	return true;
-}
-
 static boolean CV_FilterVarByVersion(consvar_t *v, const char *valstr)
 {
 	// True means allow the CV change, False means block it
@@ -2449,51 +2323,11 @@ static boolean CV_FilterVarByVersion(consvar_t *v, const char *valstr)
 	if (!(v->flags & CV_SAVE))
 		return true;
 
-	if (GETMAJOREXECVERSION(cv_execversion.value) < 26) // 26 = 2.1.21
-	{
-		// MOUSE SETTINGS
-		// alwaysfreelook split between first and third person (chasefreelook)
-		// mousemove was on by default, which invalidates the current approach
-		if (!stricmp(v->name, "alwaysmlook")
-			|| !stricmp(v->name, "alwaysmlook2")
-			|| !stricmp(v->name, "mousemove")
-			|| !stricmp(v->name, "mousemove2"))
-			return false;
-
-		// mousesens was changed from 35 to 20 due to oversensitivity
-		if ((!stricmp(v->name, "mousesens")
-			|| !stricmp(v->name, "mousesens2")
-			|| !stricmp(v->name, "mouseysens")
-			|| !stricmp(v->name, "mouseysens2"))
-			&& atoi(valstr) == 35)
-			return false;
-
-		// JOYSTICK DEFAULTS
-		// use_joystick was changed from 0 to 1 to automatically use a joystick if available
-#if defined(HAVE_SDL) || defined(_WINDOWS)
-		if ((!stricmp(v->name, "use_joystick")
-			|| !stricmp(v->name, "use_joystick2"))
-			&& atoi(valstr) == 0)
-			return false;
-#endif
-
-		// axis defaults were changed to be friendly to 360 controllers
-		// if ALL axis settings are defaults, then change them to new values
-		if (!CV_FilterJoyAxisVars(v, valstr))
-			return false;
-	}
-
 	if (GETMAJOREXECVERSION(cv_execversion.value) < 57) // 57 = 2.2.16
 	{
 		if (
-			(!stricmp(v->name, "movebob") && atoi(valstr) == FRACUNIT) ||
-			(!stricmp(v->name, "playersforexit") && atoi(valstr) == 4) || // 4 = all
-			(!stricmp(v->name, "advancemap") && atoi(valstr) == 1) || // 1 = next
-			(!stricmp(v->name, "cam_speed") && !stricmp(valstr, "0.3")) ||
-			(!stricmp(v->name, "cam2_speed") && !stricmp(valstr, "0.3")) ||
-			(!stricmp(v->name, "timerres") && atoi(valstr) == 0) || // 0 = classic
 			(!stricmp(v->name, "gr_modelinterpolation")) || // Force reset
-			(!stricmp(v->name, "fov") && atoi(valstr) == 90)
+			(!stricmp(v->name, "fov") && atoi(valstr) < 100)
 		)
 			return false;
 	}
