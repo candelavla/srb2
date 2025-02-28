@@ -2313,49 +2313,6 @@ static void CV_EnforceExecVersion(void)
 		CV_StealthSetValue(&cv_execversion, EXECVERSION);
 }
 
-#ifndef OLD_GAMEPAD_AXES
-static boolean CV_ConvertOldJoyAxisVars(consvar_t *v, const char *valstr)
-{
-	static struct {
-		const char *old;
-		const char *new;
-	} axis_names[] = {
-		{"X-Axis",    "Left Stick X"},
-		{"Y-Axis",    "Left Stick Y"},
-		{"X-Axis-",   "Left Stick X-"},
-		{"Y-Axis-",   "Left Stick Y-"},
-		{"X-Rudder",  "Right Stick X"},
-		{"Y-Rudder",  "Right Stick Y"},
-		{"X-Rudder-", "Right Stick X-"},
-		{"Y-Rudder-", "Right Stick Y-"},
-		{"Z-Axis",    "Left Trigger"},
-		{"Z-Rudder",  "Right Trigger"},
-		{"Z-Axis-",   "Left Trigger"},
-		{"Z-Rudder-", "Right Trigger"},
-		{NULL, NULL}
-	};
-
-	if (v->PossibleValue != joyaxis_cons_t)
-		return true;
-
-	for (unsigned i = 0;; i++)
-	{
-		if (axis_names[i].old == NULL)
-		{
-			CV_SetCVar(v, "None", false);
-			return false;
-		}
-		else if (!stricmp(valstr, axis_names[i].old))
-		{
-			CV_SetCVar(v, axis_names[i].new, false);
-			return false;
-		}
-	}
-
-	return true;
-}
-#endif
-
 static boolean CV_FilterVarByVersion(consvar_t *v, const char *valstr)
 {
 	// True means allow the CV change, False means block it
@@ -2365,13 +2322,14 @@ static boolean CV_FilterVarByVersion(consvar_t *v, const char *valstr)
 	if (!(v->flags & CV_SAVE))
 		return true;
 
-#ifndef OLD_GAMEPAD_AXES
-	if (GETMAJOREXECVERSION(cv_execversion.value) <= 51 && GETMINOREXECVERSION(cv_execversion.value) < 1)
+	if (GETMAJOREXECVERSION(cv_execversion.value) < 57) // 57 = 2.2.16
 	{
-		if (!CV_ConvertOldJoyAxisVars(v, valstr))
+		if (
+			(!stricmp(v->name, "gr_modelinterpolation")) || // Force reset
+			(!stricmp(v->name, "fov") && atoi(valstr) < 100)
+		)
 			return false;
 	}
-#endif
 
 	return true;
 }
