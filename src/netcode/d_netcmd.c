@@ -403,7 +403,7 @@ static CV_PossibleValue_t coopstarposts_cons_t[] = {{0, "Per-player"}, {1, "Shar
 consvar_t cv_coopstarposts = CVAR_INIT ("coopstarposts", "Per-player", CV_SAVE|CV_NETVAR|CV_CALL|CV_ALLOWLUA, coopstarposts_cons_t, CoopStarposts_OnChange);
 
 static CV_PossibleValue_t cooplives_cons_t[] = {{0, "Infinite"}, {1, "Per-player"}, {2, "Avoid Game Over"}, {3, "Single pool"}, {0, NULL}};
-consvar_t cv_cooplives = CVAR_INIT ("cooplives", "Avoid Game Over", CV_SAVE|CV_NETVAR|CV_CALL|CV_CHEAT|CV_ALLOWLUA, cooplives_cons_t, CoopLives_OnChange);
+consvar_t cv_cooplives = CVAR_INIT ("cooplives", "Infinite", CV_SAVE|CV_NETVAR|CV_CALL|CV_CHEAT|CV_ALLOWLUA, cooplives_cons_t, CoopLives_OnChange);
 
 static CV_PossibleValue_t advancemap_cons_t[] = {{0, "Off"}, {1, "Next"}, {2, "Random"}, {0, NULL}};
 consvar_t cv_advancemap = CVAR_INIT ("advancemap", "Next", CV_SAVE|CV_NETVAR|CV_ALLOWLUA, advancemap_cons_t, NULL);
@@ -4268,9 +4268,9 @@ void D_GameTypeChanged(INT32 lastgametype)
 			case GT_TEAMMATCH:
 				if (!cv_timelimit.changed && !cv_pointlimit.changed) // user hasn't changed limits
 				{
-					// default settings for match: timelimit 10 mins, no pointlimit
+					// default settings for match: timelimit 7 mins, no pointlimit
 					CV_SetValue(&cv_pointlimit, 0);
-					CV_SetValue(&cv_timelimit, 10);
+					CV_SetValue(&cv_timelimit, 7);
 				}
 				if (!cv_itemrespawntime.changed)
 					CV_Set(&cv_itemrespawntime, cv_itemrespawntime.defaultvalue); // respawn normally
@@ -4279,9 +4279,9 @@ void D_GameTypeChanged(INT32 lastgametype)
 			case GT_HIDEANDSEEK:
 				if (!cv_timelimit.changed && !cv_pointlimit.changed) // user hasn't changed limits
 				{
-					// default settings for tag: 5 mins, no pointlimit
+					// default settings for tag: 7 mins, no pointlimit
 					// Note that tag mode also uses an alternate timing mechanism in tandem with timelimit.
-					CV_SetValue(&cv_timelimit, 5);
+					CV_SetValue(&cv_timelimit, 7);
 					CV_SetValue(&cv_pointlimit, 0);
 				}
 				if (!cv_itemrespawntime.changed)
@@ -4290,8 +4290,8 @@ void D_GameTypeChanged(INT32 lastgametype)
 			case GT_CTF:
 				if (!cv_timelimit.changed && !cv_pointlimit.changed) // user hasn't changed limits
 				{
-					// default settings for CTF: no timelimit, pointlimit 5
-					CV_SetValue(&cv_timelimit, 0);
+					// default settings for CTF: 15 mins, pointlimit 5
+					CV_SetValue(&cv_timelimit, 15);
 					CV_SetValue(&cv_pointlimit, 5);
 				}
 				if (!cv_itemrespawntime.changed)
