@@ -74,6 +74,25 @@ static line_t *gl_linedef;
 static sector_t *gl_frontsector;
 static sector_t *gl_backsector;
 
+// --------------------------------------------------------------------------
+//                                              STUFF FOR THE PROJECTION CODE
+// --------------------------------------------------------------------------
+
+FTransform atransform;
+// duplicates of the main code, set after R_SetupFrame() passed them into sharedstruct,
+// copied here for local use
+static angle_t dup_viewangle;
+
+static float gl_viewx, gl_viewy, gl_viewz;
+float gl_viewsin, gl_viewcos;
+
+// Maybe not necessary with the new T&L code (needs to be checked!)
+static float gl_viewludsin, gl_viewludcos; // look up down kik test
+static float gl_fovlud;
+
+static angle_t gl_aimingangle;
+static void HWR_SetTransformAiming(FTransform *trans, player_t *player, boolean skybox);
+
 // Render stats
 ps_metric_t ps_hw_skyboxtime = {0};
 ps_metric_t ps_hw_nodesorttime = {0};
@@ -5161,7 +5180,7 @@ static void HWR_DrawSkyBackground(player_t *player)
 		// software doesn't draw any further than 1024 for skies anyway, but this doesn't overlap properly
 		// The only time this will probably be an issue is when a sky wider than 1024 is used as a sky AND a regular wall texture
 
-		angle = (viewangle + xtoviewangle[0]);
+		angle = (dup_viewangle + xtoviewangle[0]);
 
 		dimensionmultiply = ((float)textures[texturetranslation[skytexture]]->width/256.0f);
 
@@ -5282,7 +5301,7 @@ static void HWR_SetupView(player_t *player, INT32 viewnumber, float fpov, boolea
 {
 	postimg_t *type;
 
-	if (splitscreen && player == &players[secondarydisplayplayer])
+	if (viewnumber == 1)
 		type = &postimgtype2;
 	else
 		type = &postimgtype;
@@ -5349,7 +5368,7 @@ static void HWR_SetupView(player_t *player, INT32 viewnumber, float fpov, boolea
 // ==========================================================================
 // Same as rendering the player view, but from the skybox object
 // ==========================================================================
-void HWR_RenderSkyboxView(INT32 viewnumber, player_t *player)
+static void HWR_RenderSkyboxView(INT32 viewnumber, player_t *player)
 {
 	const float fpov = FixedToFloat(R_GetPlayerFov(player));
 

@@ -18,6 +18,7 @@
 #include "doomdef.h"
 #include "doomstat.h"
 #include "r_local.h"
+#include "r_splats.h"
 #include "r_translation.h"
 #include "i_video.h"
 #include "v_video.h"
@@ -101,6 +102,9 @@ float focallengthf;
 */
 
 UINT32 nflatxshift, nflatyshift, nflatshiftup, nflatmask;
+
+// For, uh, tilted lighting, duh.
+static INT32 *tiltlighting;
 
 // =========================================================================
 //                       TRANSLATION COLORMAP CODE
@@ -646,16 +650,6 @@ UINT16 R_GetSuperColorByName(const char *name)
 	return color;
 }
 
-// ==========================================================================
-//               COMMON DRAWER FOR 8 AND 16 BIT COLOR MODES
-// ==========================================================================
-
-// in a perfect world, all routines would be compatible for either mode,
-// and optimised enough
-//
-// in reality, the few routines that can work for either mode, are
-// put here
-
 /**	\brief	The R_InitViewBuffer function
 
 	Creates lookup tables for getting the framebuffer address
@@ -669,6 +663,27 @@ UINT16 R_GetSuperColorByName(const char *name)
 
 */
 
+static void R_AllocViewMemory(void)
+{
+	negonearray = Z_Realloc(negonearray, sizeof(*negonearray) * viewwidth, PU_STATIC, NULL);
+	screenheightarray = Z_Realloc(screenheightarray, sizeof(*screenheightarray) * viewwidth, PU_STATIC, NULL);
+
+	floorclip = Z_Realloc(floorclip, sizeof(*floorclip) * viewwidth, PU_STATIC, NULL);
+	ceilingclip = Z_Realloc(ceilingclip, sizeof(*ceilingclip) * viewwidth, PU_STATIC, NULL);
+
+	frontscale = Z_Realloc(frontscale, sizeof(*frontscale) * viewwidth, PU_STATIC, NULL);
+
+	xtoviewangle = Z_Realloc(xtoviewangle, sizeof(*xtoviewangle) * (viewwidth + 1), PU_STATIC, NULL);
+
+	tiltlighting = Z_Realloc(tiltlighting, sizeof(*tiltlighting) * viewwidth, PU_STATIC, NULL);
+
+	R_AllocSegMemory();
+	R_AllocClipSegMemory();
+	R_AllocPlaneMemory();
+	R_AllocFloorSpriteTables();
+	R_AllocVisSpriteMemory();
+}
+
 void R_InitViewBuffer(INT32 width, INT32 height)
 {
 	INT32 bytesperpixel = vid.bpp;
@@ -679,6 +694,8 @@ void R_InitViewBuffer(INT32 width, INT32 height)
 		height = MAXVIDHEIGHT;
 	if (bytesperpixel < 1 || bytesperpixel > 4)
 		I_Error("R_InitViewBuffer: wrong bytesperpixel value %d\n", bytesperpixel);
+
+	R_AllocViewMemory();
 
 	// Handle resize, e.g. smaller view windows with border and/or status bar.
 	viewwindowx = (vid.width - width) >> 1;
@@ -713,8 +730,6 @@ void R_VideoErase(size_t ofs, INT32 count)
 
 // R_CalcTiltedLighting
 // Exactly what it says on the tin. I wish I wasn't too lazy to explain things properly.
-static INT32 tiltlighting[MAXVIDWIDTH];
-
 static void R_CalcTiltedLighting(fixed_t start, fixed_t end)
 {
 	// ZDoom uses a different lighting setup to us, and I couldn't figure out how to adapt their version

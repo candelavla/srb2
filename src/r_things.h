@@ -58,8 +58,8 @@ void R_DrawFlippedPost(UINT8 *source, unsigned length, void (*drawcolfunc)(void)
 
 // Constant arrays used for psprite clipping
 //  and initializing clipping.
-extern INT16 negonearray[MAXVIDWIDTH];
-extern INT16 screenheightarray[MAXVIDWIDTH];
+extern INT16 *negonearray;
+extern INT16 *screenheightarray;
 
 fixed_t R_GetShadowZ(mobj_t *thing, pslope_t **shadowslope);
 
@@ -226,7 +226,7 @@ typedef struct vissprite_s
 	skincolornum_t color;
 	UINT16 translation;
 
-	INT16 clipbot[MAXVIDWIDTH], cliptop[MAXVIDWIDTH];
+	INT16 *clipbot, *cliptop;
 
 	INT32 dispoffset; // copy of mobj->dispoffset, affects ordering but not drawing
 } vissprite_t;
@@ -234,6 +234,10 @@ typedef struct vissprite_s
 extern UINT32 visspritecount, numvisiblesprites;
 
 void R_ClipSprites(drawseg_t* dsstart, portal_t* portal);
+
+void R_AllocVisSpriteMemory(void);
+
+boolean R_SpriteIsFlashing(vissprite_t *vis);
 
 void R_DrawThingBoundingBox(vissprite_t *spr);
 

@@ -88,6 +88,7 @@ RGBA_t  myPaletteData[256]; // the palette for converting textures to RGBA
 
 GLint   screen_width    = 0;               // used by Draw2DLine()
 GLint   screen_height   = 0;
+GLint   texsize         = 512; // Power-of-two screen texture render resolution
 GLbyte  screen_depth    = 0;
 GLint   textureformatGL = 0;
 GLint maximumAnisotropy = 0;
@@ -944,7 +945,9 @@ static void GLProject(GLfloat objX, GLfloat objY, GLfloat objZ,
 // -----------------+
 void SetModelView(GLint w, GLint h)
 {
-//	GL_DBG_Printf("SetModelView(): %dx%d\n", (int)w, (int)h);
+	GLint maxtexsize = 0;
+
+	//GL_DBG_Printf("SetModelView(): %dx%d\n", (int)w, (int)h);
 
 	// The screen textures need to be flushed if the width or height change so that they be remade for the correct size
 	if (screen_width != w || screen_height != h)
@@ -952,6 +955,22 @@ void SetModelView(GLint w, GLint h)
 
 	screen_width = w;
 	screen_height = h;
+	texsize = 512;
+	while (texsize < w || texsize < h)
+	{
+		texsize *= 2; // Use a power of two texture, dammit
+	}
+
+	pglGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxtexsize); // Get the maximum supported texture size
+	if (texsize > maxtexsize && maxtexsize > 0)
+	{
+		// The desired screen texture resolution is too big for the player's GPU!
+		CONS_Alert(CONS_WARNING, "Tried to make a screen texture for a %dx%d game resolution, but your GPU only supports up to %dx%d! Please switch to the software renderer or lower your game resolution.\n", w, h, maxtexsize, maxtexsize);
+
+		// For now, let's just pray that clamping it to the maximum supported size "works"
+		// There'll be a stretchy "border" artefact, but it's better than failing to make the screen textures
+		texsize = maxtexsize;
+	}
 
 	pglViewport(0, 0, w, h);
 
@@ -2855,7 +2874,6 @@ EXPORT void HWRAPI(PostImgRedraw) (float points[SCREENVERTS][SCREENVERTS][2])
 	INT32 x, y;
 	float float_x, float_y, float_nextx, float_nexty;
 	float xfix, yfix;
-	INT32 texsize = 512;
 
 	const float blackBack[16] =
 	{
@@ -2950,7 +2968,6 @@ EXPORT void HWRAPI(FlushScreenTextures) (void)
 EXPORT void HWRAPI(DrawScreenTexture)(int tex, FSurfaceInfo *surf, FBITFIELD polyflags)
 {
 	float xfix, yfix;
-	INT32 texsize = 512;
 
 	const float screenVerts[12] =
 	{
@@ -2999,7 +3016,6 @@ EXPORT void HWRAPI(DrawScreenTexture)(int tex, FSurfaceInfo *surf, FBITFIELD pol
 EXPORT void HWRAPI(DoScreenWipe)(int wipeStart, int wipeEnd, FSurfaceInfo *surf,
 		FBITFIELD polyFlags)
 {
-	INT32 texsize = 512;
 	float xfix, yfix;
 
 	INT32 fademaskdownloaded = tex_downloaded; // the fade mask that has been set
@@ -3106,7 +3122,6 @@ EXPORT void HWRAPI(DoScreenWipe)(int wipeStart, int wipeEnd, FSurfaceInfo *surf,
 // Create a texture from the screen.
 EXPORT void HWRAPI(MakeScreenTexture) (int tex)
 {
-	INT32 texsize = 512;
 	boolean firstTime = (screenTextures[tex] == 0);
 
 	// look for power of two that is large enough for the screen
@@ -3138,7 +3153,6 @@ EXPORT void HWRAPI(DrawScreenFinalTexture)(int tex, int width, int height)
 	float origaspect, newaspect;
 	float xoff = 1, yoff = 1; // xoffset and yoffset for the polygon to have black bars around the screen
 	FRGBAFloat clearColour;
-	INT32 texsize = 512;
 
 	float off[12];
 	float fix[8];

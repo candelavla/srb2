@@ -22,8 +22,16 @@
 
 struct rastery_s *prastertab; // for ASM code
 
-static struct rastery_s rastertab[MAXVIDHEIGHT];
+static struct rastery_s *rastertab;
 static void prepare_rastertab(void);
+
+static boolean *cliptable;
+
+void R_AllocFloorSpriteTables(void)
+{
+	cliptable = Z_Realloc(cliptable, sizeof(*cliptable) * (viewwidth + 1), PU_STATIC, NULL);
+	rastertab = Z_Realloc(rastertab, sizeof(*rastertab) * viewheight, PU_STATIC, NULL);
+}
 
 // ==========================================================================
 //                                                               FLOOR SPLATS
@@ -485,8 +493,6 @@ static void R_RasterizeFloorSplat(floorsplat_t *pSplat, vector2_t *verts, visspr
 
 	for (y = miny; y <= maxy; y++)
 	{
-		boolean cliptab[MAXVIDWIDTH+1];
-
 		x1 = rastertab[y].minx>>FRACBITS;
 		x2 = rastertab[y].maxx>>FRACBITS;
 
@@ -509,10 +515,10 @@ static void R_RasterizeFloorSplat(floorsplat_t *pSplat, vector2_t *verts, visspr
 			continue;
 
 		for (i = x1; i <= x2; i++)
-			cliptab[i] = (y >= mfloorclip[i] || y <= mceilingclip[i]);
+			cliptable[i] = (y >= mfloorclip[i] || y <= mceilingclip[i]);
 
 		// clip left
-		while (cliptab[x1])
+		while (cliptable[x1])
 		{
 			x1++;
 			if (x1 >= viewwidth)
@@ -524,7 +530,7 @@ static void R_RasterizeFloorSplat(floorsplat_t *pSplat, vector2_t *verts, visspr
 
 		while (i > x1)
 		{
-			if (cliptab[i])
+			if (cliptable[i])
 				x2 = i-1;
 			i--;
 			if (i < 0)

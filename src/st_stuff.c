@@ -433,12 +433,8 @@ void ST_Start(void)
 }
 
 //
-// Initializes the status bar, sets the defaults border patch for the window borders.
+// Initializes the status bar
 //
-
-// used by OpenGL mode, holds lumpnum of flat used to fill space around the viewwindow
-lumpnum_t st_borderpatchnum;
-
 void ST_Init(void)
 {
 	if (dedicated)

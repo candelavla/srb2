@@ -328,7 +328,7 @@ static void D_Display(void)
 	// 4. The frame is ready to be drawn!
 
 	// Check for change of renderer or screen size (video mode)
-	if ((setrenderneeded || setmodeneeded) && !wipe)
+	if (vid.change.set && !wipe)
 		SCR_SetMode(); // change video mode
 
 	// Recalc the screen
@@ -509,18 +509,20 @@ static void D_Display(void)
 				// render the second screen
 				if (splitscreen && players[secondarydisplayplayer].mo)
 				{
-					viewwindowy = vid.height / 2;
-
-#ifdef HWRENDER
-					if (rendermode == render_opengl)
+	#ifdef HWRENDER
+					if (rendermode != render_soft)
 						HWR_RenderPlayerView(1, &players[secondarydisplayplayer]);
 					else
 #endif
 					if (rendermode != render_none)
 					{
+						viewwindowy = vid.height / 2;
+
 						topleft = screens[0] + viewwindowy*vid.width + viewwindowx;
 
 						R_RenderPlayerView(&players[secondarydisplayplayer]);
+
+						viewwindowy = 0;
 					}
 
 					viewwindowy = 0;
@@ -1513,7 +1515,7 @@ void D_SRB2Main(void)
 	G_LoadGameData(clientGamedata);
 	M_CopyGameData(serverGamedata, clientGamedata);
 
-	VID_PrepareModeList(); // Regenerate Modelist according to cv_fullscreen
+	allow_fullscreen = true;
 
 	// set user default mode or mode set at cmdline
 	SCR_CheckDefaultMode();
