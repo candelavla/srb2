@@ -915,6 +915,7 @@ void R_ExecuteSetViewSize(void)
 	projection = projectiony = FixedDiv(centerxfrac, fovtan);
 
 	R_InitViewBuffer(viewwidth, viewheight);
+	R_SetFov(cv_fov.value);
 
 	// thing clipping
 	for (i = 0; i < viewwidth; i++)
