@@ -74,12 +74,6 @@ static line_t *gl_linedef;
 static sector_t *gl_frontsector;
 static sector_t *gl_backsector;
 
-// --------------------------------------------------------------------------
-//                                              STUFF FOR THE PROJECTION CODE
-// --------------------------------------------------------------------------
-
-FTransform atransform;
-
 // Render stats
 ps_metric_t ps_hw_skyboxtime = {0};
 ps_metric_t ps_hw_nodesorttime = {0};
