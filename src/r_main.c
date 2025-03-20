@@ -134,6 +134,7 @@ static CV_PossibleValue_t fov_cons_t[] = {{MINFOV*FRACUNIT, "MIN"}, {MAXFOV*FRAC
 static CV_PossibleValue_t translucenthud_cons_t[] = {{0, "MIN"}, {10, "MAX"}, {0, NULL}};
 static CV_PossibleValue_t maxportals_cons_t[] = {{0, "MIN"}, {12, "MAX"}, {0, NULL}}; // lmao rendering 32 portals, you're a card
 static CV_PossibleValue_t homremoval_cons_t[] = {{0, "No"}, {1, "Yes"}, {2, "Flash"}, {0, NULL}};
+static CV_PossibleValue_t shadow_cons_t[] = {{0, "Off"}, {1, "Drop"}, {2, "Sprite"}};
 
 static void R_SetFov(fixed_t playerfov);
 
@@ -151,11 +152,11 @@ consvar_t cv_chasecam2 = CVAR_INIT ("chasecam2", "On", CV_CALL, CV_OnOff, ChaseC
 consvar_t cv_flipcam = CVAR_INIT ("flipcam", "No", CV_SAVE|CV_CALL|CV_NOINIT, CV_YesNo, FlipCam_OnChange);
 consvar_t cv_flipcam2 = CVAR_INIT ("flipcam2", "No", CV_SAVE|CV_CALL|CV_NOINIT, CV_YesNo, FlipCam2_OnChange);
 
-consvar_t cv_shadow = CVAR_INIT ("shadow", "On", CV_SAVE, CV_OnOff, NULL);
-consvar_t cv_skybox = CVAR_INIT ("skybox", "On", CV_SAVE, CV_OnOff, NULL);
-consvar_t cv_allowmlook = CVAR_INIT ("allowmlook", "Yes", CV_NETVAR|CV_ALLOWLUA, CV_YesNo, NULL);
-consvar_t cv_showhud = CVAR_INIT ("showhud", "Yes", CV_CALL|CV_ALLOWLUA,  CV_YesNo, R_SetViewSize);
-consvar_t cv_translucenthud = CVAR_INIT ("translucenthud", "10", CV_SAVE, translucenthud_cons_t, NULL);
+consvar_t cv_shadow = CVAR_INIT ("shadow", "Drop", NULL, CV_SAVE, shadow_cons_t, NULL);
+consvar_t cv_skybox = CVAR_INIT ("skybox", "On", NULL, CV_SAVE, CV_OnOff, NULL);
+consvar_t cv_allowmlook = CVAR_INIT ("allowmlook", "Yes", NULL, CV_NETVAR|CV_ALLOWLUA, CV_YesNo, NULL);
+consvar_t cv_showhud = CVAR_INIT ("showhud", "Yes", NULL, CV_CALL|CV_ALLOWLUA,  CV_YesNo, R_SetViewSize);
+consvar_t cv_translucenthud = CVAR_INIT ("translucenthud", "10", NULL, CV_SAVE, translucenthud_cons_t, NULL);
 
 consvar_t cv_translucency = CVAR_INIT ("translucency", "On", CV_SAVE, CV_OnOff, NULL);
 consvar_t cv_drawdist = CVAR_INIT ("drawdist", "Infinite", CV_SAVE, drawdist_cons_t, NULL);
