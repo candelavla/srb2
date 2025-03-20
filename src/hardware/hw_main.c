@@ -2848,7 +2848,7 @@ static void HWR_DrawDropShadow(mobj_t *thing, gl_vissprite_t *spr, fixed_t scale
 	alpha = 255 - alpha;
 
 	gpatch = (cv_shadow.value == 2) ? spr->gpatch : (patch_t *)W_CachePatchName("DSHADOW", PU_SPRITE);
-	if (!(gpatch && ((GLPatch_t *)gpatch->hardware)->mipmap->format)) return;
+	if (!gpatch || !gpatch->hardware || !((GLPatch_t *)gpatch->hardware)->mipmap->format) return;
 	HWR_GetPatch(gpatch);
 
 	scalemul = FixedMul(FRACUNIT - floordiff/640, scale);
