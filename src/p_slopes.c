@@ -30,12 +30,48 @@ UINT16 slopecount = 0;
 
 static void P_UpdateMidtextureSlopesForSector(sector_t *sector);
 
+// Calculate light
+static void P_UpdateSlopeLightOffset(pslope_t *slope)
+{
+	const boolean ceiling = (slope->normal.z < 0);
+	const UINT8 contrast = 8;
+
+	fixed_t contrastFixed = ((fixed_t)contrast) * FRACUNIT;
+	fixed_t zMul = FRACUNIT;
+	angle_t slopeDir = ANGLE_MAX;
+	fixed_t extralight = 0;
+
+	if (slope->normal.z == 0)
+	{
+		slope->lightOffset = slope->hwLightOffset = 0;
+		return;
+	}
+
+	slopeDir = R_PointToAngle2(0, 0, abs(slope->normal.y), abs(slope->normal.x));
+	if (ceiling == true)
+	{
+		slopeDir ^= ANGLE_180;
+	}
+
+	zMul = min(FRACUNIT, abs(slope->zdelta)*3/2); // *3/2, to make 60 degree slopes match walls.
+	contrastFixed = FixedMul(contrastFixed, zMul);
+	extralight = -contrastFixed + FixedMul(FixedDiv(AngleFixed(slopeDir), 90*FRACUNIT), (contrastFixed * 2));
+
+	// Between -2 and 2 for software, -8 and 8 for hardware
+	slope->lightOffset = FixedFloor((extralight / 8) + (FRACUNIT / 2)) / FRACUNIT;
+#ifdef HWRENDER
+	slope->hwLightOffset = FixedFloor(extralight + (FRACUNIT / 2)) / FRACUNIT;
+#endif
+}
+
 // Calculate line normal
 void P_CalculateSlopeNormal(pslope_t *slope)
 {
 	slope->normal.z = FINECOSINE(slope->zangle>>ANGLETOFINESHIFT);
 	slope->normal.x = FixedMul(FINESINE(slope->zangle>>ANGLETOFINESHIFT), slope->d.x);
 	slope->normal.y = FixedMul(FINESINE(slope->zangle>>ANGLETOFINESHIFT), slope->d.y);
+
+	P_UpdateSlopeLightOffset(slope);
 }
 
 static void CalculateNormalDir(pslope_t *slope, dvector3_t *dnormal)
@@ -120,6 +156,8 @@ static void ReconfigureViaVertexes (pslope_t *slope, const vector3_t v1, const v
 		slope->xydirection = R_PointToAngle2(0, 0, slope->d.x, slope->d.y)+ANGLE_180;
 		slope->zangle = InvAngle(R_PointToAngle2(0, 0, FRACUNIT, slope->zdelta));
 	}
+
+	P_UpdateSlopeLightOffset(slope);
 
 	P_CalculateSlopeVectors(slope);
 }

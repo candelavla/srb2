@@ -354,6 +354,11 @@ typedef struct pslope_s
 	boolean moved;
 
 	UINT8 flags; // Slope options
+
+	SINT8 lightOffset;
+#ifdef HWRENDER	
+	INT16 hwLightOffset;	
+#endif
 } pslope_t;
 
 typedef enum

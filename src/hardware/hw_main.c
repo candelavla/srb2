@@ -264,44 +264,23 @@ static FUINT HWR_CalcWallLight(FUINT lightnum, fixed_t v1x, fixed_t v1y, fixed_t
 	return (FUINT)finallight;
 }
 
-static FUINT HWR_CalcSlopeLight(FUINT lightnum, angle_t dir, fixed_t delta)
+static FUINT HWR_CalcSlopeLight(FUINT lightnum, pslope_t *slope)
 {
 	INT16 finallight = lightnum;
 
-	if (cv_glfakecontrast.value != 0 && cv_glslopecontrast.value != 0)
+	if (slope != NULL && cv_glfakecontrast.value != 0 && cv_glslopecontrast.value != 0)
 	{
-		const UINT8 contrast = 8;
 		fixed_t extralight = 0;
 
 		if (cv_glfakecontrast.value == 2) // Smooth setting
-		{
-			fixed_t dirmul = abs(FixedDiv(AngleFixed(dir) - (180<<FRACBITS), 180<<FRACBITS));
-
-			extralight = -(contrast<<FRACBITS) + (dirmul * (contrast * 2));
-
-			extralight = FixedMul(extralight, delta*4) >> FRACBITS;
-		}
+			extralight += slope->hwLightOffset;
 		else
-		{
-			dir = ((dir + ANGLE_45) / ANGLE_90) * ANGLE_90;
-
-			if (dir == ANGLE_180)
-				extralight = -contrast;
-			else if (dir == 0)
-				extralight = contrast;
-
-			if (delta >= FRACUNIT/2)
-				extralight *= 2;
-		}
+			extralight += slope->lightOffset * 8;
 
 		if (extralight != 0)
 		{
 			finallight += extralight;
-
-			if (finallight < 0)
-				finallight = 0;
-			if (finallight > 255)
-				finallight = 255;
+			finallight = min(max(finallight, 0) , 255);
 		}
 	}
 
@@ -498,7 +477,7 @@ static void HWR_RenderPlane(subsector_t *subsector, extrasubsector_t *xsub, bool
 		SETUP3DVERT(v3d, pv->x, pv->y);
 
 	if (slope)
-		lightlevel = HWR_CalcSlopeLight(lightlevel, R_PointToAngle2(0, 0, slope->normal.x, slope->normal.y), abs(slope->zdelta));
+		lightlevel = HWR_CalcSlopeLight(lightlevel, slope);
 
 	HWR_Lighting(&Surf, lightlevel, planecolormap);
 
