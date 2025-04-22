@@ -3348,7 +3348,7 @@ boolean M_Responder(event_t *ev)
 	}
 
 	if (!useEventHandler && ch == -1)
-		return false;
+		return menuactive;
 	else if (ev->type != ev_text && (ch == gamecontrol[GC_SYSTEMMENU][0] || ch == gamecontrol[GC_SYSTEMMENU][1])) // allow remappable ESC key
 		ch = KEY_ESCAPE;
 
