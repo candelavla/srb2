@@ -567,8 +567,8 @@ typedef struct
 #define DEF_NAME_SIMPLE(str) {.name = str, .menu1 = NULL, .menu2 = "the " str}
 #define DEF_NAME_DPAD(a, b)  {.name = "D-Pad " a, .menu1 = "D-Pad " b, .menu2 = a}
 
-#define PARTIAL_DEF_START [GAMEPAD_BUTTON_A] = { NULL }
-#define PARTIAL_DEF_END [NUM_GAMEPAD_BUTTONS - 1] = { NULL }
+#define PARTIAL_DEF_START [GAMEPAD_BUTTON_A] = { .name = NULL, .menu1 = NULL, .menu2 = NULL }
+#define PARTIAL_DEF_END [NUM_GAMEPAD_BUTTONS - 1] = { .name = NULL, .menu1 = NULL, .menu2 = NULL }
 
 static const char *GetStringFromButtonList(const button_strings_t *names, gamepad_button_e button, gamepad_string_e type)
 {
@@ -741,7 +741,7 @@ typedef struct
 #define DEF_NAME_TRIGGER(str) {str, NULL, "the " str, NULL, NULL, NULL}
 #define DEF_NAME_BUTTON(str) {str, str " Button", "the " str " Button", NULL, NULL, NULL}
 
-#define PARTIAL_DEF_START [GAMEPAD_AXIS_LEFTX] = { NULL }
+#define PARTIAL_DEF_START [GAMEPAD_AXIS_LEFTX] = { .name = NULL, .menu1 = NULL, .menu2 = NULL, .name_inv = NULL, .menu1_inv = NULL, .menu2_inv = NULL }
 
 static const char *GetStringFromAxisList(const axis_strings_t *names, gamepad_axis_e axis, gamepad_string_e type, boolean inv)
 {
