@@ -13601,7 +13601,7 @@ static void M_ChangeControl(INT32 choice)
 	controltochange = currentMenu->menuitems[choice].alphaKey;
 	if (controltochange == GC_SHIELD)
 	{
-		sprintf(tmp, M_GetText("Press the new key/button for\n%s\n\nESCAPE to cancel\n\nBind to same key/button as Spin to disable\nBe warned that enabling shield might break addons!"),
+		sprintf(tmp, M_GetText("Press the new key/button for\n%s\n\nESCAPE to cancel\n\nBind to same key/button as Spin to disable"),
 			currentMenu->menuitems[choice].text);
 	}
 	else
