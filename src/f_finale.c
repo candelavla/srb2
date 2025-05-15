@@ -1,4 +1,4 @@
-// SONIC ROBO BLAST 2
+a// SONIC ROBO BLAST 2
 //-----------------------------------------------------------------------------
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -1048,6 +1048,8 @@ static const char *credits[] = {
 	"Alam \"GBC\" Arias",
 	"Logan \"GBA\" Arias",
 	"Zolton \"Zippy_Zolton\" Auburn",
+	"\"bitten2up\"",
+	"\"candelavla\"",
 	"Colette \"fickleheart\" Bordelon",
 	"Andrew \"orospakr\" Clunis",
 	"Sally \"TehRealSalt\" Cochenour",
@@ -1061,7 +1063,6 @@ static const char *credits[] = {
 	"Julio \"Chaos Zero 64\" Guir",
 	"\"Hanicef\"",
 	"\"Hannu_Hanhi\"", // For many OpenGL performance improvements!
-	"\"hazepastel\"",
 	"Kepa \"Nev3r\" Iceta",
 	"Thomas \"Shadow Hog\" Igoe",
 	"Iestyn \"Monster Iestyn\" Jealous",
