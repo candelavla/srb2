@@ -36,10 +36,6 @@
 #include "lua_script.h" // Reluctantly included for LUA_EvalMath
 #include "netcode/d_clisrv.h"
 
-#ifdef HWRENDER
-#include "hardware/hw_light.h"
-#endif
-
 #include "m_cond.h"
 
 #include "dehacked.h"
@@ -98,34 +94,6 @@ INT32 activesound;   Action sound = 32        sfx_None,       // activesound
 INT32 flags;         Bits = 3232              MF_SOLID|MF_SHOOTABLE|MF_DROPOFF|MF_PICKUP|MF_NOTDMATCH,
 INT32 raisestate;    Respawn frame = 32       S_NULL          // raisestate
                                          }, */
-
-#ifdef HWRENDER
-static INT32 searchvalue(const char *s)
-{
-	while (s[0] != '=' && s[0])
-		s++;
-	if (s[0] == '=')
-		return atoi(&s[1]);
-	else
-	{
-		deh_warning("No value found");
-		return 0;
-	}
-}
-
-static float searchfvalue(const char *s)
-{
-	while (s[0] != '=' && s[0])
-		s++;
-	if (s[0] == '=')
-		return (float)atof(&s[1]);
-	else
-	{
-		deh_warning("No value found");
-		return 0;
-	}
-}
-#endif
 
 // These are for clearing all of various things
 void clear_emblems(void)
@@ -796,77 +764,6 @@ void readskincolor(MYFILE *f, INT32 num)
 	Z_Free(s);
 }
 
-#ifdef HWRENDER
-void readlight(MYFILE *f, INT32 num)
-{
-	char *s = Z_Malloc(MAXLINELEN, PU_STATIC, NULL);
-	char *word;
-	char *tmp;
-	INT32 value;
-	float fvalue;
-
-	do
-	{
-		if (myfgets(s, MAXLINELEN, f))
-		{
-			if (s[0] == '\n')
-				break;
-
-			tmp = strchr(s, '#');
-			if (tmp)
-				*tmp = '\0';
-			if (s == tmp)
-				continue; // Skip comment lines, but don't break.
-
-			fvalue = searchfvalue(s);
-			value = searchvalue(s);
-
-			word = strtok(s, " ");
-			if (word)
-				strupr(word);
-			else
-				break;
-
-			if (fastcmp(word, "TYPE"))
-			{
-				lspr[num].type = (UINT16)value;
-			}
-			else if (fastcmp(word, "OFFSETX"))
-			{
-				lspr[num].light_xoffset = fvalue;
-			}
-			else if (fastcmp(word, "OFFSETY"))
-			{
-				lspr[num].light_yoffset = fvalue;
-			}
-			else if (fastcmp(word, "CORONACOLOR"))
-			{
-				lspr[num].corona_color = value;
-			}
-			else if (fastcmp(word, "CORONARADIUS"))
-			{
-				lspr[num].corona_radius = fvalue;
-			}
-			else if (fastcmp(word, "DYNAMICCOLOR"))
-			{
-				lspr[num].dynamic_color = value;
-			}
-			else if (fastcmp(word, "DYNAMICRADIUS"))
-			{
-				lspr[num].dynamic_radius = fvalue;
-
-				/// \note Update the sqrradius! unnecessary?
-				lspr[num].dynamic_sqrradius = fvalue * fvalue;
-			}
-			else
-				deh_warning("Light %d: unknown word '%s'", num, word);
-		}
-	} while (!myfeof(f)); // finish when the line is empty
-
-	Z_Free(s);
-}
-#endif // HWRENDER
-
 static void readspriteframe(MYFILE *f, spriteinfo_t *sprinfo, UINT8 frame)
 {
 	char *s = Z_Malloc(MAXLINELEN, PU_STATIC, NULL);
@@ -946,9 +843,6 @@ void readspriteinfo(MYFILE *f, INT32 num, boolean sprite2)
 	char *s = Z_Malloc(MAXLINELEN, PU_STATIC, NULL);
 	char *word, *word2;
 	char *tmp;
-#ifdef HWRENDER
-	INT32 value;
-#endif
 	char *lastline;
 	UINT8 *skinnumbers = NULL;
 	INT32 foundskins = 0;
@@ -1004,23 +898,7 @@ void readspriteinfo(MYFILE *f, INT32 num, boolean sprite2)
 					break;
 			}
 			strupr(word);
-#ifdef HWRENDER
-			value = atoi(word2); // used for numerical settings
 
-			if (fastcmp(word, "LIGHTTYPE"))
-			{
-				if (sprite2)
-					deh_warning("Sprite2 %s: invalid word '%s'", spr2names[num], word);
-				else
-				{
-					INT32 oldvar;
-					for (oldvar = 0; t_lspr[num] != &lspr[oldvar]; oldvar++)
-						;
-					t_lspr[num] = &lspr[value];
-				}
-			}
-			else
-#endif
 			if (fastcmp(word, "SKIN"))
 			{
 				INT32 skinnum = -1;

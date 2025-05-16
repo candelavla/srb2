@@ -37,7 +37,7 @@
 
 #ifdef HWRENDER
 #include "hardware/hw_main.h"
-#include "hardware/hw_light.h"
+#include "hardware/hw_glob.h"
 #include "hardware/hw_model.h"
 #endif
 

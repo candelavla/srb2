@@ -1,7 +1,6 @@
 target_sources(SRB2SDL2 PRIVATE
 	hw_bsp.c
 	hw_draw.c
-	hw_light.c
 	hw_main.c
 	hw_clip.c
 	hw_md2.c

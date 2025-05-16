@@ -40,7 +40,6 @@
 #ifdef HWRENDER
 #include "hardware/hw_md2.h"
 #include "hardware/hw_glob.h"
-#include "hardware/hw_light.h"
 #include "hardware/hw_drv.h"
 #endif
 

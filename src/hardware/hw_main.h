@@ -74,13 +74,6 @@ boolean HWR_ShouldUsePaletteRendering(void);
 
 extern CV_PossibleValue_t glanisotropicmode_cons_t[];
 
-#ifdef ALAM_LIGHTING
-extern consvar_t cv_gldynamiclighting;
-extern consvar_t cv_glstaticlighting;
-extern consvar_t cv_glcoronas;
-extern consvar_t cv_glcoronasize;
-#endif
-
 extern consvar_t cv_glshaders, cv_glallowshaders;
 extern consvar_t cv_glmodels;
 extern consvar_t cv_glmodelinterpolation;
@@ -99,8 +92,6 @@ extern consvar_t cv_glpalettedepth;
 
 extern consvar_t cv_glwireframe;
 
-// BP: big hack for a test in lighting ref : 1249753487AB
-extern fixed_t *hwbbox;
 extern FTransform atransform;
 extern float gl_viewsin, gl_viewcos;
 

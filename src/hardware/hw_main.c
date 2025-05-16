@@ -16,7 +16,6 @@
 
 #ifdef HWRENDER
 #include "hw_glob.h"
-#include "hw_light.h"
 #include "hw_drv.h"
 #include "hw_batching.h"
 #include "hw_md2.h"
@@ -613,11 +612,6 @@ static void HWR_RenderPlane(subsector_t *subsector, extrasubsector_t *xsub, bool
 			}
 		}
 	}
-
-#ifdef ALAM_LIGHTING
-	// add here code for dynamic lighting on planes
-	HWR_PlaneLighting(planeVerts, nrPlaneVerts);
-#endif
 }
 
 FBITFIELD HWR_GetBlendModeFlag(INT32 style)
@@ -2666,9 +2660,6 @@ static void HWR_Subsector(size_t num)
 //  traversing subtree recursively.
 // Just call with BSP root.
 
-// BP: big hack for a test in lighning ref : 1249753487AB
-fixed_t *hwbbox;
-
 static void HWR_RenderBSPNode(INT32 bspnum)
 {
 	node_t *bsp;
@@ -2682,8 +2673,6 @@ static void HWR_RenderBSPNode(INT32 bspnum)
 
 		// Decide which side the view point is on.
 		side = R_PointOnSide(viewx, viewy, bsp);
-		// BP: big hack for a test in lighning ref : 1249753487AB
-		hwbbox = bsp->bbox[side];
 		// Recursively divide front space.
 		HWR_RenderBSPNode(bsp->children[side]);
 
@@ -3434,12 +3423,6 @@ static void HWR_DrawSprite(gl_vissprite_t *spr)
 	//          in memory and we add the md2 model if it exists for that sprite
 
 	gpatch = spr->gpatch;
-
-#ifdef ALAM_LIGHTING
-	if (!(spr->mobj->flags2 & MF2_DEBRIS) && (spr->mobj->sprite != SPR_PLAY ||
-	 (spr->mobj->player && spr->mobj->player->powers[pw_super])))
-		HWR_DL_AddLight(spr, gpatch);
-#endif
 
 	// create the sprite billboard
 	//
@@ -5376,11 +5359,7 @@ static void HWR_SetupView(player_t *player, INT32 viewnumber, float fpov, boolea
 		stplyr = player;
 		ST_doPaletteStuff();
 		stplyr = saved_player;
-#ifdef ALAM_LIGHTING
-		HWR_SetLights(viewnumber);
-#else
 		(void)viewnumber;
-#endif
 	}
 
 	// note: sets viewangle, viewx, viewy, viewz
@@ -5489,12 +5468,6 @@ void HWR_RenderSkyboxView(INT32 viewnumber, player_t *player)
 
 	// Check for new console commands.
 	NetUpdate();
-
-#ifdef ALAM_LIGHTING
-	//14/11/99: Hurdler: moved here because it doesn't work with
-	// subsector, see other comments;
-	HWR_ResetLights();
-#endif
 
 	// Draw MD2 and sprites
 	HWR_SortVisSprites();
@@ -5610,12 +5583,6 @@ void HWR_RenderPlayerView(INT32 viewnumber, player_t *player)
 	// Check for new console commands.
 	NetUpdate();
 
-#ifdef ALAM_LIGHTING
-	//14/11/99: Hurdler: moved here because it doesn't work with
-	// subsector, see other comments;
-	HWR_ResetLights();
-#endif
-
 	// Draw MD2 and sprites
 	ps_numsprites.value.i = gl_visspritecount;
 	PS_START_TIMING(ps_hw_spritesorttime);
@@ -5706,11 +5673,6 @@ static void HWR_TogglePaletteRendering(void)
 
 void HWR_LoadLevel(void)
 {
-#ifdef ALAM_LIGHTING
-	// BP: reset light between levels (we draw preview frame lights on current frame)
-	HWR_ResetLights();
-#endif
-
 	HWR_CreatePlanePolygons((INT32)numnodes - 1);
 
 	// Build the sky dome
@@ -5747,13 +5709,6 @@ static CV_PossibleValue_t glfiltermode_cons_t[]= {{HWD_SET_TEXTUREFILTER_POINTSA
 CV_PossibleValue_t glanisotropicmode_cons_t[] = {{1, "MIN"}, {16, "MAX"}, {0, NULL}};
 
 consvar_t cv_glshaders = CVAR_INIT ("gr_shaders", "On", CV_SAVE|CV_CALL, glshaders_cons_t, CV_glshaders_OnChange);
-
-#ifdef ALAM_LIGHTING
-consvar_t cv_gldynamiclighting = CVAR_INIT ("gr_dynamiclighting", "On", CV_SAVE, CV_OnOff, NULL);
-consvar_t cv_glstaticlighting  = CVAR_INIT ("gr_staticlighting", "On", CV_SAVE, CV_OnOff, NULL);
-consvar_t cv_glcoronas = CVAR_INIT ("gr_coronas", "On", CV_SAVE, CV_OnOff, NULL);
-consvar_t cv_glcoronasize = CVAR_INIT ("gr_coronasize", "1", CV_SAVE|CV_FLOAT, 0, NULL);
-#endif
 
 consvar_t cv_glmodels = CVAR_INIT ("gr_models", "Off", CV_SAVE, CV_OnOff, NULL);
 consvar_t cv_glmodelinterpolation = CVAR_INIT ("gr_modelinterpolation", "On", CV_SAVE, CV_OnOff, NULL);
@@ -5832,13 +5787,6 @@ static void CV_glshaders_OnChange(void)
 //added by Hurdler: console varibale that are saved
 void HWR_AddCommands(void)
 {
-#ifdef ALAM_LIGHTING
-	CV_RegisterVar(&cv_glstaticlighting);
-	CV_RegisterVar(&cv_gldynamiclighting);
-	CV_RegisterVar(&cv_glcoronasize);
-	CV_RegisterVar(&cv_glcoronas);
-#endif
-
 	CV_RegisterVar(&cv_glmodellighting);
 	CV_RegisterVar(&cv_glmodelinterpolation);
 	CV_RegisterVar(&cv_glmodels);
@@ -5875,9 +5823,6 @@ void HWR_Startup(void)
 		HWR_InitPolyPool();
 		HWR_InitMapTextures();
 		HWR_InitModels();
-#ifdef ALAM_LIGHTING
-		HWR_InitLight();
-#endif
 
 		gl_shadersavailable = HWR_InitShaders();
 		HWR_SetShaderState();

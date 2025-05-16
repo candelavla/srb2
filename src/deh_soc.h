@@ -37,10 +37,6 @@
 #include "lua_script.h" // Reluctantly included for LUA_EvalMath
 #include "netcode/d_clisrv.h"
 
-#ifdef HWRENDER
-#include "hardware/hw_light.h"
-#endif
-
 #include "info.h"
 #include "dehacked.h"
 #include "doomdef.h" // HWRENDER

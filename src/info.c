@@ -22,9 +22,6 @@
 #include "d_player.h"
 #include "v_video.h" // V_*MAP constants
 #include "lzf.h"
-#ifdef HWRENDER
-#include "hardware/hw_light.h"
-#endif
 
 
 // Hey, moron! If you change this table, don't forget about the sprite enum in info.h and the sprite lights in hw_light.c!
