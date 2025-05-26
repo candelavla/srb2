@@ -82,7 +82,7 @@
 
 #ifdef HWRENDER
 #include "../hardware/hw_main.h"
-#include "../hardware/hw_drv.h"
+#include "../hardware/hw_gpu.h"
 #include "hwsym_sdl.h"
 #include "ogl_sdl.h"
 #endif
@@ -1379,10 +1379,10 @@ void I_FinishUpdate(void)
 		// Final postprocess step of palette rendering, after everything else has been drawn.
 		if (HWR_ShouldUsePaletteRendering())
 		{
-			HWD.pfnMakeScreenTexture(HWD_SCREENTEXTURE_GENERIC2);
-			HWD.pfnSetShader(HWR_GetShaderFromTarget(SHADER_PALETTE_POSTPROCESS));
-			HWD.pfnDrawScreenTexture(HWD_SCREENTEXTURE_GENERIC2, NULL, 0);
-			HWD.pfnUnSetShader();
+			GL_MakeScreenTexture(HWD_SCREENTEXTURE_GENERIC2);
+			GL_SetShader(HWR_GetShaderFromTarget(SHADER_PALETTE_POSTPROCESS));
+			GL_DrawScreenTexture(HWD_SCREENTEXTURE_GENERIC2, NULL, 0);
+			GL_UnSetShader();
 		}
 		OglSdlFinishUpdate(cv_vidwait.value);
 	}
@@ -1800,47 +1800,7 @@ static void Impl_InitOpenGL(void)
 	if (vid.glstate == VID_GL_LIBRARY_LOADED)
 		return;
 
-	HWD.pfnInit             = hwSym("Init",NULL);
-	HWD.pfnFinishUpdate     = NULL;
-	HWD.pfnDraw2DLine       = hwSym("Draw2DLine",NULL);
-	HWD.pfnDrawPolygon      = hwSym("DrawPolygon",NULL);
-	HWD.pfnDrawIndexedTriangles = hwSym("DrawIndexedTriangles",NULL);
-	HWD.pfnRenderSkyDome    = hwSym("RenderSkyDome",NULL);
-	HWD.pfnSetBlend         = hwSym("SetBlend",NULL);
-	HWD.pfnClearBuffer      = hwSym("ClearBuffer",NULL);
-	HWD.pfnSetTexture       = hwSym("SetTexture",NULL);
-	HWD.pfnUpdateTexture    = hwSym("UpdateTexture",NULL);
-	HWD.pfnDeleteTexture    = hwSym("DeleteTexture",NULL);
-	HWD.pfnReadScreenTexture= hwSym("ReadScreenTexture",NULL);
-	HWD.pfnGClipRect        = hwSym("GClipRect",NULL);
-	HWD.pfnClearMipMapCache = hwSym("ClearMipMapCache",NULL);
-	HWD.pfnSetSpecialState  = hwSym("SetSpecialState",NULL);
-	HWD.pfnSetTexturePalette= hwSym("SetTexturePalette",NULL);
-	HWD.pfnGetTextureUsed   = hwSym("GetTextureUsed",NULL);
-	HWD.pfnDrawModel        = hwSym("DrawModel",NULL);
-	HWD.pfnCreateModelVBOs  = hwSym("CreateModelVBOs",NULL);
-	HWD.pfnSetTransform     = hwSym("SetTransform",NULL);
-	HWD.pfnPostImgRedraw    = hwSym("PostImgRedraw",NULL);
-	HWD.pfnFlushScreenTextures=hwSym("FlushScreenTextures",NULL);
-	HWD.pfnDoScreenWipe     = hwSym("DoScreenWipe",NULL);
-	HWD.pfnDrawScreenTexture= hwSym("DrawScreenTexture",NULL);
-	HWD.pfnMakeScreenTexture= hwSym("MakeScreenTexture",NULL);
-	HWD.pfnDrawScreenFinalTexture=hwSym("DrawScreenFinalTexture",NULL);
-
-	HWD.pfnInitShaders      = hwSym("InitShaders",NULL);
-	HWD.pfnLoadShader       = hwSym("LoadShader",NULL);
-	HWD.pfnCompileShader    = hwSym("CompileShader",NULL);
-	HWD.pfnSetShader        = hwSym("SetShader",NULL);
-	HWD.pfnUnSetShader      = hwSym("UnSetShader",NULL);
-
-	HWD.pfnSetShaderInfo    = hwSym("SetShaderInfo",NULL);
-
-	HWD.pfnSetPaletteLookup = hwSym("SetPaletteLookup",NULL);
-	HWD.pfnCreateLightTable = hwSym("CreateLightTable",NULL);
-	HWD.pfnClearLightTables = hwSym("ClearLightTables",NULL);
-	HWD.pfnSetScreenPalette = hwSym("SetScreenPalette",NULL);
-
-	if (HWD.pfnInit())
+	if (GL_Init())
 		vid.glstate = VID_GL_LIBRARY_LOADED;
 	else
 	{

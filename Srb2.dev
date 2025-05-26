@@ -94,7 +94,7 @@ OverrideBuildCmd=0
 BuildCmd=
 
 [Unit9]
-FileName=src\hardware\hw_drv.h
+FileName=src\hardware\hw_gpu.h
 Folder=Hw_Hardware
 Compile=1
 CompileCpp=0
