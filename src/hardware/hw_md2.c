@@ -25,7 +25,7 @@
 #include "../fastcmp.h"
 
 #ifdef HWRENDER
-#include "hw_drv.h"
+#include "hw_gpu.h"
 #include "hw_md2.h"
 #include "../d_main.h"
 #include "../r_bsp.h"
@@ -424,7 +424,7 @@ static void md2_loadTexture(md2_t *model)
 			}
 		}
 	}
-	HWD.pfnSetTexture(grPatch->mipmap);
+	GL_SetTexture(grPatch->mipmap);
 }
 
 // -----------------+
@@ -478,7 +478,7 @@ static void md2_loadBlendTexture(md2_t *model)
 		grPatch->mipmap->width = (UINT16)w;
 		grPatch->mipmap->height = (UINT16)h;
 	}
-	HWD.pfnSetTexture(grPatch->mipmap); // We do need to do this so that it can be cleared and knows to recreate it when necessary
+	GL_SetTexture(grPatch->mipmap); // We do need to do this so that it can be cleared and knows to recreate it when necessary
 
 	Z_Free(filename);
 }
@@ -991,7 +991,7 @@ static void HWR_GetBlendedTexture(patch_t *patch, patch_t *blendpatch, INT32 ski
 	if (blendpatch == NULL || colormap == colormaps || colormap == NULL)
 	{
 		// Don't do any blending
-		HWD.pfnSetTexture(grPatch->mipmap);
+		GL_SetTexture(grPatch->mipmap);
 		return;
 	}
 
@@ -999,7 +999,7 @@ static void HWR_GetBlendedTexture(patch_t *patch, patch_t *blendpatch, INT32 ski
 		&& (patch->width != blendpatch->width || patch->height != blendpatch->height))
 	{
 		// Blend image exists, but it's bad.
-		HWD.pfnSetTexture(grPatch->mipmap);
+		GL_SetTexture(grPatch->mipmap);
 		return;
 	}
 
@@ -1016,10 +1016,10 @@ static void HWR_GetBlendedTexture(patch_t *patch, patch_t *blendpatch, INT32 ski
 				{
 					M_Memcpy(grMipmap->colormap->data, colormap, 256 * sizeof(UINT8));
 					HWR_CreateBlendedTexture(patch, blendpatch, grMipmap, skinnum, color);
-					HWD.pfnUpdateTexture(grMipmap);
+					GL_UpdateTexture(grMipmap);
 				}
 				else
-					HWD.pfnSetTexture(grMipmap); // found the colormap, set it to the correct texture
+					GL_SetTexture(grMipmap); // found the colormap, set it to the correct texture
 
 				Z_ChangeTag(grMipmap->data, PU_HWRMODELTEXTURE_UNLOCKED);
 				return;
@@ -1045,7 +1045,7 @@ static void HWR_GetBlendedTexture(patch_t *patch, patch_t *blendpatch, INT32 ski
 
 	HWR_CreateBlendedTexture(patch, blendpatch, newMipmap, skinnum, color);
 
-	HWD.pfnSetTexture(newMipmap);
+	GL_SetTexture(newMipmap);
 	Z_ChangeTag(newMipmap->data, PU_HWRMODELTEXTURE_UNLOCKED);
 }
 
@@ -1453,7 +1453,7 @@ boolean HWR_DrawModel(gl_vissprite_t *spr)
 				// note down the max_s and max_t that end up in the VBO
 				md2->model->vbo_max_s = md2->model->max_s;
 				md2->model->vbo_max_t = md2->model->max_t;
-				HWD.pfnCreateModelVBOs(md2->model);
+				GL_CreateModelVBOs(md2->model);
 			}
 			else
 			{
@@ -1463,7 +1463,7 @@ boolean HWR_DrawModel(gl_vissprite_t *spr)
 			}
 		}
 
-		//HWD.pfnSetBlend(blend); // This seems to actually break translucency?
+		//GL_SetBlend(blend); // This seems to actually break translucency?
 		//Hurdler: arf, I don't like that implementation at all... too much crappy
 
 		if (gpatch && hwrPatch && hwrPatch->mipmap->format) // else if meant that if a texture couldn't be loaded, it would just end up using something else's texture
@@ -1638,7 +1638,7 @@ boolean HWR_DrawModel(gl_vissprite_t *spr)
 		p.mirror = atransform.mirror;
 
 		if (HWR_UseShader())
-			HWD.pfnSetShader(HWR_GetShaderFromTarget(SHADER_MODEL));
+			GL_SetShader(HWR_GetShaderFromTarget(SHADER_MODEL));
 		{
 			float this_scale = FIXED_TO_FLOAT(interp.scale);
 
@@ -1653,7 +1653,7 @@ boolean HWR_DrawModel(gl_vissprite_t *spr)
 			p.y += ox * gl_viewcos;
 			p.z += oy;
 
-			HWD.pfnDrawModel(md2->model, frame, durs, tics, nextFrame, &p, md2->scale * xs, md2->scale * ys, flip, hflip, &Surf);
+			GL_DrawModel(md2->model, frame, durs, tics, nextFrame, &p, md2->scale * xs, md2->scale * ys, flip, hflip, &Surf);
 		}
 	}
 	return true;
