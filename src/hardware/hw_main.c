@@ -5265,9 +5265,11 @@ static void HWR_SetShaderState(void)
 	GL_SetSpecialState(HWD_SET_SHADERS, HWR_UseShader() ? 1 : 0);
 }
 
-static void HWR_SetupView(player_t *player, INT32 viewnumber, float fpov, boolean skybox)
+static void HWR_SetupView(player_t *player, INT32 viewnumber, boolean skybox)
 {
 	postimg_t *type;
+
+	const float fpov = FixedToFloat(R_GetPlayerFov(player));
 
 	if (viewnumber == 1)
 		type = &postimgtype2;
@@ -5333,14 +5335,22 @@ static void HWR_SetupView(player_t *player, INT32 viewnumber, float fpov, boolea
 	gl_fovlud = (float)(1.0l/tan((double)(fpov*M_PIl/360l)));
 }
 
+static void HWR_ClearClipper(void)
+{
+	angle_t a1 = gld_FrustumAngle(gl_aimingangle);
+	gld_clipper_Clear();
+	gld_clipper_SafeAddClipRange(viewangle + a1, viewangle - a1);
+#ifdef HAVE_SPHEREFRUSTUM
+	gld_FrustumSetup();
+#endif
+}
+
 // ==========================================================================
 // Same as rendering the player view, but from the skybox object
 // ==========================================================================
 static void HWR_RenderSkyboxView(INT32 viewnumber, player_t *player)
 {
-	const float fpov = FixedToFloat(R_GetPlayerFov(player));
-
-	HWR_SetupView(player, viewnumber, fpov, true);
+	HWR_SetupView(player, viewnumber, true);
 
 	// check for new console commands.
 	NetUpdate();
@@ -5358,19 +5368,11 @@ static void HWR_RenderSkyboxView(INT32 viewnumber, player_t *player)
 
 	drawcount = 0;
 
-	if (rendermode == render_opengl)
-	{
-		angle_t a1 = gld_FrustumAngle(fpov, gl_aimingangle);
-		gld_clipper_Clear();
-		gld_clipper_SafeAddClipRange(viewangle + a1, viewangle - a1);
-#ifdef HAVE_SPHEREFRUSTRUM
-		gld_FrustrumSetup();
-#endif
-	}
-
 	//04/01/2000: Hurdler: added for T&L
 	//                     Actually it only works on Walls and Planes
 	GL_SetTransform(&atransform);
+
+	HWR_ClearClipper();
 
 	// Reset the shader state.
 	HWR_SetShaderState();
@@ -5424,8 +5426,6 @@ static void HWR_RenderSkyboxView(INT32 viewnumber, player_t *player)
 // ==========================================================================
 void HWR_RenderPlayerView(INT32 viewnumber, player_t *player)
 {
-	const float fpov = FixedToFloat(R_GetPlayerFov(player));
-
 	const boolean skybox = (skyboxmo[0] && cv_skybox.value); // True if there's a skybox object and skyboxes are on
 
 	FRGBAFloat ClearColor;
@@ -5446,7 +5446,7 @@ void HWR_RenderPlayerView(INT32 viewnumber, player_t *player)
 		HWR_RenderSkyboxView(viewnumber, player); // This is drawn before everything else so it is placed behind
 	PS_STOP_TIMING(ps_hw_skyboxtime);
 
-	HWR_SetupView(player, viewnumber, fpov, false);
+	HWR_SetupView(player, viewnumber, false);
 
 	framecount++; // timedemo
 
@@ -5466,19 +5466,11 @@ void HWR_RenderPlayerView(INT32 viewnumber, player_t *player)
 
 	drawcount = 0;
 
-	if (rendermode == render_opengl)
-	{
-		angle_t a1 = gld_FrustumAngle(fpov, gl_aimingangle);
-		gld_clipper_Clear();
-		gld_clipper_SafeAddClipRange(viewangle + a1, viewangle - a1);
-#ifdef HAVE_SPHEREFRUSTRUM
-		gld_FrustrumSetup();
-#endif
-	}
-
 	//04/01/2000: Hurdler: added for T&L
 	//                     Actually it only works on Walls and Planes
 	GL_SetTransform(&atransform);
+
+	HWR_ClearClipper();
 
 	// Reset the shader state.
 	HWR_SetShaderState();
