@@ -14349,8 +14349,35 @@ void M_QuitResponse(INT32 ch)
 	I_Quit();
 }
 
+const char *QuitDialogMessages[22] = {
+	("Eggman's tied explosives\nto your girlfriend, and\nwill activate them if\nyou press the 'Y' key!\nPress 'N' to save her!"),
+	("What would Tails say if\nhe saw you quitting the game?"),
+	("Hey!\nWhere do ya think you're goin'?"),
+	("Forget your studies!\nPlay some more!"),
+	("You're trying to say you\nlike Sonic 2K6 better than\nthis, right?"),
+	("Don't leave yet -- there's a\nsuper emerald around that corner!"),
+	("You'd rather work than play?"),
+	("Go ahead and leave. See if I care...\n*sniffle*"),
+
+	("If you leave now,\nEggman will take over the world!"),
+	("Don't quit!\nThere are animals\nto save!"),
+	("Aw c'mon, just bop\na few more robots!"),
+	("Did you get all those Chaos Emeralds?"),
+	("If you leave, I'll use\nmy spin attack on you!"),
+	("Don't go!\nYou might find the hidden\nlevels!"),
+	("Hit the 'N' key, Sonic!\nThe 'N' key!"),
+
+	("Are you really going to give up?\nWe certainly would never give you up."),
+	("Come on, just ONE more netgame!"),
+	("Press 'N' to unlock\nthe Ultimate Cheat!"),
+	("Why don't you go back and try\njumping on that house to\nsee what happens?"),
+	("Every time you press 'Y', an\nSRB2 Developer cries..."),
+	("You'll be back to play soon, though...\n......right?"),
+	("Aww, is Egg Rock Zone too\ndifficult for you?")
+};
+
 static void M_QuitSRB2(INT32 choice)
 {
 	(void)choice;
-	M_StartMessage(M_GetText("Are you sure you would like to quit SRB2?\n\n\n(Press 'Y Key' or 'Confirm Button' to quit)"), M_QuitResponse, MM_YESNO);
+	M_StartMessage(M_GetText(va("%s\n\n\n%s", QuitDialogMessages[M_RandomKey(22)], "(Press 'Y Key' or 'Confirm Button' to quit)")), M_QuitResponse, MM_YESNO);
 }
