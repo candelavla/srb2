@@ -3036,7 +3036,7 @@ static void HWR_SplitSprite(gl_vissprite_t *spr)
 
 
 	// push it toward the camera to mitigate floor-clipping sprites
-	if (!R_ThingIsPaperSprite(spr->mobj)) // but not for papersprites
+	if (!R_ThingIsPaperSprite(spr->mobj) && spr->mobj->type != MT_SIGN) // but not for papersprites nor goalposts
 	{
 		// Let dispoffset work first since this adjust each vertex
 		HWR_RotateSpritePolyToAim(spr, baseWallVerts, false);
@@ -3498,7 +3498,7 @@ static void HWR_DrawSprite(gl_vissprite_t *spr)
 	float sprdist = 0.0f, distfact = 0.0f;
 	size_t i;
 
-	if (!splat && !R_ThingIsPaperSprite(spr->mobj))
+	if (!splat && !R_ThingIsPaperSprite(spr->mobj) && spr->mobj->type != MT_SIGN)
 	{
 		// Let dispoffset work first since this adjust each vertex
 		HWR_RotateSpritePolyToAim(spr, wallVerts, false);
