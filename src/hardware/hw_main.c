@@ -3553,7 +3553,7 @@ static void HWR_DrawSprite(gl_vissprite_t *spr)
 
 		if (splat && sector->numlights)
 		{
-			INT32 light = R_GetPlaneLight(sector, spr->mobj->z, false);
+			INT32 light = R_GetPlaneLight(sector, spr->gz, false);
 
 			if (!lightset)
 				lightlevel = max(min(*sector->lightlist[light].lightlevel, 255), 0);
@@ -4592,43 +4592,40 @@ static void HWR_ProjectSprite(mobj_t *thing)
 	}
 	else
 	{
-		if (flip)
+		if (splat)
 		{
-			x1 = (FIXED_TO_FLOAT(spr_width - spr_offset) * this_xscale);
-			x2 = (FIXED_TO_FLOAT(spr_offset) * this_xscale);
+			z1 = z2 = tr_y;
+			x1 = x2 = tr_x;
+			gz = gzt = interp.z;
 		}
 		else
 		{
-			x1 = (FIXED_TO_FLOAT(spr_offset) * this_xscale);
-			x2 = (FIXED_TO_FLOAT(spr_width - spr_offset) * this_xscale);
-		}
+			if (flip)
+			{
+				x1 = (FIXED_TO_FLOAT(spr_width - spr_offset) * this_xscale);
+				x2 = (FIXED_TO_FLOAT(spr_offset) * this_xscale);
+			}
+			else
+			{
+				x1 = (FIXED_TO_FLOAT(spr_offset) * this_xscale);
+				x2 = (FIXED_TO_FLOAT(spr_width - spr_offset) * this_xscale);
+			}
 
-		// test if too close
-	/*
-		if (papersprite)
-		{
-			z1 = tz - x1 * angle_scalez;
-			z2 = tz + x2 * angle_scalez;
+			z1 = tr_y + x1 * rightsin;
+			z2 = tr_y - x2 * rightsin;
+			x1 = tr_x + x1 * rightcos;
+			x2 = tr_x - x2 * rightcos;
 
-			if (max(z1, z2) < ZCLIP_PLANE)
-				return;
-		}
-	*/
-
-		z1 = tr_y + x1 * rightsin;
-		z2 = tr_y - x2 * rightsin;
-		x1 = tr_x + x1 * rightcos;
-		x2 = tr_x - x2 * rightcos;
-
-		if (vflip)
-		{
-			gz = FIXED_TO_FLOAT(interp.z + interp.height) - (FIXED_TO_FLOAT(spr_topoffset) * this_yscale);
-			gzt = gz + (FIXED_TO_FLOAT(spr_height) * this_yscale);
-		}
-		else
-		{
-			gzt = FIXED_TO_FLOAT(interp.z) + (FIXED_TO_FLOAT(spr_topoffset) * this_yscale);
-			gz = gzt - (FIXED_TO_FLOAT(spr_height) * this_yscale);
+			if (vflip)
+			{
+				gz = FIXED_TO_FLOAT(interp.z + interp.height) - (FIXED_TO_FLOAT(spr_topoffset) * this_yscale);
+				gzt = gz + (FIXED_TO_FLOAT(spr_height) * this_yscale);
+			}
+			else
+			{
+				gzt = FIXED_TO_FLOAT(interp.z) + (FIXED_TO_FLOAT(spr_topoffset) * this_yscale);
+				gz = gzt - (FIXED_TO_FLOAT(spr_height) * this_yscale);
+			}
 		}
 	}
 

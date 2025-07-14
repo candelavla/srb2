@@ -1064,12 +1064,14 @@ static const char *credits[] = {
 	"Nathan \"Jazz\" Giroux",
 	"\"Golden\"",
 	"Vivian \"toaster\" Grannell",
+	"\"blankart\"",
 	"Julio \"Chaos Zero 64\" Guir",
 	"\"Hanicef\"",
 	"\"Hannu_Hanhi\"", // For many OpenGL performance improvements!
 	"Kepa \"Nev3r\" Iceta",
 	"Thomas \"Shadow Hog\" Igoe",
 	"Iestyn \"Monster Iestyn\" Jealous",
+	"\"Jisk\"",
 	"\"Kaito Sinclaire\"",
 	"\"Kalaron\"", // Coded some of Sryder13's collection of OpenGL fixes, especially fog
 	"Ronald \"Furyhunter\" Kinard", // The SDL2 port
