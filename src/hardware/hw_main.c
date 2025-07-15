@@ -4592,40 +4592,31 @@ static void HWR_ProjectSprite(mobj_t *thing)
 	}
 	else
 	{
-		if (splat)
+		if (flip)
 		{
-			z1 = z2 = tr_y;
-			x1 = x2 = tr_x;
-			gz = gzt = interp.z;
+			x1 = (FIXED_TO_FLOAT(spr_width - spr_offset) * this_xscale);
+			x2 = (FIXED_TO_FLOAT(spr_offset) * this_xscale);
 		}
 		else
 		{
-			if (flip)
-			{
-				x1 = (FIXED_TO_FLOAT(spr_width - spr_offset) * this_xscale);
-				x2 = (FIXED_TO_FLOAT(spr_offset) * this_xscale);
-			}
-			else
-			{
-				x1 = (FIXED_TO_FLOAT(spr_offset) * this_xscale);
-				x2 = (FIXED_TO_FLOAT(spr_width - spr_offset) * this_xscale);
-			}
+			x1 = (FIXED_TO_FLOAT(spr_offset) * this_xscale);
+			x2 = (FIXED_TO_FLOAT(spr_width - spr_offset) * this_xscale);
+		}
 
-			z1 = tr_y + x1 * rightsin;
-			z2 = tr_y - x2 * rightsin;
-			x1 = tr_x + x1 * rightcos;
-			x2 = tr_x - x2 * rightcos;
+		z1 = tr_y + x1 * rightsin;
+		z2 = tr_y - x2 * rightsin;
+		x1 = tr_x + x1 * rightcos;
+		x2 = tr_x - x2 * rightcos;
 
-			if (vflip)
-			{
-				gz = FIXED_TO_FLOAT(interp.z + interp.height) - (FIXED_TO_FLOAT(spr_topoffset) * this_yscale);
-				gzt = gz + (FIXED_TO_FLOAT(spr_height) * this_yscale);
-			}
-			else
-			{
-				gzt = FIXED_TO_FLOAT(interp.z) + (FIXED_TO_FLOAT(spr_topoffset) * this_yscale);
-				gz = gzt - (FIXED_TO_FLOAT(spr_height) * this_yscale);
-			}
+		if (vflip)
+		{
+			gz = FIXED_TO_FLOAT(interp.z + interp.height) - (FIXED_TO_FLOAT(spr_topoffset) * this_yscale);
+			gzt = gz + (FIXED_TO_FLOAT(spr_height) * this_yscale);
+		}
+		else
+		{
+			gzt = FIXED_TO_FLOAT(interp.z) + (FIXED_TO_FLOAT(spr_topoffset) * this_yscale);
+			gz = gzt - (FIXED_TO_FLOAT(spr_height) * this_yscale);
 		}
 	}
 
