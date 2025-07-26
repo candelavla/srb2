@@ -1666,7 +1666,6 @@ void I_ShutdownGraphics(void)
 	SDL_QuitSubSystem(SDL_INIT_VIDEO);
 	framebuffer = SDL_FALSE;
 }
-#endif
 
 void I_GetCursorPosition(INT32 *x, INT32 *y)
 {
