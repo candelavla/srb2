@@ -514,7 +514,6 @@ static void VID_Command_Info_f (void)
 
 	SurfaceInfo(bufSurface, M_GetText("Current Engine Mode"));
 	SurfaceInfo(vidSurface, M_GetText("Current Video Mode"));
-#endif
 	TimingInfo();
 }
 
@@ -1666,6 +1665,7 @@ void I_ShutdownGraphics(void)
 	SDL_QuitSubSystem(SDL_INIT_VIDEO);
 	framebuffer = SDL_FALSE;
 }
+#endif
 
 void I_GetCursorPosition(INT32 *x, INT32 *y)
 {
