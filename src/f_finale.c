@@ -1,4 +1,4 @@
-// SONIC ROBO BLAST 2
+a// SONIC ROBO BLAST 2
 //-----------------------------------------------------------------------------
 // Copyright (C) 1993-1996 by id Software, Inc.
 // Copyright (C) 1998-2000 by DooM Legacy Team.
@@ -921,13 +921,9 @@ void F_IntroTicker(void)
 
 					I_OsPolling();
 					I_UpdateNoBlit();
-#ifdef HAVE_THREADS
 					I_lock_mutex(&m_menu_mutex);
-#endif
 					M_Drawer(); // menu is drawn even on top of wipes
-#ifdef HAVE_THREADS
 					I_unlock_mutex(m_menu_mutex);
-#endif
 					I_FinishUpdate(); // Update the screen with the image Tails 06-19-2001
 
 					if (moviemode) // make sure we save frames for the white hold too
