@@ -921,13 +921,9 @@ void F_IntroTicker(void)
 
 					I_OsPolling();
 					I_UpdateNoBlit();
-#ifdef HAVE_THREADS
 					I_lock_mutex(&m_menu_mutex);
-#endif
 					M_Drawer(); // menu is drawn even on top of wipes
-#ifdef HAVE_THREADS
 					I_unlock_mutex(m_menu_mutex);
-#endif
 					I_FinishUpdate(); // Update the screen with the image Tails 06-19-2001
 
 					if (moviemode) // make sure we save frames for the white hold too
@@ -1051,6 +1047,8 @@ static const char *credits[] = {
 	"Alam \"GBC\" Arias",
 	"Logan \"GBA\" Arias",
 	"Zolton \"Zippy_Zolton\" Auburn",
+	"\"bitten2up\"",
+	"\"candelavla\"",
 	"Colette \"fickleheart\" Bordelon",
 	"Andrew \"orospakr\" Clunis",
 	"Sally \"TehRealSalt\" Cochenour",
@@ -1064,7 +1062,6 @@ static const char *credits[] = {
 	"Julio \"Chaos Zero 64\" Guir",
 	"\"Hanicef\"",
 	"\"Hannu_Hanhi\"", // For many OpenGL performance improvements!
-	"\"hazepastel\"",
 	"Kepa \"Nev3r\" Iceta",
 	"Thomas \"Shadow Hog\" Igoe",
 	"Iestyn \"Monster Iestyn\" Jealous",
