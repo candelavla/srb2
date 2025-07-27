@@ -7,6 +7,7 @@ target_sources(SRB2SDL2 PRIVATE
 	i_system.c
 	i_main.c
 	i_video.c
+	i_gamepad.c
 	dosstr.c
 	endtxt.c
 	hwsym_sdl.c

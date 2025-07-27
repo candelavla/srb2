@@ -3325,7 +3325,7 @@ boolean M_Responder(event_t *ev)
 	}
 
 	if (!useEventHandler && ch == -1)
-		return false;
+		return menuactive;
 	else if (ev->type != ev_text && (ch == gamecontrol[GC_SYSTEMMENU][0] || ch == gamecontrol[GC_SYSTEMMENU][1])) // allow remappable ESC key
 		ch = KEY_ESCAPE;
 
@@ -13567,7 +13567,7 @@ static void M_ChangeControl(INT32 choice)
 {
 	// This buffer assumes a 91-character message (per below) plus a max control name limit of 32 chars (per controltochangetext)
 	// If you change the below message, then change the size of this buffer!
-	static char tmp[124];
+	static char tmp[144];
 
 	if (tutorialmode && tutorialgcs) // don't allow control changes if temp control override is active
 		return;
@@ -13575,7 +13575,7 @@ static void M_ChangeControl(INT32 choice)
 	controltochange = currentMenu->menuitems[choice].alphaKey;
 	if (controltochange == GC_SHIELD)
 	{
-		sprintf(tmp, M_GetText("Press the new key/button for\n%s\n\nESCAPE to cancel\n\nBind to same key/button as Spin to disable"),
+		sprintf(tmp, M_GetText("Press the new key/button for\n%s\n\nESCAPE to cancel\n\nBind to same key/button as Spin to disable\nBe warned that enabling shield might break addons!"),
 			currentMenu->menuitems[choice].text);
 	}
 	else
