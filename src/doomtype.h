@@ -145,6 +145,10 @@ size_t strlcpy(char *dst, const char *src, size_t siz);
 
 /* Boolean type definition */
 
+#ifndef bool // backwards compat for older GNU
+#include <stdbool.h>
+#endif
+
 #define boolean bool
 
 /* 7.18.2.1  Limits of exact-width integer types */
