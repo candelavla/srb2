@@ -14350,30 +14350,30 @@ void M_QuitResponse(INT32 ch)
 }
 
 const char *QuitDialogMessages[22] = {
-	("Eggman's tied explosives\nto your girlfriend, and\nwill activate them if\nyou press the 'Y' key!\nPress 'N' to save her!"),
-	("What would Tails say if\nhe saw you quitting the game?"),
-	("Hey!\nWhere do ya think you're goin'?"),
+	("Your girlfriend has tied explosives\nto Eggman, and will activate\nthem if you quit the game!"),
+	("I bet you wish you didn't have to restart\nthe game to unload all of your addons."),
+	("Aw no!\nThis isn't happening!"),
 	("Forget your studies!\nPlay some more!"),
-	("You're trying to say you\nlike Sonic 2K6 better than\nthis, right?"),
-	("Don't leave yet -- there's a\nsuper emerald around that corner!"),
-	("You'd rather work than play?"),
-	("Go ahead and leave. See if I care...\n*sniffle*"),
+	("You're trying to say you like Sonic 3D Blast\nbetter than this, right?"),
+	("Don't leave yet, there's a\nsol emerald around that corner!"),
+	("Fresh redberries and the greenest flowers\n await, but only if you don't quit the game."),
+	("C'mon ya big drip, where ya goin'?"),
 
-	("If you leave now,\nEggman will take over the world!"),
-	("Don't quit!\nThere are animals\nto save!"),
-	("Aw c'mon, just bop\na few more robots!"),
+	("If you stay, I won't tell anyone\nthat you broke Robotnik's Rules."),
+	("Don't leave yet, just look at\nall of those Eggman's robots!"),
+	("Shame to see you go, but I understand\nyou have an important thok debate coming up."),
 	("Did you get all those Chaos Emeralds?"),
-	("If you leave, I'll use\nmy spin attack on you!"),
-	("Don't go!\nYou might find the hidden\nlevels!"),
-	("Hit the 'N' key, Sonic!\nThe 'N' key!"),
+	("When you're done playing,\nremember to join #srb2fun.\nThe place is never empty!"),
+	("Mephiles told me the Iblis Trigger\nwas last seen quitting SRB2!"),
+	("I am the all-powerful Quit Message!\nOnly the Ultimate Cheat can defeat me."),
 
-	("Are you really going to give up?\nWe certainly would never give you up."),
-	("Come on, just ONE more netgame!"),
-	("Press 'N' to unlock\nthe Ultimate Cheat!"),
+	("No...\nI want... to exist...!"),
+	("Talk about low budget games!\nNo loops or momentum?\nI'm outta here!"),
+	("Quitting is like taking candy from a baby,\nwhich I'm sure is fine by you. Jerk."),
 	("Why don't you go back and try\njumping on that house to\nsee what happens?"),
-	("Every time you press 'Y', an\nSRB2 Developer cries..."),
-	("You'll be back to play soon, though...\n......right?"),
-	("Aww, is Egg Rock Zone too\ndifficult for you?")
+	("It's not that games end.\nWe just give up on them."),
+	("You'll be back to play soon, though...\n...right?"),
+	("Aww, is Freak Show Zone too\ndifficult for you?")
 };
 
 static void M_QuitSRB2(INT32 choice)
