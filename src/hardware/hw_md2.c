@@ -1311,7 +1311,7 @@ boolean HWR_DrawModel(gl_vissprite_t *spr)
 		{
 			INT32 light;
 
-			light = R_GetPlaneLight(sector, spr->mobj->z + spr->mobj->height, false); // Always use the light at the top instead of whatever I was doing before
+			light = P_GetSectorLightNumAt(sector, spr->mobj->x, spr->mobj->y, spr->mobj->z + spr->mobj->height);
 
 			if (R_ThingIsFullDark(spr->mobj))
 				lightlevel = 0;
