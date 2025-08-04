@@ -735,6 +735,9 @@ void D_SRB2Loop(void)
 	con_refresh = false;
 	con_startup = false;
 
+	// set user default mode or mode set at cmdline
+	SCR_CheckDefaultMode();
+
 	// make sure to do a d_display to init mode _before_ load a level
 	SCR_SetMode(); // change video mode
 	SCR_Recalc();
@@ -1524,9 +1527,6 @@ void D_SRB2Main(void)
 	M_CopyGameData(serverGamedata, clientGamedata);
 
 	allow_fullscreen = true;
-
-	// set user default mode or mode set at cmdline
-	SCR_CheckDefaultMode();
 
 	wipegamestate = gamestate;
 
