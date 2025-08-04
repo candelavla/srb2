@@ -112,6 +112,7 @@ consvar_t cv_fullscreen = CVAR_INIT ("fullscreen", "Yes", CV_SAVE|CV_CALL, CV_Ye
 // =========================================================================
 
 INT32 scr_bpp; // current video mode bytes per pixel
+static bool resolution_ready = false;
 
 // =========================================================================
 
@@ -321,6 +322,7 @@ void SCR_SetSizeNoRestore(INT32 width, INT32 height)
 void SCR_CheckDefaultMode(void)
 {
 	INT32 scr_forcex, scr_forcey; // resolution asked from the cmd-line
+	resolution_ready = true;
 
 	if (dedicated)
 		return;
@@ -383,8 +385,10 @@ void SCR_CheckDefaultMode(void)
 // sets the resolution as the new default to be saved in the config file
 void SCR_SetDefaultMode(INT32 width, INT32 height)
 {
-	CV_SetValue(cv_fullscreen.value ? &cv_scr_width : &cv_scr_width_w, width);
-	CV_SetValue(cv_fullscreen.value ? &cv_scr_height : &cv_scr_height_w, height);
+	if (!resolution_ready) // hack to avoid resolution changes fucking things up at startup
+		return;
+	CV_SetValue((cv_fullscreen.value == 1) ? &cv_scr_width : &cv_scr_width_w, width);
+	CV_SetValue((cv_fullscreen.value == 1) ? &cv_scr_height : &cv_scr_height_w, height);
 }
 
 // Change fullscreen on/off according to cv_fullscreen
