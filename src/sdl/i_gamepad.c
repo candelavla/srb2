@@ -321,6 +321,9 @@ static boolean Controller_IsAnyOtherUsingDevice(SDL_GameController *dev, UINT8 t
 
 void I_ControllerDeviceAdded(INT32 which)
 {
+	if (dedicated)
+		return;
+
 	if (!SDL_IsGameController(which))
 		return;
 
@@ -412,6 +415,9 @@ void I_ControllerDeviceAdded(INT32 which)
 
 void I_ControllerDeviceRemoved(void)
 {
+	if (dedicated)
+		return;
+
 	for (UINT8 this = 0; this < NUM_GAMEPADS; this++)
 	{
 		if (controllers[this].dev && !SDL_GameControllerGetAttached(controllers[this].dev))
