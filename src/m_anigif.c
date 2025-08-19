@@ -646,8 +646,8 @@ static void GIF_framewrite(void)
 			// Ensure our downscaled blitx/y starts and ends on a pixel.
 			blitx -= (blitx % scrbuf_downscaleamt);
 			blity -= (blity % scrbuf_downscaleamt);
-			blitw = ((blitw + (scrbuf_downscaleamt - 1)) / scrbuf_downscaleamt) * scrbuf_downscaleamt;
-			blith = ((blith + (scrbuf_downscaleamt - 1)) / scrbuf_downscaleamt) * scrbuf_downscaleamt;
+			blitw -= (blitw % scrbuf_downscaleamt);
+			blith -= (blith % scrbuf_downscaleamt);
 		}
 
 		WRITEUINT8(p, 0x2C);
@@ -671,7 +671,7 @@ static void GIF_framewrite(void)
 		}
 
 		scrbuf_pos = movie_screen + blitx + (blity * vid.width);
-		scrbuf_writeend = scrbuf_pos + (blitw - 1) + ((blith - 1) * vid.width);
+		scrbuf_writeend = scrbuf_pos + blitw + (blith * vid.width);
 
 		if (!gifbwr_buf)
 			gifbwr_buf = Z_Malloc(256, PU_STATIC, NULL);
