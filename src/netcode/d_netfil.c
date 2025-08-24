@@ -112,7 +112,6 @@ static pauseddownload_t *pauseddownload = NULL;
 file_download_t filedownload;
 
 static CURL *http_handle;
-static char curl_errbuf[CURL_ERROR_SIZE];
 static CURLM *multi_handle;
 static UINT32 curl_dlnow;
 static UINT32 curl_dltotal;
@@ -1605,10 +1604,6 @@ static int curlprogress_callback(void *clientp, curl_off_t dltotal, curl_off_t d
 boolean CURLPrepareFile(const char* url, int dfilenum)
 {
 	HTTP_login *login;
-	CURLcode cc;
-
-	if (!I_can_thread())
-		return false;
 
 #ifdef PARANOIA
 	if (M_CheckParm("-nodownload"))
@@ -1617,32 +1612,13 @@ boolean CURLPrepareFile(const char* url, int dfilenum)
 
 	if (!multi_handle)
 	{
-		cc = curl_global_init(CURL_GLOBAL_ALL);
-		if (cc < 0)
-		{
-			I_OutputMsg("libcurl: curl_global_init() returned %d\n", cc);
-		}
-		else
-		{
-			multi_handle = curl_multi_init();
-		}
-		if (!multi_handle)
-		{
-			I_OutputMsg("libcurl: curl_multi_init() failed\n");
-			curl_global_cleanup();
-			return false;
-		}
+		curl_global_init(CURL_GLOBAL_ALL);
+		multi_handle = curl_multi_init();
 	}
 
 	http_handle = curl_easy_init();
-	if (http_handle)
+	if (http_handle && multi_handle)
 	{
-		CURLMcode mc;
-
-		cc = curl_easy_setopt(http_handle, CURLOPT_ERRORBUFFER, curl_errbuf);
-		if (cc != CURLE_OK) I_OutputMsg("libcurl: CURLOPT_ERRORBUFFER failed\n");
-		curl_errbuf[0] = 0x00;
-
 		I_mkdir(downloaddir, 0755);
 
 		curl_curfile = &fileneeded[dfilenum];
@@ -1656,76 +1632,50 @@ boolean CURLPrepareFile(const char* url, int dfilenum)
 		for (INT32 j = 0; j < 16; j++)
 			sprintf(&md5tmp[j*2], "%02x", curl_curfile->md5sum[j]);
 
-		cc = curl_easy_setopt(http_handle, CURLOPT_URL, va("%s/%s?md5=%s", url, curl_realname, md5tmp));
-		if (cc != CURLE_OK) I_OutputMsg("libcurl: %s\n", curl_errbuf);
+		curl_easy_setopt(http_handle, CURLOPT_URL, va("%s/%s?md5=%s", url, curl_realname, md5tmp));
 
 		// Only allow HTTP and HTTPS
 #if (LIBCURL_VERSION_MAJOR <= 7) && (LIBCURL_VERSION_MINOR < 85)
-		cc = curl_easy_setopt(http_handle, CURLOPT_PROTOCOLS, CURLPROTO_HTTP|CURLPROTO_HTTPS);
+		curl_easy_setopt(http_handle, CURLOPT_PROTOCOLS, CURLPROTO_HTTP|CURLPROTO_HTTPS);
 #else
-		cc = curl_easy_setopt(http_handle, CURLOPT_PROTOCOLS_STR, "http,https");
+		curl_easy_setopt(http_handle, CURLOPT_PROTOCOLS_STR, "http,https");
 #endif
-		if (cc != CURLE_OK) I_OutputMsg("libcurl: %s\n", curl_errbuf);
 
 		// Set user agent, as some servers won't accept invalid user agents.
-		cc = curl_easy_setopt(http_handle, CURLOPT_USERAGENT, va("Sonic Robo Blast 2/%s", VERSIONSTRING));
-		if (cc != CURLE_OK) I_OutputMsg("libcurl: %s\n", curl_errbuf);
+		curl_easy_setopt(http_handle, CURLOPT_USERAGENT, va("Sonic Robo Blast 2/%s", VERSIONSTRING));
 
 		// Authenticate if the user so wishes
 		login = CURLGetLogin(url, NULL);
 
 		if (login)
 		{
-			cc = curl_easy_setopt(http_handle, CURLOPT_USERPWD, login->auth);
-			if (cc != CURLE_OK) I_OutputMsg("libcurl: %s\n", curl_errbuf);
+			curl_easy_setopt(http_handle, CURLOPT_USERPWD, login->auth);
 		}
 
 		// Follow a redirect request, if sent by the server.
-		cc = curl_easy_setopt(http_handle, CURLOPT_FOLLOWLOCATION, 1L);
-		if (cc != CURLE_OK) I_OutputMsg("libcurl: %s\n", curl_errbuf);
+		curl_easy_setopt(http_handle, CURLOPT_FOLLOWLOCATION, 1L);
 
-		cc = curl_easy_setopt(http_handle, CURLOPT_FAILONERROR, 1L);
-		if (cc != CURLE_OK) I_OutputMsg("libcurl: %s\n", curl_errbuf);
+		curl_easy_setopt(http_handle, CURLOPT_FAILONERROR, 1L);
 
 		CONS_Printf("Downloading addon \"%s\" from %s\n", curl_realname, url);
 
 		strcatbf(curl_curfile->filename, downloaddir, "/");
 		curl_curfile->file = fopen(curl_curfile->filename, "wb");
-
-		cc = curl_easy_setopt(http_handle, CURLOPT_WRITEDATA, curl_curfile->file);
-		if (cc != CURLE_OK) I_OutputMsg("libcurl: %s\n", curl_errbuf);
-
-		cc = curl_easy_setopt(http_handle, CURLOPT_WRITEFUNCTION, curlwrite_data);
-		if (cc != CURLE_OK) I_OutputMsg("libcurl: %s\n", curl_errbuf);
-
-		cc = curl_easy_setopt(http_handle, CURLOPT_NOPROGRESS, 0L);
-		if (cc != CURLE_OK) I_OutputMsg("libcurl: %s\n", curl_errbuf);
-
-		cc = curl_easy_setopt(http_handle, CURLOPT_XFERINFOFUNCTION, curlprogress_callback);
-		if (cc != CURLE_OK) I_OutputMsg("libcurl: %s\n", curl_errbuf);
+		curl_easy_setopt(http_handle, CURLOPT_WRITEDATA, curl_curfile->file);
+		curl_easy_setopt(http_handle, CURLOPT_WRITEFUNCTION, curlwrite_data);
+		curl_easy_setopt(http_handle, CURLOPT_NOPROGRESS, 0L);
+		curl_easy_setopt(http_handle, CURLOPT_XFERINFOFUNCTION, curlprogress_callback);
 
 		curl_curfile->status = FS_DOWNLOADING;
+		curl_multi_add_handle(multi_handle, http_handle);
 
-		mc = curl_multi_add_handle(multi_handle, http_handle);
-		if (mc != CURLM_OK) I_OutputMsg("libcurl: %s\n", curl_multi_strerror(mc));
-
-		mc = curl_multi_perform(multi_handle, &curl_runninghandles);
-		if (mc != CURLM_OK) I_OutputMsg("libcurl: %s\n", curl_multi_strerror(mc));
-
+		curl_multi_perform(multi_handle, &curl_runninghandles);
 		curl_starttime = time(NULL);
 
 		filedownload.current = dfilenum;
 		filedownload.http_running = true;
 
-		if (!I_spawn_thread("http-download", (I_thread_fn)CURLGetFile, NULL))
-		{
-			mc = curl_multi_cleanup(multi_handle);
-			if (mc != CURLM_OK) I_OutputMsg("libcurl: %s\n",  curl_multi_strerror(mc));
-			curl_global_cleanup();
-			multi_handle = NULL;
-			filedownload.http_running = false;
-			return false;
-		}
+		I_spawn_thread("http-download", (I_thread_fn)CURLGetFile, NULL);
 
 		return true;
 	}
@@ -1759,15 +1709,14 @@ void CURLGetFile(void)
 	{
 		if (curl_runninghandles)
 		{
-			mc = curl_multi_perform(multi_handle, &curl_runninghandles);
-			if (mc != CURLM_OK) I_OutputMsg("libcurl: %s\n", curl_multi_strerror(mc));
+			curl_multi_perform(multi_handle, &curl_runninghandles);
 
 			/* wait for activity, timeout or "nothing" */
 			mc = curl_multi_wait(multi_handle, NULL, 0, 1000, NULL);
 
 			if (mc != CURLM_OK)
 			{
-				CONS_Alert(CONS_WARNING, "curl_multi_wait() failed: %s.\n", curl_multi_strerror(mc));
+				CONS_Alert(CONS_WARNING, "curl_multi_wait() failed, code %d.\n", mc);
 				continue;
 			}
 			curl_curfile->currentsize = curl_dlnow;
@@ -1791,10 +1740,7 @@ void CURLGetFile(void)
 					long response_code = 0;
 
 					if (easyres == CURLE_HTTP_RETURNED_ERROR)
-					{
-						CURLcode cc = curl_easy_getinfo(e, CURLINFO_RESPONSE_CODE, &response_code);
-						if (cc != CURLE_OK) I_OutputMsg("libcurl: %s\n", curl_errbuf);
-					}
+						curl_easy_getinfo(e, CURLINFO_RESPONSE_CODE, &response_code);
 
 					if (response_code == 404)
 						curl_curfile->failed = FDOWNLOAD_FAIL_NOTFOUND;
@@ -1835,8 +1781,7 @@ void CURLGetFile(void)
 
 				curl_curfile->file = NULL;
 				filedownload.remaining--;
-				mc = curl_multi_remove_handle(multi_handle, e);
-				if (mc != CURLM_OK) I_OutputMsg("libcurl: %s\n", curl_multi_strerror(mc));
+				curl_multi_remove_handle(multi_handle, e);
 				curl_easy_cleanup(e);
 
 				if (!filedownload.remaining)
@@ -1847,8 +1792,7 @@ void CURLGetFile(void)
 
 	if (!filedownload.remaining || !filedownload.http_running)
 	{
-		mc = curl_multi_cleanup(multi_handle);
-		if (mc != CURLM_OK) I_OutputMsg("libcurl: %s\n", curl_multi_strerror(mc));
+		curl_multi_cleanup(multi_handle);
 		curl_global_cleanup();
 		multi_handle = NULL;
 	}

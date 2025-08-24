@@ -55,14 +55,19 @@ void R_ClearDrawSegs(void)
 // CPhipps -
 // Instead of clipsegs, let's try using an array with one entry for each column,
 // indicating whether it's blocked by a solid wall yet or not.
-UINT8 solidcol[MAXVIDWIDTH];
+UINT8 *solidcol;
+
+void R_AllocClipSegMemory(void)
+{
+	solidcol = Z_Realloc(solidcol, sizeof(*solidcol) * viewwidth, PU_STATIC, NULL);
+}
 
 // CPhipps -
 // R_ClipWallSegment
 //
 // Replaces the old R_Clip*WallSegment functions. It draws bits of walls in those
 // columns which aren't solid, and updates the solidcol[] array appropriately
-static void R_ClipWallSegment(INT32 first, INT32 last, boolean solid)
+static void R_ClipWallSegment(int first, int last, boolean solid)
 {
 	while (first < last)
 	{
@@ -96,6 +101,9 @@ static void R_ClipWallSegment(INT32 first, INT32 last, boolean solid)
 	}
 }
 
+//
+// R_ClearClipSegs
+//
 void R_ClearClipSegs(void)
 {
 	memset(solidcol, 0, viewwidth);

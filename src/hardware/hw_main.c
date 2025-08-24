@@ -16,7 +16,6 @@
 
 #ifdef HWRENDER
 #include "hw_glob.h"
-#include "hw_light.h"
 #include "hw_drv.h"
 #include "hw_batching.h"
 #include "hw_md2.h"
@@ -265,44 +264,23 @@ static FUINT HWR_CalcWallLight(FUINT lightnum, fixed_t v1x, fixed_t v1y, fixed_t
 	return (FUINT)finallight;
 }
 
-static FUINT HWR_CalcSlopeLight(FUINT lightnum, angle_t dir, fixed_t delta)
+static FUINT HWR_CalcSlopeLight(FUINT lightnum, pslope_t *slope)
 {
 	INT16 finallight = lightnum;
 
-	if (cv_glfakecontrast.value != 0 && cv_glslopecontrast.value != 0)
+	if (slope != NULL && cv_glfakecontrast.value != 0 && cv_glslopecontrast.value != 0)
 	{
-		const UINT8 contrast = 8;
 		fixed_t extralight = 0;
 
 		if (cv_glfakecontrast.value == 2) // Smooth setting
-		{
-			fixed_t dirmul = abs(FixedDiv(AngleFixed(dir) - (180<<FRACBITS), 180<<FRACBITS));
-
-			extralight = -(contrast<<FRACBITS) + (dirmul * (contrast * 2));
-
-			extralight = FixedMul(extralight, delta*4) >> FRACBITS;
-		}
+			extralight += slope->hwLightOffset;
 		else
-		{
-			dir = ((dir + ANGLE_45) / ANGLE_90) * ANGLE_90;
-
-			if (dir == ANGLE_180)
-				extralight = -contrast;
-			else if (dir == 0)
-				extralight = contrast;
-
-			if (delta >= FRACUNIT/2)
-				extralight *= 2;
-		}
+			extralight += slope->lightOffset * 8;
 
 		if (extralight != 0)
 		{
 			finallight += extralight;
-
-			if (finallight < 0)
-				finallight = 0;
-			if (finallight > 255)
-				finallight = 255;
+			finallight = min(max(finallight, 0) , 255);
 		}
 	}
 
@@ -499,7 +477,7 @@ static void HWR_RenderPlane(subsector_t *subsector, extrasubsector_t *xsub, bool
 		SETUP3DVERT(v3d, pv->x, pv->y);
 
 	if (slope)
-		lightlevel = HWR_CalcSlopeLight(lightlevel, R_PointToAngle2(0, 0, slope->normal.x, slope->normal.y), abs(slope->zdelta));
+		lightlevel = HWR_CalcSlopeLight(lightlevel, slope);
 
 	HWR_Lighting(&Surf, lightlevel, planecolormap);
 
@@ -613,11 +591,6 @@ static void HWR_RenderPlane(subsector_t *subsector, extrasubsector_t *xsub, bool
 			}
 		}
 	}
-
-#ifdef ALAM_LIGHTING
-	// add here code for dynamic lighting on planes
-	HWR_PlaneLighting(planeVerts, nrPlaneVerts);
-#endif
 }
 
 FBITFIELD HWR_GetBlendModeFlag(INT32 style)
@@ -2666,9 +2639,6 @@ static void HWR_Subsector(size_t num)
 //  traversing subtree recursively.
 // Just call with BSP root.
 
-// BP: big hack for a test in lighning ref : 1249753487AB
-fixed_t *hwbbox;
-
 static void HWR_RenderBSPNode(INT32 bspnum)
 {
 	node_t *bsp;
@@ -2682,8 +2652,6 @@ static void HWR_RenderBSPNode(INT32 bspnum)
 
 		// Decide which side the view point is on.
 		side = R_PointOnSide(viewx, viewy, bsp);
-		// BP: big hack for a test in lighning ref : 1249753487AB
-		hwbbox = bsp->bbox[side];
 		// Recursively divide front space.
 		HWR_RenderBSPNode(bsp->children[side]);
 
@@ -3065,18 +3033,22 @@ static void HWR_SplitSprite(gl_vissprite_t *spr)
 		baseWallVerts[0].t = baseWallVerts[1].t = ((GLPatch_t *)gpatch->hardware)->max_t;
 	}
 
-	// if it has a dispoffset, push it a little towards the camera
-	if (spr->dispoffset) {
-		float co = -gl_viewcos*(0.05f*spr->dispoffset);
-		float si = -gl_viewsin*(0.05f*spr->dispoffset);
-		baseWallVerts[0].z = baseWallVerts[3].z = baseWallVerts[0].z+si;
-		baseWallVerts[1].z = baseWallVerts[2].z = baseWallVerts[1].z+si;
-		baseWallVerts[0].x = baseWallVerts[3].x = baseWallVerts[0].x+co;
-		baseWallVerts[1].x = baseWallVerts[2].x = baseWallVerts[1].x+co;
-	}
 
+
+	// push it toward the camera to mitigate floor-clipping sprites
 	// Let dispoffset work first since this adjust each vertex
 	HWR_RotateSpritePolyToAim(spr, baseWallVerts, false);
+
+	// push it toward the camera to mitigate floor-clipping sprites
+	float sprdist = sqrtf((spr->x1 - gl_viewx)*(spr->x1 - gl_viewx) + (spr->z1 - gl_viewy)*(spr->z1 - gl_viewy) + (spr->gzt - gl_viewz)*(spr->gzt - gl_viewz));
+	float distfact = ((2.0f*spr->dispoffset) + 20.0f) / sprdist;
+	for (i = 0; i < 4; i++)
+	{
+		baseWallVerts[i].x += (gl_viewx - baseWallVerts[i].x)*distfact;
+		baseWallVerts[i].z += (gl_viewy - baseWallVerts[i].z)*distfact;
+		baseWallVerts[i].y += (gl_viewz - baseWallVerts[i].y)*distfact;
+	}
+
 
 	realtop = top = baseWallVerts[3].y;
 	realbot = bot = baseWallVerts[0].y;
@@ -3371,12 +3343,6 @@ static void HWR_DrawSprite(gl_vissprite_t *spr)
 
 	gpatch = spr->gpatch;
 
-#ifdef ALAM_LIGHTING
-	if (!(spr->mobj->flags2 & MF2_DEBRIS) && (spr->mobj->sprite != SPR_PLAY ||
-	 (spr->mobj->player && spr->mobj->player->powers[pw_super])))
-		HWR_DL_AddLight(spr, gpatch);
-#endif
-
 	// create the sprite billboard
 	//
 	//  3--2
@@ -3402,7 +3368,7 @@ static void HWR_DrawSprite(gl_vissprite_t *spr)
 		renderflags_t renderflags = spr->renderflags;
 
 		if (spr->rotateflags & SRF_3D || renderflags & RF_NOSPLATBILLBOARD)
-			angle = spr->mobj->angle;
+			angle = spr->angle;
 		else
 			angle = viewangle;
 
@@ -3457,8 +3423,8 @@ static void HWR_DrawSprite(gl_vissprite_t *spr)
 		// Translate
 		for (i = 0; i < 4; i++)
 		{
-			wallVerts[i].x = rotated[i].x + FIXED_TO_FLOAT(spr->mobj->x);
-			wallVerts[i].z = rotated[i].y + FIXED_TO_FLOAT(spr->mobj->y);
+			wallVerts[i].x = rotated[i].x + spr->x1;
+			wallVerts[i].z = rotated[i].y + spr->z1;
 		}
 
 		if (renderflags & (RF_SLOPESPLAT | RF_OBJECTSLOPESPLAT))
@@ -3526,21 +3492,40 @@ static void HWR_DrawSprite(gl_vissprite_t *spr)
 		wallVerts[0].t = wallVerts[1].t = ((GLPatch_t *)gpatch->hardware)->max_t;
 	}
 
+	float sprdist = 0.0f, distfact = 0.0f;
+	size_t i;
+
 	if (!splat)
 	{
-		// if it has a dispoffset, push it a little towards the camera
-		if (spr->dispoffset) {
-			float co = -gl_viewcos*(0.05f*spr->dispoffset);
-			float si = -gl_viewsin*(0.05f*spr->dispoffset);
-			wallVerts[0].z = wallVerts[3].z = wallVerts[0].z+si;
-			wallVerts[1].z = wallVerts[2].z = wallVerts[1].z+si;
-			wallVerts[0].x = wallVerts[3].x = wallVerts[0].x+co;
-			wallVerts[1].x = wallVerts[2].x = wallVerts[1].x+co;
-		}
-
 		// Let dispoffset work first since this adjust each vertex
 		HWR_RotateSpritePolyToAim(spr, wallVerts, false);
+
+		// push it toward the camera to mitigate floor-clipping sprites
+		sprdist = sqrtf((spr->x1 - gl_viewx)*(spr->x1 - gl_viewx) + (spr->z1 - gl_viewy)*(spr->z1 -gl_viewy)+ (spr->gzt - gl_viewz)*(spr->gzt - gl_viewz));
+		distfact = ((2.0f* spr->dispoffset) + 20.0f) / sprdist;
+		for (i = 0; i < 4; i++)
+		{
+			wallVerts[i].x += (gl_viewx - wallVerts[i].x)*distfact;
+			wallVerts[i].z += (gl_viewy - wallVerts[i].z)*distfact;
+			wallVerts[i].y += (gl_viewz - wallVerts[i].y)*distfact;
+		}
 	}
+	else if (R_ThingIsFloorSprite(spr->mobj))
+	{
+		sprdist = sqrtf((spr->x1 - gl_viewx)*(spr->x1 - gl_viewx) + (spr->z1 - gl_viewy)*(spr->z1 - gl_viewy));
+		distfact = (2.0f + 20.0f) / sprdist;
+
+		// pull splats out of the floor
+		for (i = 0; i < 4; i++)
+		{
+			wallVerts[i].x += (gl_viewx - wallVerts[i].x)*distfact;
+			wallVerts[i].z += (gl_viewy - wallVerts[i].z)*distfact;
+			wallVerts[i].y += (gl_viewz - wallVerts[i].y)*distfact;
+		}
+	}
+
+
+
 
 	// This needs to be AFTER the shadows so that the regular sprites aren't drawn completely black.
 	// sprite lighting by modulating the RGB components
@@ -3565,7 +3550,7 @@ static void HWR_DrawSprite(gl_vissprite_t *spr)
 
 		if (splat && sector->numlights)
 		{
-			INT32 light = R_GetPlaneLight(sector, spr->mobj->z, false);
+			INT32 light = R_GetPlaneLight(sector, spr->gz, false);
 
 			if (!lightset)
 				lightlevel = max(min(*sector->lightlist[light].lightlevel, 255), 0);
@@ -4615,18 +4600,6 @@ static void HWR_ProjectSprite(mobj_t *thing)
 			x2 = (FIXED_TO_FLOAT(spr_width - spr_offset) * this_xscale);
 		}
 
-		// test if too close
-	/*
-		if (papersprite)
-		{
-			z1 = tz - x1 * angle_scalez;
-			z2 = tz + x2 * angle_scalez;
-
-			if (max(z1, z2) < ZCLIP_PLANE)
-				return;
-		}
-	*/
-
 		z1 = tr_y + x1 * rightsin;
 		z2 = tr_y - x2 * rightsin;
 		x1 = tr_x + x1 * rightcos;
@@ -5297,7 +5270,7 @@ static void HWR_SetupView(player_t *player, INT32 viewnumber, float fpov, boolea
 {
 	postimg_t *type;
 
-	if (splitscreen && player == &players[secondarydisplayplayer])
+	if (viewnumber == 1)
 		type = &postimgtype2;
 	else
 		type = &postimgtype;
@@ -5309,11 +5282,7 @@ static void HWR_SetupView(player_t *player, INT32 viewnumber, float fpov, boolea
 		stplyr = player;
 		ST_doPaletteStuff();
 		stplyr = saved_player;
-#ifdef ALAM_LIGHTING
-		HWR_SetLights(viewnumber);
-#else
 		(void)viewnumber;
-#endif
 	}
 
 	// note: sets viewangle, viewx, viewy, viewz
@@ -5368,7 +5337,7 @@ static void HWR_SetupView(player_t *player, INT32 viewnumber, float fpov, boolea
 // ==========================================================================
 // Same as rendering the player view, but from the skybox object
 // ==========================================================================
-void HWR_RenderSkyboxView(INT32 viewnumber, player_t *player)
+static void HWR_RenderSkyboxView(INT32 viewnumber, player_t *player)
 {
 	const float fpov = FixedToFloat(R_GetPlayerFov(player));
 
@@ -5422,12 +5391,6 @@ void HWR_RenderSkyboxView(INT32 viewnumber, player_t *player)
 
 	// Check for new console commands.
 	NetUpdate();
-
-#ifdef ALAM_LIGHTING
-	//14/11/99: Hurdler: moved here because it doesn't work with
-	// subsector, see other comments;
-	HWR_ResetLights();
-#endif
 
 	// Draw MD2 and sprites
 	HWR_SortVisSprites();
@@ -5543,12 +5506,6 @@ void HWR_RenderPlayerView(INT32 viewnumber, player_t *player)
 	// Check for new console commands.
 	NetUpdate();
 
-#ifdef ALAM_LIGHTING
-	//14/11/99: Hurdler: moved here because it doesn't work with
-	// subsector, see other comments;
-	HWR_ResetLights();
-#endif
-
 	// Draw MD2 and sprites
 	ps_numsprites.value.i = gl_visspritecount;
 	PS_START_TIMING(ps_hw_spritesorttime);
@@ -5639,11 +5596,6 @@ static void HWR_TogglePaletteRendering(void)
 
 void HWR_LoadLevel(void)
 {
-#ifdef ALAM_LIGHTING
-	// BP: reset light between levels (we draw preview frame lights on current frame)
-	HWR_ResetLights();
-#endif
-
 	HWR_CreatePlanePolygons((INT32)numnodes - 1);
 
 	// Build the sky dome
@@ -5680,13 +5632,6 @@ static CV_PossibleValue_t glfiltermode_cons_t[]= {{HWD_SET_TEXTUREFILTER_POINTSA
 CV_PossibleValue_t glanisotropicmode_cons_t[] = {{1, "MIN"}, {16, "MAX"}, {0, NULL}};
 
 consvar_t cv_glshaders = CVAR_INIT ("gr_shaders", "On", CV_SAVE|CV_CALL, glshaders_cons_t, CV_glshaders_OnChange);
-
-#ifdef ALAM_LIGHTING
-consvar_t cv_gldynamiclighting = CVAR_INIT ("gr_dynamiclighting", "On", CV_SAVE, CV_OnOff, NULL);
-consvar_t cv_glstaticlighting  = CVAR_INIT ("gr_staticlighting", "On", CV_SAVE, CV_OnOff, NULL);
-consvar_t cv_glcoronas = CVAR_INIT ("gr_coronas", "On", CV_SAVE, CV_OnOff, NULL);
-consvar_t cv_glcoronasize = CVAR_INIT ("gr_coronasize", "1", CV_SAVE|CV_FLOAT, 0, NULL);
-#endif
 
 consvar_t cv_glmodels = CVAR_INIT ("gr_models", "Off", CV_SAVE, CV_OnOff, NULL);
 consvar_t cv_glmodelinterpolation = CVAR_INIT ("gr_modelinterpolation", "On", CV_SAVE, CV_OnOff, NULL);
@@ -5765,13 +5710,6 @@ static void CV_glshaders_OnChange(void)
 //added by Hurdler: console varibale that are saved
 void HWR_AddCommands(void)
 {
-#ifdef ALAM_LIGHTING
-	CV_RegisterVar(&cv_glstaticlighting);
-	CV_RegisterVar(&cv_gldynamiclighting);
-	CV_RegisterVar(&cv_glcoronasize);
-	CV_RegisterVar(&cv_glcoronas);
-#endif
-
 	CV_RegisterVar(&cv_glmodellighting);
 	CV_RegisterVar(&cv_glmodelinterpolation);
 	CV_RegisterVar(&cv_glmodels);
@@ -5808,9 +5746,6 @@ void HWR_Startup(void)
 		HWR_InitPolyPool();
 		HWR_InitMapTextures();
 		HWR_InitModels();
-#ifdef ALAM_LIGHTING
-		HWR_InitLight();
-#endif
 
 		gl_shadersavailable = HWR_InitShaders();
 		HWR_SetShaderState();

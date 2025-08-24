@@ -45,10 +45,15 @@
 
 #define MAXHUDLINES 20
 
+#ifdef HAVE_THREADS
 I_mutex con_mutex;
 
 #  define Lock_state()    I_lock_mutex(&con_mutex)
 #  define Unlock_state() I_unlock_mutex(con_mutex)
+#else/*HAVE_THREADS*/
+#  define Lock_state()
+#  define Unlock_state()
+#endif/*HAVE_THREADS*/
 
 static boolean con_started = false; // console has been initialised
        boolean con_startup = false; // true at game startup
@@ -1551,13 +1556,6 @@ void CONS_Debug(INT32 debugflags, const char *fmt, ...)
 //
 void CONS_Error(const char *msg)
 {
-#if defined(RPC_NO_WINDOWS_H) && defined(_WINDOWS)
-	if (!graphics_started)
-	{
-		MessageBoxA(vid.WndParent, msg, "SRB2 Warning", MB_OK);
-		return;
-	}
-#endif
 	CONS_Printf("\x82%s", msg); // write error msg in different colour
 	CONS_Printf(M_GetText("Press ENTER to continue\n"));
 

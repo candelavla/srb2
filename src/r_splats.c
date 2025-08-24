@@ -22,8 +22,16 @@
 
 struct rastery_s *prastertab; // for ASM code
 
-static struct rastery_s rastertab[MAXVIDHEIGHT];
+static struct rastery_s *rastertab;
 static void prepare_rastertab(void);
+
+static boolean *cliptable;
+
+void R_AllocFloorSpriteTables(void)
+{
+	cliptable = Z_Realloc(cliptable, sizeof(*cliptable) * (viewwidth + 1), PU_STATIC, NULL);
+	rastertab = Z_Realloc(rastertab, sizeof(*rastertab) * viewheight, PU_STATIC, NULL);
+}
 
 // ==========================================================================
 //                                                               FLOOR SPLATS
@@ -174,7 +182,7 @@ void R_DrawFloorSplat(vissprite_t *spr)
 		splat.scale = FixedMul(splat.scale, ((skin_t *)mobj->skin)->highresscale);
 
 	if (spr->rotateflags & SRF_3D || renderflags & RF_NOSPLATBILLBOARD)
-		splatangle = mobj->angle;
+		splatangle = spr->centerangle;
 	else
 		splatangle = spr->viewpoint.angle;
 
@@ -198,8 +206,8 @@ void R_DrawFloorSplat(vissprite_t *spr)
 	xoffset = FixedMul(leftoffset, splat.xscale);
 	yoffset = FixedMul(topoffset, splat.yscale);
 
-	x = mobj->x;
-	y = mobj->y;
+	x = spr->gx;
+	y = spr->gy;
 	w = (splat.width * splat.xscale);
 	h = (splat.height * splat.yscale);
 
@@ -252,8 +260,8 @@ void R_DrawFloorSplat(vissprite_t *spr)
 	// Translate
 	for (i = 0; i < 4; i++)
 	{
-		tr_x = rotated[i].x + mobj->x;
-		tr_y = rotated[i].y + mobj->y;
+		tr_x = rotated[i].x + x;
+		tr_y = rotated[i].y + y;
 
 		if (splat.slope)
 		{
@@ -281,8 +289,8 @@ void R_DrawFloorSplat(vissprite_t *spr)
 		tr_y = v3d->y - spr->viewpoint.y;
 
 		// rotation around vertical y axis
-		rot_x = FixedMul(tr_x - (mobj->x - x), sa) - FixedMul(tr_y - (mobj->y - y), ca);
-		rot_y = FixedMul(tr_x - (mobj->x - x), ca) + FixedMul(tr_y - (mobj->y - y), sa);
+		rot_x = FixedMul(tr_x, sa) - FixedMul(tr_y, ca);
+		rot_y = FixedMul(tr_x, ca) + FixedMul(tr_y, sa);
 		rot_z = v3d->z - spr->viewpoint.z;
 
 		if (rot_y < FRACUNIT)
@@ -485,8 +493,6 @@ static void R_RasterizeFloorSplat(floorsplat_t *pSplat, vector2_t *verts, visspr
 
 	for (y = miny; y <= maxy; y++)
 	{
-		boolean cliptab[MAXVIDWIDTH+1];
-
 		x1 = rastertab[y].minx>>FRACBITS;
 		x2 = rastertab[y].maxx>>FRACBITS;
 
@@ -509,10 +515,10 @@ static void R_RasterizeFloorSplat(floorsplat_t *pSplat, vector2_t *verts, visspr
 			continue;
 
 		for (i = x1; i <= x2; i++)
-			cliptab[i] = (y >= mfloorclip[i] || y <= mceilingclip[i]);
+			cliptable[i] = (y >= mfloorclip[i] || y <= mceilingclip[i]);
 
 		// clip left
-		while (cliptab[x1])
+		while (cliptable[x1])
 		{
 			x1++;
 			if (x1 >= viewwidth)
@@ -524,7 +530,7 @@ static void R_RasterizeFloorSplat(floorsplat_t *pSplat, vector2_t *verts, visspr
 
 		while (i > x1)
 		{
-			if (cliptab[i])
+			if (cliptable[i])
 				x2 = i-1;
 			i--;
 			if (i < 0)

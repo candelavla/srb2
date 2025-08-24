@@ -21,7 +21,9 @@ void CON_StopRefresh(void);
 
 boolean CON_Responder(event_t *ev);
 
+#ifdef HAVE_THREADS
 extern I_mutex con_mutex;
+#endif
 
 // set true when screen size has changed, to adapt console
 extern boolean con_recalc;
@@ -35,7 +37,8 @@ extern boolean con_refresh;
 // 0 means console if off, or moving out
 extern INT32 con_destlines;
 
-extern UINT32 con_scalefactor; // console text scale factor
+// console text scale factor
+extern UINT32 con_scalefactor;
 
 extern consvar_t cons_backcolor;
 
