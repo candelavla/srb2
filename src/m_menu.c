@@ -1378,7 +1378,6 @@ static menuitem_t OP_OpenGLOptionsMenu[] =
 	{IT_STRING|IT_CVAR,         NULL, "Shaders",             &cv_glshaders,            63},
 	{IT_STRING|IT_CVAR,         NULL, "Palette rendering",   &cv_glpaletterendering,   73},
 	{IT_STRING|IT_CVAR,         NULL, "Lack of perspective", &cv_glshearing,           83},
-	{IT_STRING|IT_CVAR,         NULL, "Field of view",       &cv_fov,                  93},
 
 	{IT_HEADER, NULL, "Miscellaneous", NULL, 112},
 	{IT_STRING|IT_CVAR,         NULL, "Bit depth",           &cv_scr_depth,           124},
