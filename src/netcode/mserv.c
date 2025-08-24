@@ -35,11 +35,16 @@ static boolean MSUpdateAgain;
 
 static time_t  MSLastPing;
 
+#ifdef HAVE_THREADS
 static I_mutex MSMutex;
 static I_cond  MSCond;
 
 #  define Lock_state()   I_lock_mutex  (&MSMutex)
 #  define Unlock_state() I_unlock_mutex (MSMutex)
+#else/*HAVE_THREADS*/
+#  define Lock_state()
+#  define Unlock_state()
+#endif/*HAVE_THREADS*/
 
 static void Command_Listserv_f(void);
 
@@ -67,11 +72,13 @@ consvar_t cv_masterserver_room_id = CVAR_INIT ("masterserver_room_id", "-1", CV_
 
 static INT16 ms_RoomId = -1;
 
+#if defined (MASTERSERVER) && defined (HAVE_THREADS)
 int           ms_QueryId;
 I_mutex       ms_QueryId_mutex;
 
 msg_server_t *ms_ServerList;
 I_mutex       ms_ServerList_mutex;
+#endif
 
 UINT16 current_port = 0;
 
@@ -103,9 +110,13 @@ void AddMServCommands(void)
 
 static void WarnGUI (void)
 {
+#ifdef HAVE_THREADS
 	I_lock_mutex(&m_menu_mutex);
+#endif
 	M_StartMessage(M_GetText("There was a problem connecting to\nthe Master Server\n\nCheck the console for details.\n"), NULL, MM_NOTHING);
+#ifdef HAVE_THREADS
 	I_unlock_mutex(m_menu_mutex);
+#endif
 }
 
 #define NUM_LIST_SERVER MAXSERVERLIST
@@ -149,12 +160,14 @@ char *GetMODVersion(int id)
 
 	c = HMS_compare_mod_version(buffer, 16);
 
+#ifdef HAVE_THREADS
 	I_lock_mutex(&ms_QueryId_mutex);
 	{
 		if (id != ms_QueryId)
 			c = -1;
 	}
 	I_unlock_mutex(ms_QueryId_mutex);
+#endif
 
 	if (c > 0)
 		return buffer;
@@ -281,7 +294,9 @@ Finish_unlist (void)
 		}
 		Unlock_state();
 
+#ifdef HAVE_THREADS
 		I_wake_all_cond(&MSCond);
+#endif
 	}
 
 	Lock_state();
@@ -292,6 +307,7 @@ Finish_unlist (void)
 	Unlock_state();
 }
 
+#ifdef HAVE_THREADS
 static int *
 Server_id (void)
 {
@@ -386,67 +402,53 @@ Change_masterserver_thread (char *api)
 
 	HMS_set_api(api);
 }
+#endif/*HAVE_THREADS*/
 
 void RegisterServer(void)
 {
-	if (I_can_thread())
-	{
-		void *nsid = New_server_id();
-		if (!I_spawn_thread(
-				"register-server",
-				(I_thread_fn)Register_server_thread,
-				nsid
-		))
-		{
-			free(nsid);
-		}
-	}
-	else
-	{
-		Finish_registration();
-	}
+#ifdef MASTERSERVER
+#ifdef HAVE_THREADS
+	I_spawn_thread(
+			"register-server",
+			(I_thread_fn)Register_server_thread,
+			New_server_id()
+	);
+#else
+	Finish_registration();
+#endif
+#endif/*MASTERSERVER*/
 }
 
 static void UpdateServer(void)
 {
-	if (I_can_thread())
-	{
-		void *sid = Server_id();
-		if (!I_spawn_thread(
-				"update-server",
-				(I_thread_fn)Update_server_thread,
-				sid
-		))
-		{
-			free(sid);
-		}
-	}
-	else
-	{
-		Finish_update();
-	}
+#ifdef HAVE_THREADS
+	I_spawn_thread(
+			"update-server",
+			(I_thread_fn)Update_server_thread,
+			Server_id()
+	);
+#else
+	Finish_update();
+#endif
 }
 
 void UnregisterServer(void)
 {
-	if (I_can_thread())
-	{
-		if (!I_spawn_thread(
-				"unlist-server",
-				(I_thread_fn)Unlist_server_thread,
-				Server_id()
-		))
-		{
-			;
-		}
-	}
-	else
-	{
-		Finish_unlist();
-	}
+#ifdef MASTERSERVER
+#ifdef HAVE_THREADS
+	I_spawn_thread(
+			"unlist-server",
+			(I_thread_fn)Unlist_server_thread,
+			Server_id()
+	);
+#else
+	Finish_unlist();
+#endif
+#endif/*MASTERSERVER*/
 }
 
-static boolean Online(void)
+static boolean
+Online (void)
 {
 	return ( serverrunning && cv_masterserver_room_id.value > 0 );
 }
@@ -480,35 +482,26 @@ static inline void SendPingToMasterServer(void)
 
 void MasterClient_Ticker(void)
 {
+#ifdef MASTERSERVER
 	SendPingToMasterServer();
+#endif
 }
 
 static void
 Set_api (const char *api)
 {
-	char *dapi = strdup(api);
-	if (I_can_thread())
-	{
-		if (!I_spawn_thread(
-				"change-masterserver",
-				(I_thread_fn)Change_masterserver_thread,
-				dapi
-		))
-		{
-			free(dapi);
-		}
-	}
-	else
-	{
-		HMS_set_api(dapi);
-	}
-}
-#else /*MASTERSERVER*/
-
-void RegisterServer(void) {}
-void UnregisterServer(void) {}
-
+#ifdef HAVE_THREADS
+	I_spawn_thread(
+			"change-masterserver",
+			(I_thread_fn)Change_masterserver_thread,
+			strdup(api)
+	);
+#else
+	HMS_set_api(strdup(api));
 #endif
+}
+
+#endif/*MASTERSERVER*/
 
 static boolean ServerName_CanChange(const char* newvalue)
 {
@@ -551,9 +544,7 @@ static void RoomId_OnChange(void)
 	{
 		UnregisterServer();
 		ms_RoomId = cv_masterserver_room_id.value;
-#ifdef MASTERSERVER
 		if (Online())
-#endif
 			RegisterServer();
 	}
 }
