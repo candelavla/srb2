@@ -19,26 +19,6 @@ void I_SetPalette(RGBA_t *palette)
 	(void)palette;
 }
 
-INT32 VID_NumModes(void)
-{
-	return 0;
-}
-
-INT32 VID_GetModeForSize(INT32 w, INT32 h)
-{
-	(void)w;
-	(void)h;
-	return 0;
-}
-
-void VID_PrepareModeList(void){}
-
-INT32 VID_SetMode(INT32 modenum)
-{
-	(void)modenum;
-	return 0;
-}
-
 boolean VID_CheckRenderer(void)
 {
 	return false;
@@ -47,12 +27,6 @@ boolean VID_CheckRenderer(void)
 void VID_CheckGLLoaded(rendermode_t oldrender)
 {
 	(void)oldrender;
-}
-
-const char *VID_GetModeName(INT32 modenum)
-{
-	(void)modenum;
-	return NULL;
 }
 
 UINT32 I_GetRefreshRate(void) { return 35; }
@@ -76,3 +50,15 @@ void I_ReadScreen(UINT8 *scr)
 void I_BeginRead(void){}
 
 void I_EndRead(void){}
+
+void VID_SetSize(INT32 width, INT32 height)
+{
+	(void)width;
+	(void)height;
+}
+
+boolean VID_IsMaximized(void)
+{
+	return false;
+}
+void VID_RestoreWindow(void){}

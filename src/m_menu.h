@@ -353,7 +353,9 @@ void M_ClearMenus(boolean callexitmenufunc);
 // Maybe this goes here????? Who knows.
 boolean M_MouseNeeded(void);
 
+#ifdef HAVE_THREADS
 extern I_mutex m_menu_mutex;
+#endif
 
 extern menu_t *currentMenu;
 
@@ -412,9 +414,8 @@ extern gtdesc_t gametypedesc[NUMGAMETYPES];
 // mode descriptions for video mode menu
 typedef struct
 {
-	INT32 modenum; // video mode number in the vidmodes list
-	const char *desc;  // XXXxYYY
-	UINT8 goodratio; // aspect correct if 1
+	INT32 width, height;
+	char desc[12]; // XXXXXxYYYYY
 } modedesc_t;
 
 // savegame struct for save game menu

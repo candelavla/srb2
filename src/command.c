@@ -16,10 +16,6 @@
 ///
 ///        code shamelessly inspired by the QuakeC sources, thanks Id :)
 
-#ifdef __EMSCRIPTEN__
-#include <emscripten.h>
-#endif
-
 #include "doomdef.h"
 #include "doomstat.h"
 #include "command.h"
@@ -280,11 +276,7 @@ void COM_BufExecute(void)
 
 /** Executes a string immediately.  Used for skirting around WAIT commands.
   */
-void
-#ifdef __EMSCRIPTEN__
-EMSCRIPTEN_KEEPALIVE
-#endif
-COM_ImmedExecute(const char *ptext)
+void COM_ImmedExecute(const char *ptext)
 {
 	size_t i = 0, j = 0;
 	char line[1024] = "";

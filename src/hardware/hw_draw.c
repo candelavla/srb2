@@ -22,6 +22,7 @@
 #include "hw_drv.h"
 
 #include "../m_misc.h" //FIL_WriteFile()
+#include "../r_draw.h"
 #include "../r_main.h"
 #include "../w_wad.h"
 #include "../z_zone.h"

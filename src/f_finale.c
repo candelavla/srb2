@@ -921,9 +921,13 @@ void F_IntroTicker(void)
 
 					I_OsPolling();
 					I_UpdateNoBlit();
+#ifdef HAVE_THREADS
 					I_lock_mutex(&m_menu_mutex);
+#endif
 					M_Drawer(); // menu is drawn even on top of wipes
+#ifdef HAVE_THREADS
 					I_unlock_mutex(m_menu_mutex);
+#endif
 					I_FinishUpdate(); // Update the screen with the image Tails 06-19-2001
 
 					if (moviemode) // make sure we save frames for the white hold too
@@ -1061,12 +1065,14 @@ static const char *credits[] = {
 	"Nathan \"Jazz\" Giroux",
 	"\"Golden\"",
 	"Vivian \"toaster\" Grannell",
+	"\"blankart\"",
 	"Julio \"Chaos Zero 64\" Guir",
 	"\"Hanicef\"",
 	"\"Hannu_Hanhi\"", // For many OpenGL performance improvements!
 	"Kepa \"Nev3r\" Iceta",
 	"Thomas \"Shadow Hog\" Igoe",
 	"Iestyn \"Monster Iestyn\" Jealous",
+	"\"Jisk\"",
 	"\"Kaito Sinclaire\"",
 	"\"Kalaron\"", // Coded some of Sryder13's collection of OpenGL fixes, especially fog
 	"Ronald \"Eidolon\" Kinard", // The SDL2 port, uncapped

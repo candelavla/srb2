@@ -135,7 +135,7 @@ static dvector3_t *R_LerpDVector3(const dvector3_t *from, const dvector3_t *to, 
 
 // recalc necessary stuff for mouseaiming
 // slopes are already calculated for the full possible view (which is 4*viewheight).
-// 18/08/18: (No it's actually 16*viewheight, thanks Jimita for finding this out)
+// 18/08/18: (No it's actually 16*viewheight, thanks Lactozilla for finding this out)
 static void R_SetupFreelook(player_t *player, boolean skybox)
 {
 #ifndef HWRENDER

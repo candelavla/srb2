@@ -354,6 +354,11 @@ typedef struct pslope_s
 	boolean moved;
 
 	UINT8 flags; // Slope options
+
+	SINT8 lightOffset;
+#ifdef HWRENDER	
+	INT16 hwLightOffset;	
+#endif
 } pslope_t;
 
 typedef enum
@@ -844,7 +849,7 @@ typedef struct drawseg_s
 	struct ffloor_s *thicksides[MAXFFLOORS];
 	fixed_t *thicksidecol;
 	INT32 numthicksides;
-	fixed_t frontscale[MAXVIDWIDTH];
+	fixed_t *frontscale;
 
 	UINT8 portalpass; // if > 0 and <= portalrender, do not affect sprite clipping
 
