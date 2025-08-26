@@ -402,8 +402,8 @@ static visplane_t *new_visplane(unsigned hash)
 		check = calloc(1, sizeof (*check));
 		if (check == NULL)
 			I_Error("new_visplane: Out of memory");
-		check->top_memory = Z_Malloc(sizeof(UINT16) * (viewwidth + 2), PU_STATIC, NULL);
-		check->bottom_memory = Z_Malloc(sizeof(UINT16) * (viewwidth + 2), PU_STATIC, NULL);
+		check->top_memory = Z_Calloc(sizeof(UINT16) * (viewwidth + 2), PU_STATIC, NULL);
+		check->bottom_memory = Z_Calloc(sizeof(UINT16) * (viewwidth + 2), PU_STATIC, NULL);
 		check->top = check->top_memory + 1;
 		check->bottom = check->bottom_memory + 1;
 	}
@@ -535,8 +535,8 @@ visplane_t *R_FindPlane(sector_t *sector, fixed_t height, INT32 picnum, INT32 li
 	check->polyobj = polyobj;
 	check->slope = slope;
 
-	memset(check->top, 0xff, sizeof(*check->top) * viewwidth);
-	memset(check->bottom, 0x00, sizeof(*check->bottom) * viewwidth);
+	memset(check->top, 0xff, sizeof(*check->top) * (viewwidth+2));
+	memset(check->bottom, 0x00, sizeof(*check->bottom) * (viewwidth+2));
 
 	return check;
 }

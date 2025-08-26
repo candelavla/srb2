@@ -7988,7 +7988,7 @@ boolean P_LoadLevel(boolean fromnetsave, boolean reloadinggamestate)
 
 	// Close text prompt before freeing the old level
 	F_EndTextPrompt(false, true);
-
+	
 	LUA_InvalidateLevel();
 
 	for (ss = sectors; sectors+numsectors != ss; ss++)
@@ -8004,11 +8004,15 @@ boolean P_LoadLevel(boolean fromnetsave, boolean reloadinggamestate)
 
 #ifdef HWRENDER
 	// Free GPU textures before freeing patches.
-	if (rendermode == render_opengl && (vid.glstate == VID_GL_LIBRARY_LOADED))
-		HWR_ClearAllTextures();
-
+	if (vid.glstate == VID_GL_LIBRARY_LOADED)
+	{
+		if (rendermode == render_opengl)
+		{
+			HWR_ClearAllTextures();
+		}
 	// Delete light table textures
 	HWR_ClearLightTables();
+	}
 #endif
 
 	Patch_FreeTag(PU_PATCH_LOWPRIORITY);
