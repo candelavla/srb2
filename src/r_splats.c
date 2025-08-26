@@ -30,7 +30,7 @@ static boolean *cliptable;
 void R_AllocFloorSpriteTables(void)
 {
 	cliptable = Z_Realloc(cliptable, sizeof(*cliptable) * (viewwidth + 1), PU_STATIC, NULL);
-	rastertab = Z_Realloc(rastertab, sizeof(*rastertab) * viewheight, PU_STATIC, NULL);
+	rastertab = Z_Realloc(rastertab, sizeof(*rastertab) * (viewheight + 1), PU_STATIC, NULL);
 }
 
 // ==========================================================================
