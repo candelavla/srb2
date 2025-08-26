@@ -7936,11 +7936,11 @@ boolean P_LoadLevel(boolean fromnetsave, boolean reloadinggamestate)
 		P_RunSpecialStageWipe();
 		ranspecialwipe = 1;
 	}
+	
 
 	// Make sure all sounds are stopped before Z_FreeTags.
 	S_StopSounds();
 	S_ClearSfx();
-
 	// Fade out music here. Deduct 2 tics so the fade volume actually reaches 0.
 	// But don't halt the music! S_Start will take care of that. This dodges a MIDI crash bug.
 	if (!(reloadinggamestate || titlemapinaction) && (RESETMUSIC ||
@@ -7989,8 +7989,6 @@ boolean P_LoadLevel(boolean fromnetsave, boolean reloadinggamestate)
 	// Close text prompt before freeing the old level
 	F_EndTextPrompt(false, true);
 
-	LUA_InvalidateLevel();
-
 	for (ss = sectors; sectors+numsectors != ss; ss++)
 	{
 		Z_Free(ss->attached);
@@ -8004,16 +8002,20 @@ boolean P_LoadLevel(boolean fromnetsave, boolean reloadinggamestate)
 
 #ifdef HWRENDER
 	// Free GPU textures before freeing patches.
-	if (rendermode == render_opengl && (vid.glstate == VID_GL_LIBRARY_LOADED))
-		HWR_ClearAllTextures();
-
+	if (vid.glstate == VID_GL_LIBRARY_LOADED)
+	{
+		if (rendermode == render_opengl)
+		{
+			HWR_ClearAllTextures();
+		}
 	// Delete light table textures
 	HWR_ClearLightTables();
+	}
 #endif
 
 	Patch_FreeTag(PU_PATCH_LOWPRIORITY);
 	Patch_FreeTag(PU_PATCH_ROTATED);
-	Z_FreeTags(PU_LEVEL, PU_PURGELEVEL - 1);
+	Z_FreeTags(PU_LEVEL, PU_PURGELEVEL);
 	mobjcache = NULL;
 
 	R_InitializeLevelInterpolators();
