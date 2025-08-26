@@ -10148,7 +10148,7 @@ boolean P_MoveChaseCamera(player_t *player, camera_t *thiscam, boolean resetcall
 		UINT8 forplayer = (thiscam == &camera) ? 0 : 1;
 		fixed_t shift = FixedMul(FINESINE((player->mo->angle - angle) >> ANGLETOFINESHIFT), FRACUNIT>>2);
 
-		if (!player->cmd.forwardmove && !player->cmd.sidemove && angle == thiscam->lastangle)
+		if (!player->cmd.forwardmove && !player->cmd.sidemove && (leveltime > 4) && angle == thiscam->lastangle)
 		{
 			shift = thiscam->lastshift;
 		}
