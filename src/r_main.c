@@ -905,15 +905,6 @@ void R_ExecuteSetViewSize(void)
 	centerxfrac = centerx<<FRACBITS;
 	centeryfrac = centery<<FRACBITS;
 
-	if (splitscreen == 1) // Splitscreen FOV should be adjusted to maintain expected vertical view
-		fovtan = 17*fovtan/10;
-
-	// Adjust field of view to the aspect ratio
-	if (cv_fovadjust.value)
-		fovtan = R_AdjustFOV(fovtan);
-
-	projection = projectiony = FixedDiv(centerxfrac, fovtan);
-
 	R_InitViewBuffer(viewwidth, viewheight);
 	R_SetFov(cv_fov.value);
 
@@ -977,6 +968,13 @@ static void R_SetFov(fixed_t playerfov)
 
 	projection = projectiony = FixedDiv(centerxfrac, fovtan);
 
+	if (splitscreen == 1) // Splitscreen FOV should be adjusted to maintain expected vertical view
+		fovtan = 17*fovtan/10;
+
+	// Adjust field of view to the aspect ratio
+	if (cv_fovadjust.value)
+		fovtan = R_AdjustFOV(fovtan);
+
 	R_InitTextureMapping();
 
 	// setup sky scaling
@@ -1015,10 +1013,10 @@ fixed_t R_GetFOV(void)
 fixed_t R_AdjustFOV(fixed_t ftan)
 {
 	fixed_t aspect = FixedDiv(vid.width, vid.height);
-	fixed_t baseaspect = FixedDiv(FRACUNIT, FixedDiv(BASEVIDWIDTH, BASEVIDHEIGHT));
+	fixed_t baseaspect = FixedDiv(BASEVIDWIDTH, BASEVIDHEIGHT);
 
-	// (vid.width / vid.height) * (1.0 / (BASEVIDWIDTH / BASEVIDHEIGHT))
-	fixed_t resmul = FixedMul(aspect, baseaspect);
+	// (vid.width / vid.height) / (BASEVIDWIDTH / BASEVIDHEIGHT)
+	fixed_t resmul = FixedDiv(aspect, baseaspect);
 
 	if (resmul > FRACUNIT)
 		return FixedMul(ftan, resmul);
