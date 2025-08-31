@@ -1130,7 +1130,7 @@ static menuitem_t OP_ChangeControlsMenu[] =
 static menuitem_t OP_Gamepad1Menu[] =
 {
 	{IT_STRING | IT_CALL,  NULL, "Select Gamepad...", M_Setup1PGamepadMenu, 10},
-	{IT_STRING | IT_CVAR,  NULL, "Menu Button Style",  &cv_menubuttons,     30},
+	{IT_STRING | IT_CVAR,  NULL, "Confirm Button",  &cv_menubuttons,     30},
 	{IT_STRING | IT_CVAR,  NULL, "Player \x17 Axis"    , &cv_moveaxis[0]      , 50},
 	{IT_STRING | IT_CVAR,  NULL, "Player \x18 Axis"    , &cv_sideaxis[0]      , 60},
 	{IT_STRING | IT_CVAR,  NULL, "Camera \x17 Axis"  , &cv_lookaxis[0]      , 70},

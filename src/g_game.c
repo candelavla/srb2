@@ -327,7 +327,7 @@ consvar_t cv_consolechat = CVAR_INIT ("chatmode", "Window", CV_SAVE, consolechat
 // Pause game upon window losing focus
 consvar_t cv_pauseifunfocused = CVAR_INIT ("pauseifunfocused", "Yes", CV_SAVE, CV_YesNo, NULL);
 
-static CV_PossibleValue_t menubuttons_cons_t[] = {{0, "Standard"}, {1, "Nintendo"}, {0, NULL}};
+static CV_PossibleValue_t menubuttons_cons_t[] = {{0, "Standard"}, {1, "Inverted"}, {0, NULL}};
 consvar_t cv_menubuttons = CVAR_INIT ("menubuttons", "Standard", CV_SAVE, menubuttons_cons_t, NULL);
 
 static CV_PossibleValue_t crosshair_cons_t[] = {{0, "Off"}, {1, "Cross"}, {2, "Angle"}, {3, "Point"}, {0, NULL}};
