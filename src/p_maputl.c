@@ -114,17 +114,6 @@ void P_ClosestPointOnLine3D(const vector3_t *p, const vector3_t *Line, vector3_t
 }
 
 //
-// P_PointOnLineSide
-// Returns 0 or 1
-//
-INT32 P_PointOnLineSide(fixed_t x, fixed_t y, line_t *line)
-{
-	// use cross product to determine side quickly
-	INT64 v = ((INT64)y - line->v1->y) * line->dx - ((INT64)x - line->v1->x) * line->dy;
-	return v > 0;
-}
-
-//
 // P_BoxOnLineSide
 // Considers the line to be infinite
 // Returns side 0 or 1, -1 if box crosses the line.
@@ -179,7 +168,7 @@ INT32 P_BoxOnLineSide(fixed_t *tmbox, line_t *ld)
 // P_PointOnDivlineSide
 // Returns 0 or 1.
 //
-static INT32 P_PointOnDivlineSide(fixed_t x, fixed_t y, divline_t *line)
+FUNCMATH FUNCINLINE static ATTRINLINE INT32 P_PointOnDivlineSide(fixed_t x, fixed_t y, divline_t *line)
 {
 	// use cross product to determine side quickly
 	INT64 v = ((INT64)y - line->y) * line->dx - ((INT64)x - line->x) * line->dy;
