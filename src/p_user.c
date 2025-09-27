@@ -4853,6 +4853,7 @@ static void P_DoSpinAbility(player_t *player, ticcmd_t *cmd)
 						mobj_t *bullet;
 
 						P_SetMobjState(player->mo, S_PLAY_FIRE);
+						player->skidtime = 0;
 
 #define zpos(posmo) (posmo->z + (posmo->height - mobjinfo[player->revitem].height)/2)
 						if (lockon)
