@@ -4854,6 +4854,7 @@ static void P_DoSpinAbility(player_t *player, ticcmd_t *cmd)
 
 						P_SetMobjState(player->mo, S_PLAY_FIRE);
 						player->skidtime = 0;
+						S_StopSoundByID(player->mo, sfx_skid);
 
 #define zpos(posmo) (posmo->z + (posmo->height - mobjinfo[player->revitem].height)/2)
 						if (lockon)
