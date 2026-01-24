@@ -267,6 +267,7 @@ struct Hook_State {
 	INT32        status;/* return status to calling function */
 	void       * userdata;
 	int          hook_type;
+	mobj_t     * mobj;/* mobj the current hook is being called for, only if mobj_type >0 */
 	mobjtype_t   mobj_type;/* >0 if mobj hook */
 	const char * string;/* used to fetch table, ran first if set */
 	int          top;/* index of last argument passed to hook */
@@ -352,6 +353,9 @@ static boolean prepare_mobj_hook
 	if (mobj_type == MT_NULL)
 		I_Error("MT_NULL has been passed to a mobj hook\n");
 #endif
+
+	hook->mobj = primary_mobj;
+
 	return init_hook_type(hook, default_status,
 			hook_type, mobj_type, NULL,
 			mobj_hook_available(hook_type, mobj_type));
@@ -471,6 +475,9 @@ static int call_mapped(Hook_State *hook, const hook_t *map)
 
 	for (k = 0; k < map->numHooks; ++k)
 	{
+		if (hook->mobj_type > 0 && (P_MobjWasRemoved(hook->mobj) || !ISINLEVEL))
+			return k;
+
 		get_hook(hook, map->ids, k);
 		call_single_hook(hook);
 	}

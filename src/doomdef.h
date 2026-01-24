@@ -696,16 +696,6 @@ extern int
 ///	Shuffle's incomplete OpenGL sorting code.
 #define SHUFFLE // This has nothing to do with sorting, why was it disabled?
 
-///	Allow the use of the SOC RESETINFO command.
-///	\note	Builds that are tight on memory should disable this.
-///	    	This stops the game from storing backups of the states, sprites, and mobjinfo tables.
-///	    	Though this info is compressed under normal circumstances, it's still a lot of extra
-///	    	memory that never gets touched.
-#define ALLOW_RESETDATA
-
-/// Experimental tweaks to analog mode. (Needs a lot of work before it's ready for primetime.)
-//#define REDSANALOG
-
 /// Experimental attempts at preventing MF_PAPERCOLLISION objects from getting stuck in walls.
 //#define PAPER_COLLISIONCORRECTION
 
