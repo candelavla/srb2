@@ -1438,10 +1438,8 @@ void D_SRB2Main(void)
 	// Initializes the game logic side of gamepads
 	G_InitGamepads();
 
-	// Make backups of some SOCcable tables.
-	P_BackupTables();
-
 	mainwads = 3; // doesn't include music.pk3
+
 #ifdef USE_PATCH_DTA
 	mainwads++;
 #endif

@@ -3814,11 +3814,6 @@ void readmaincfg(MYFILE *f)
 				gamedataadded = true;
 				titlechanged = true;
 			}
-			else if (fastcmp(word, "RESETDATA"))
-			{
-				P_ResetData(value);
-				titlechanged = true;
-			}
 			else if (fastcmp(word, "CUSTOMVERSION"))
 			{
 				deh_strlcpy(customversionstring, word2, sizeof customversionstring, va("Maincfg: customversion"));
