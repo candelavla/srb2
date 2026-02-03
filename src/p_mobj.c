@@ -3859,7 +3859,6 @@ void P_RecalcPrecipInSector(sector_t *sector)
 void P_NullPrecipThinker(precipmobj_t *mobj)
 {
 	//(void)mobj;
-	mobj->precipflags &= ~PCF_THUNK;
 	R_ResetPrecipitationMobjInterpolationState(mobj);
 }
 
