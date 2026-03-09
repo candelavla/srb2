@@ -57,7 +57,6 @@ static void COM_Add_f(void);
 
 
 static void CV_EnforceExecVersion(void);
-static boolean CV_FilterVarByVersion(consvar_t *v, const char *valstr);
 static boolean CV_Command(void);
 consvar_t *CV_FindVar(const char *name);
 static const char *CV_StringValue(const char *var_name);
@@ -2313,27 +2312,6 @@ static void CV_EnforceExecVersion(void)
 		CV_StealthSetValue(&cv_execversion, EXECVERSION);
 }
 
-static boolean CV_FilterVarByVersion(consvar_t *v, const char *valstr)
-{
-	// True means allow the CV change, False means block it
-
-	// We only care about CV_SAVE because this filters the user's config files
-	// We do this same check in CV_Command
-	if (!(v->flags & CV_SAVE))
-		return true;
-
-	if (GETMAJOREXECVERSION(cv_execversion.value) < 57) // 57 = 2.2.16
-	{
-		if (
-			(!stricmp(v->name, "gr_modelinterpolation")) || // Force reset
-			(!stricmp(v->name, "fov") && atoi(valstr) < 100)
-		)
-			return false;
-	}
-
-	return true;
-}
-
 /** Displays or changes a variable from the console.
   * Since the user is presumed to have been directly responsible
   * for this change, the variable is marked as changed this game.
@@ -2364,11 +2342,9 @@ static boolean CV_Command(void)
 		return true;
 	}
 
-	if (!(v->flags & CV_SAVE) || CV_FilterVarByVersion(v, COM_Argv(1)))
-	{
-		CV_Set(v, COM_Argv(1));
-		v->changed = 1; // now it's been changed by (presumably) the user
-	}
+	CV_Set(v, COM_Argv(1));
+	v->changed = 1; // now it's been changed by (presumably) the user
+
 	return true;
 }
 
