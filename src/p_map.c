@@ -171,11 +171,11 @@ boolean P_DoSpring(mobj_t *spring, mobj_t *object)
 	if (object->eflags & MFE_SPRUNG)
 		return false;
 
-	// Spectators don't trigger springs.
-	if (object->player && object->player->spectator)
+	// Spectators and zoomtube riders don't trigger springs
+	if (object->player && (object->player->spectator || object->player->powers[pw_carry] == CR_ZOOMTUBE))
 		return false;
 
-	// "Even in Death" is a song from Volume 8, not a command.
+	// "Even in Death" is a song from Volume 8, not a command
 	if (!spring->health || !object->health)
 		return false;
 
