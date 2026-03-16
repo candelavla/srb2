@@ -3136,8 +3136,7 @@ void G_DoReborn(INT32 playernum)
 
 	if (modeattacking)
 	{
-		M_EndModeAttackRun();
-		return;
+		countdowntimeup = true; //force reload everything in time attack
 	}
 
 	// Make sure objectplace is OFF when you first start the level!
