@@ -7960,7 +7960,6 @@ boolean P_LoadLevel(boolean fromnetsave, boolean reloadinggamestate)
 	{
 		if (ranspecialwipe == 2)
 		{
-			pausedelay = -3; // preticker plus one
 			S_StartSound(NULL, sfx_s3k73);
 		}
 

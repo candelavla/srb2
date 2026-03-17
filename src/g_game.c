@@ -1155,11 +1155,13 @@ void G_BuildTiccmd(ticcmd_t *cmd, INT32 realtics, UINT8 ssplayer)
 	// why build a ticcmd if we're paused?
 	// Or, for that matter, if we're being reborn.
 	// ...OR if we're blindfolded. No looking into the floor.
-	if (ignoregameinputs || paused || P_AutoPause() || (gamestate == GS_LEVEL && (player->playerstate == PST_REBORN || ((gametyperules & GTR_TAG)
+	if (ignoregameinputs || paused || menuactive || P_AutoPause() || (gamestate == GS_LEVEL && (player->playerstate == PST_REBORN || ((gametyperules & GTR_TAG)
 	&& (leveltime < hidetime * TICRATE) && (player->pflags & PF_TAGIT)))))
 	{//@TODO splitscreen player
 		cmd->angleturn = ticcmd_oldangleturn[forplayer];
 		cmd->aiming = G_ClipAimingPitch(myaiming);
+		cmd->forwardmove = 0;
+		cmd->sidemove = 0;
 		return;
 	}
 
@@ -1920,7 +1922,7 @@ static void AutoBrake2_OnChange(void)
 	SendWeaponPref2();
 }
 
-static void G_ResetInputs(void)
+void G_ResetInputs(void)
 {
 	memset(gamekeydown, 0, sizeof (gamekeydown));
 
@@ -2103,7 +2105,6 @@ boolean G_IsTitleCardAvailable(void)
 	return true;
 }
 
-INT32 pausedelay = 0;
 boolean pausebreakkey = false;
 
 static boolean ViewpointSwitchResponder(event_t *ev)
@@ -2287,7 +2288,7 @@ boolean G_Responder(event_t *ev)
 				if (modeattacking && !demoplayback && (gamestate == GS_LEVEL))
 				{
 					pausebreakkey = (key == KEY_PAUSE);
-					if (menuactive || pausedelay < 0 || leveltime < 2)
+					if (menuactive || leveltime < 4)
 						return true;
 
 					G_SetModeAttackRetryFlag();
@@ -2295,14 +2296,8 @@ boolean G_Responder(event_t *ev)
 				}
 				else
 				{
-					INT32 oldpausedelay = pausedelay;
-					pausedelay = (NEWTICRATE/7);
-					if (!oldpausedelay)
-					{
-						// command will handle all the checks for us
-						COM_ImmedExecute("pause");
-						return true;
-					}
+					COM_ImmedExecute("pause");
+					return true;
 				}
 			}
 			if (key == gamecontrol[GC_CAMTOGGLE][0] || key == gamecontrol[GC_CAMTOGGLE][1])
@@ -2402,7 +2397,6 @@ void G_Ticker(boolean run)
 
 			if (modeattacking)
 			{
-				pausedelay = INT32_MIN;
 				M_ModeAttackRetry(0);
 			}
 			else
@@ -2591,9 +2585,6 @@ void G_Ticker(boolean run)
 
 	if (run)
 	{
-		if (pausedelay && pausedelay != INT32_MIN)
-			(pausedelay > 0) ? pausedelay-- : pausedelay++;
-
 		for (i = 0; i < 2; i++)
 			if (camtoggledelay[i]) camtoggledelay[i]--;
 
@@ -3160,9 +3151,10 @@ void G_DoReborn(INT32 playernum)
 	boolean resetlevel = false;
 	INT32 i;
 
-	if (modeattacking)
+	if (modeattacking) // you died in time attack, so force retry to handle ghost properly
 	{
-		countdowntimeup = true; //force reload everything in time attack
+		M_ModeAttackRetry(0);
+		return;
 	}
 
 	// Make sure objectplace is OFF when you first start the level!
@@ -4210,9 +4202,6 @@ static void G_DoCompleted(void)
 	INT32 i;
 
 	tokenlist = 0; // Reset the list
-
-	if (modeattacking && pausedelay)
-		pausedelay = 0;
 
 	gameaction = ga_nothing;
 
