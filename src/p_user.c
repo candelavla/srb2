@@ -9156,7 +9156,7 @@ void P_NukeEnemies(mobj_t *inflictor, mobj_t *source, fixed_t radius)
 
 		mo = (mobj_t *)think;
 
-		boolean isring = (mo->type == MT_RING);
+		boolean isring = (mo->type == MT_RING || mo->type == MT_COIN);
 
 		if (!isring && !(mo->flags & (MF_SHOOTABLE|MF_ENEMY|MF_BOSS)))
 			continue;
@@ -9186,9 +9186,18 @@ void P_NukeEnemies(mobj_t *inflictor, mobj_t *source, fixed_t radius)
 			continue;
 		}
 
-		mobj_t *quicksilver = P_SpawnMobjFromMobj(mo, 0, 0, mo->height>>1, MT_RING);
-		quicksilver->color = SKINCOLOR_SLATE;
-		quicksilver->colorized = true;
+		if (mariomode) // SMW style P-switch coins for Mario Mode
+		{
+			mobj_t *pswitched = P_SpawnMobjFromMobj(mo, 0, 0, mo->height>>1, MT_COIN);
+			pswitched->color = SKINCOLOR_SLATE;
+			pswitched->colorized = true;
+		}
+		else // Quicksilver rings can be attracted from a shorter distance even without a magnet
+		{
+			mobj_t *quicksilver = P_SpawnMobjFromMobj(mo, 0, 0, mo->height>>1, MT_RING);
+			quicksilver->color = SKINCOLOR_SLATE;
+			quicksilver->colorized = true;
+		}
 		P_KillMobj(mo, inflictor, source, DMG_NUKE);
 	}
 }
