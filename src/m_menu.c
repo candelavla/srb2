@@ -3150,11 +3150,12 @@ static INT32 RemapGamepadButton(event_t *ev)
 			case GAMEPAD_BUTTON_A: return KEY_ESCAPE;
 			case GAMEPAD_BUTTON_B: return KEY_ENTER;
 			case GAMEPAD_BUTTON_X: return KEY_ESCAPE;
-			case GAMEPAD_BUTTON_Y: return KEY_BACKSPACE;
+			case GAMEPAD_BUTTON_Y: return KEY_ESCAPE;
 			case GAMEPAD_BUTTON_DPAD_UP: return KEY_UPARROW;
 			case GAMEPAD_BUTTON_DPAD_DOWN: return KEY_DOWNARROW;
 			case GAMEPAD_BUTTON_DPAD_LEFT: return KEY_LEFTARROW;
 			case GAMEPAD_BUTTON_DPAD_RIGHT: return KEY_RIGHTARROW;
+			case GAMEPAD_BUTTON_BACK: return KEY_BACKSPACE;
 		}
 	}
 	else
@@ -3164,11 +3165,12 @@ static INT32 RemapGamepadButton(event_t *ev)
 			case GAMEPAD_BUTTON_A: return KEY_ENTER;
 			case GAMEPAD_BUTTON_B: return KEY_ESCAPE;
 			case GAMEPAD_BUTTON_X: return KEY_ESCAPE;
-			case GAMEPAD_BUTTON_Y: return KEY_BACKSPACE;
+			case GAMEPAD_BUTTON_Y: return KEY_ESCAPE;
 			case GAMEPAD_BUTTON_DPAD_UP: return KEY_UPARROW;
 			case GAMEPAD_BUTTON_DPAD_DOWN: return KEY_DOWNARROW;
 			case GAMEPAD_BUTTON_DPAD_LEFT: return KEY_LEFTARROW;
 			case GAMEPAD_BUTTON_DPAD_RIGHT: return KEY_RIGHTARROW;
+			case GAMEPAD_BUTTON_BACK: return KEY_BACKSPACE;
 		}
 	}
 	return KEY_GAMEPAD + ev->key;
@@ -3809,6 +3811,8 @@ void M_ClearMenus(boolean callexitmenufunc)
 		currentMenu = &MainDef; // Not like it matters
 	menuactive = false;
 	hidetitlemap = false;
+
+	G_ResetInputs();
 
 	I_UpdateMouseGrab();
 	P_UnpauseRumble(NULL);
@@ -10620,6 +10624,7 @@ void M_ModeAttackRetry(INT32 choice)
 	(void)choice;
 	// todo -- maybe seperate this out and G_SetRetryFlag() here instead? is just calling this from the menu 100% safe?
 	G_CheckDemoStatus(); // Cancel recording
+	G_ResetInputs();
 	if (modeattacking == ATTACKING_RECORD)
 		M_ChooseTimeAttack(0);
 	else if (modeattacking == ATTACKING_NIGHTS)
@@ -10630,6 +10635,7 @@ static void M_ModeAttackEndGame(INT32 choice)
 {
 	(void)choice;
 	G_CheckDemoStatus(); // Cancel recording
+	G_ResetInputs();
 
 	if (gamestate == GS_LEVEL || gamestate == GS_INTERMISSION)
 		Command_ExitGame_f();
