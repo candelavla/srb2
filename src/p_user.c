@@ -4698,7 +4698,11 @@ static void P_DoSpinAbility(player_t *player, ticcmd_t *cmd)
 		{
 			if (player->flycmd == 3)
 			{
-				if (player->pflags & PF_ANALOGMODE)
+				if (twodlevel || player->mo->flags2 & MF2_TWOD)
+				{
+					player->drawangle = player->mo->angle;
+				}
+				else if (player->pflags & PF_ANALOGMODE)
 				{
 					if (cmd->forwardmove || cmd->sidemove)
 					{
@@ -5464,7 +5468,11 @@ static void P_DoJumpStuff(player_t *player, ticcmd_t *cmd, boolean spinshieldhac
 			{
 				if (player->flycmd == 3)
 				{
-					if (player->pflags & PF_ANALOGMODE)
+					if (twodlevel || player->mo->flags2 & MF2_TWOD)
+					{
+						player->drawangle = player->mo->angle;
+					}
+					else if (player->pflags & PF_ANALOGMODE)
 					{
 						if (cmd->forwardmove || cmd->sidemove)
 						{

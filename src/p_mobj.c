@@ -1338,7 +1338,7 @@ fixed_t P_GetMobjGravity(mobj_t *mo)
 #define plyr mo->player
 	if (plyr)
 	{
-		fixed_t flipz = P_MobjFlip(mo)*mo->momz;
+		fixed_t flipz = (wasflip) ? -mo->momz : mo->momz;
 
 		if ((plyr->pflags & PF_GLIDING)
 		|| (plyr->charability == CA_FLY && plyr->panim == PA_ABILITY))
