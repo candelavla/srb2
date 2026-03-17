@@ -4679,8 +4679,8 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		22*FRACUNIT,    // radius
 		22*FRACUNIT,    // height
 		0,              // display offset
-		11*FRACUNIT,    // mass
-		11*FRACUNIT,    // damage
+		15*FRACUNIT,    // mass
+		15*FRACUNIT,    // damage
 		sfx_None,       // activesound
 		MF_SPRING|MF_NOGRAVITY, // flags
 		S_CDIAG2        // raisestate
@@ -5109,7 +5109,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		sfx_pop,        // deathsound
 		6,              // speed
 		24*FRACUNIT,    // radius
-		40*FRACUNIT,    // height
+		64*FRACUNIT,    // height
 		0,              // display offset
 		15*FRACUNIT,    // mass
 		0,              // damage
@@ -5136,7 +5136,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		sfx_pop,        // deathsound
 		6,              // speed
 		24*FRACUNIT,    // radius
-		40*FRACUNIT,    // height
+		64*FRACUNIT,    // height
 		0,              // display offset
 		20*FRACUNIT,    // mass
 		0,              // damage
