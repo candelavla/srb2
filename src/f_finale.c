@@ -1091,6 +1091,7 @@ static const char *credits[] = {
 	"Tasos \"tatokis\" Sahanidis", // Corrected C FixedMul, making 64-bit builds netplay compatible
 	"Riku \"Ors\" Salminen", // Demo consistency improvements
 	"Jonas \"MascaraSnake\" Sauer",
+	"\"Skydusk\"", // Mario mode SOC
 	"Wessel \"sphere\" Smit",
 	"\"SMS Alfredo\"",
 	"\"SSNTails\"",
@@ -1108,6 +1109,7 @@ static const char *credits[] = {
 	"Graeme P. \"SuperPhanto\" Caldwell", // for the new brak render
 	"\"ChrispyPixels\"",
 	"Paul \"Boinciel\" Clempson",
+	"\"ClovesCloestar\"", // Resprited springs, crushtacean, springshells
 	"Sally \"TehRealSalt\" Cochenour",
 	"\"DaJumpJump\"", // New Ringslinger graphics (2.2.14)
 	"\"DeltaSanic\"",
@@ -1121,20 +1123,21 @@ static const char *credits[] = {
 	"Vivian \"toaster\" Grannell",
 	"James \"SwitchKaze\" Hale",
 	"James \"SeventhSentinel\" Hall",
+	"Kamijojo_", // Pipe Towers Revamped
 	"Kepa \"Nev3r\" Iceta",
 	"Iestyn \"Monster Iestyn\" Jealous",
 	"William \"GuyWithThePie\" Kloppenberg",
-	"\"Krabs\"",
+	"Dan \"Krabs\" Cidoni",
 	"Alice \"Alacroix\" de Lemos",
-	"Logan \"Hyperchaotix\" McCloud",
+	"Logan \"Hyperchaotix\" McCloud", // Resprited NiGHTS bumper, small spikeball, crystal
 	"Alexander \"DrTapeworm\" Moench-Ford",
-    "\"orbitalviolet\"", // summit showdown hehehehe (aka Evertone)
+        "\"orbitalviolet\"", // summit showdown hehehehe (aka Evertone)
 	"Andrew \"Senku Niola\" Moran",
 	"\"MotorRoach\"",
 	"\"Princess Plushima\"", // flowbubble
-	"\"Revolution\"", // HUD tweaks
 	"Phillip \"TelosTurntable\" Robinson",
 	"\"Scizor300\"",
+	"\"Skydusk\"", // Pipe Towers Revamped
 	"Wessel \"sphere\" Smit",
 	"\"SonicX8000\"", // title card and fonts
 	"David \"Instant Sonic\" Spencer Jr.",
@@ -1149,7 +1152,6 @@ static const char *credits[] = {
 	"Victor \"VAdaPEGA\" Ara\x1Fjo", // Araújo
 	"Malcolm \"RedXVI\" Brown",
 	"Dave \"DemonTomatoDave\" Bulmer",
-	"Dan Cidoni", // aka Krabs
 	"Paul \"Boinciel\" Clempson",
 	"\"Cyan Helkaraxe\"",
 	"Claire \"clairebun\" Ellis",
@@ -1168,7 +1170,7 @@ static const char *credits[] = {
 	"Colette \"fickleheart\" Bordelon",
 	"Hank \"FuriousFox\" Brannock",
 	"Matthew \"Fawfulfan\" Chapman",
-	"Dan Cidoni", // aka Krabs
+	"Dan \"Krabs\" Cidoni",
 	"Paul \"Boinciel\" Clempson",
 	"Sally \"TehRealSalt\" Cochenour",
 	"Desmond \"Blade\" DesJardins",
@@ -1182,13 +1184,16 @@ static const char *credits[] = {
 	"Thomas \"Shadow Hog\" Igoe",
 	"Mujamel \"MK\" Khan",
 	"\"Kaito Sinclaire\"",
+	"\"Kumin\"", // Pipe Towers Revamped
 	"Alexander \"DrTapeworm\" Moench-Ford",
 	"\"Radicalicious\"",
 	"\"Revan\"",
 	"Anna \"QueenDelta\" Sandlin",
+	"\"Skydusk\"", // Pipe Towers Revamped
 	"Wessel \"sphere\" Smit",
 	"\"SSNTails\"",
 	"Aaron \"Othius\" Stojkov",
+	"\"TehPuertoRicanSpartan\"", // Pipe Towers Revamped
 	"Rob Tisdell",
 	"\"Torgo\"",
 	"Samuel \"Spectorious\" Tuttle",
