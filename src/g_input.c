@@ -1420,8 +1420,8 @@ void G_DefineDefaultControls(void)
 		// Gamepad controls -- same for both schemes
 		gamecontroldefault[i][GC_JUMP          ][1] = GAMEPAD_KEY(A); // A
 		gamecontroldefault[i][GC_SPIN          ][1] = GAMEPAD_KEY(X); // X
-		gamecontroldefault[i][GC_CUSTOM1       ][1] = GAMEPAD_KEY(B); // B
-		gamecontroldefault[i][GC_SHIELD        ][1] = GAMEPAD_KEY(Y); // Y
+		gamecontroldefault[i][GC_SHIELD        ][1] = GAMEPAD_KEY(B); // B
+		gamecontroldefault[i][GC_CUSTOM1       ][1] = GAMEPAD_KEY(Y); // Y
 		gamecontroldefault[i][GC_CUSTOM2       ][1] = GAMEPAD_KEY(LEFTSHOULDER); // LB
 		gamecontroldefault[i][GC_CENTERVIEW    ][1] = GAMEPAD_KEY(RIGHTSHOULDER); // RB
 		gamecontroldefault[i][GC_TOSSFLAG      ][1] = GAMEPAD_KEY(LEFTSTICK); // Left Stick
@@ -1438,8 +1438,8 @@ void G_DefineDefaultControls(void)
 		// Second player only has gamepad defaults
 		gamecontrolbisdefault[i][GC_JUMP          ][1] = GAMEPAD_KEY(A); // A
 		gamecontrolbisdefault[i][GC_SPIN          ][1] = GAMEPAD_KEY(X); // X
-		gamecontrolbisdefault[i][GC_CUSTOM1       ][1] = GAMEPAD_KEY(B); // B
-		gamecontrolbisdefault[i][GC_SHIELD        ][1] = GAMEPAD_KEY(Y); // Y
+		gamecontrolbisdefault[i][GC_SHIELD        ][1] = GAMEPAD_KEY(B); // B
+		gamecontrolbisdefault[i][GC_CUSTOM1       ][1] = GAMEPAD_KEY(Y); // Y
 		gamecontrolbisdefault[i][GC_CUSTOM2       ][1] = GAMEPAD_KEY(LEFTSHOULDER); // LB
 		gamecontrolbisdefault[i][GC_CENTERVIEW    ][1] = GAMEPAD_KEY(RIGHTSHOULDER); // RB
 		gamecontrolbisdefault[i][GC_TOSSFLAG      ][1] = GAMEPAD_KEY(LEFTSTICK); // Left Stick
