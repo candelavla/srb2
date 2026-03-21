@@ -1,6 +1,6 @@
 # SRB2 Cherry
-[![latest release](https://badgen.net/static/get/cherry/pink)](https://mb.srb2.org/addons/redberries.8043/)
-[![latest release](https://badgen.net/static/get/reveries/yellow)](https://codeberg.org/lavla/cherry/releases/latest)
+[![latest release](https://badgen.net/static/get/reveries/yellow)](https://codeberg.org/cande/cherry/releases/latest)
+[![latest release](https://badgen.net/static/get/redberries/pink)](https://mb.srb2.org/addons/redberries.8043/)
 
 SRB2 Cherry is a project containing the Reveries and Redberries source modifications of Sonic Robo Blast 2.
 
