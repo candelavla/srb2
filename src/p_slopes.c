@@ -1057,7 +1057,7 @@ void P_SlopeLaunch(mobj_t *mo)
 		slopemom.x = mo->momx;
 		slopemom.y = mo->momy;
 		if (mo->player && (mo->player->pflags & (PF_JUMPED|PF_NOJUMPDAMAGE|PF_BOUNCING))) // Increase the pre-rotation Z only if a player jumped off
-			slopemom.z = 10*mo->momz/7;
+			slopemom.z = FixedMul(10*FRACUNIT/7, mo->momz);
 		else
 			slopemom.z = mo->momz;
 
@@ -1066,9 +1066,9 @@ void P_SlopeLaunch(mobj_t *mo)
 		mo->momx = slopemom.x;
 		mo->momy = slopemom.y;
 		if (mo->player && (mo->player->pflags & (PF_JUMPED|PF_NOJUMPDAMAGE|PF_BOUNCING))) // Decrease the post-rotation Z, moreso if a player jumped off
-			mo->momz = 7*slopemom.z/10;
+			mo->momz = FixedMul(7*FRACUNIT/10, slopemom.z);
 		else
-			mo->momz = 5*slopemom.z/6;
+			mo->momz = FixedMul(13*FRACUNIT/16, slopemom.z);
 
 	    if (mo->player)
 		    mo->player->powers[pw_justlaunched] = 1;
@@ -1120,7 +1120,7 @@ fixed_t P_GetWallTransferMomZ(mobj_t *mo, pslope_t *slope)
 
 	slopemom.x = mo->momx;
 	slopemom.y = mo->momy;
-	slopemom.z = 6*mo->momz/5;
+	slopemom.z = FixedMul(25*FRACUNIT/19, mo->momz);
 
 	axis.x = -slope->d.y;
 	axis.y = slope->d.x;
@@ -1128,7 +1128,7 @@ fixed_t P_GetWallTransferMomZ(mobj_t *mo, pslope_t *slope)
 
 	FV3_Rotate(&slopemom, &axis, ang >> ANGLETOFINESHIFT);
 
-	return 5*slopemom.z/6;
+	return FixedMul(19*FRACUNIT/25, slopemom.z);
 }
 
 // Function to help handle landing on slopes

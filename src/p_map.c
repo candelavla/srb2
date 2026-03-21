@@ -454,7 +454,7 @@ boolean P_DoSpring(mobj_t *spring, mobj_t *object)
 			else if (P_IsObjectOnGround(object))
 				P_SetMobjState(object, (horizspeed >= FixedMul(object->player->runspeed, object->scale)) ? S_PLAY_RUN : S_PLAY_WALK);
 			else
-				P_SetMobjState(object, (object->momz*P_MobjFlip(object) >= 5*object->scale) ? S_PLAY_SPRING : S_PLAY_FALL);
+				P_SetMobjState(object, (object->momz*P_MobjFlip(object) >= 8*object->scale) ? S_PLAY_SPRING : S_PLAY_FALL);
 		}
 		else if (P_MobjFlip(object)*vertispeed > 0)
 			P_SetMobjState(object, S_PLAY_SPRING);

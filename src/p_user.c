@@ -8393,7 +8393,7 @@ void P_MovePlayer(player_t *player)
 	// TODO: 2.3: Change this to PA_DASH. It checks the state to avoid causing issue with characters that use PA_DASH as a hack to avoid resetting animation on the ground.
 	if ((player->panim == PA_SPRING && P_MobjFlip(player->mo)*player->mo->momz < 0)
 	|| ((player->panim == PA_WALK || player->panim == PA_RUN || player->mo->state-states == S_PLAY_DASH) && !player->secondjump && !player->jerboatime && !player->powers[pw_carry]))
-		P_SetMobjState(player->mo, (P_MobjFlip(player->mo)*player->mo->momz < 5*player->mo->scale) ? S_PLAY_FALL : S_PLAY_SPRING);
+		P_SetMobjState(player->mo, (P_MobjFlip(player->mo)*player->mo->momz < 8*player->mo->scale) ? S_PLAY_FALL : S_PLAY_SPRING);
 	// If doing an air animation but on the ground, change back!
 	else if (onground && (player->panim == PA_SPRING || player->panim == PA_FALL || player->panim == PA_RIDE || player->panim == PA_JUMP) && !player->mo->momz)
 		P_SetMobjState(player->mo, S_PLAY_STND);
