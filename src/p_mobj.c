@@ -3164,7 +3164,7 @@ void P_MobjCheckWater(mobj_t *mobj)
 	// Specific things for underwater players
 	if (p && (mobj->eflags & (MFE_UNDERWATER|MFE_TOUCHWATER)) == MFE_UNDERWATER)
 	{
-		if (!((p->powers[pw_super]) || (p->powers[pw_invulnerability])))
+		if (!p->powers[pw_super] && !(mobj->eflags & MFE_JUSTHITFLOOR) && !p->powers[pw_invulnerability])
 		{
 			boolean electric = !!(p->powers[pw_shield] & SH_PROTECTELECTRIC);
 			if (electric || ((p->powers[pw_shield] & SH_PROTECTFIRE) && !(p->powers[pw_shield] & SH_PROTECTWATER) && !(mobj->eflags & MFE_TOUCHLAVA)))
