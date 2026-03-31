@@ -326,7 +326,7 @@ static void I_ReportSignal(int num, int coredumped)
 	const char *sigmsg, *signame;
 	char ttl[128];
 	char sigttl[512] = "Process killed by signal: ";
-	const char *reportmsg = "\n\nIf this doesn't happen in vanilla SRB2, send the author your srb2r.rpt file.";
+	const char *reportmsg = "\n\nIf this doesn't happen in vanilla SRB2, send the author your srb2rvre.rpt file.";
 
 	switch (num)
 	{
@@ -335,15 +335,15 @@ static void I_ReportSignal(int num, int coredumped)
 //		sigmsg = "SRB2 was interrupted prematurely by the user.";
 //		break;
 	case SIGILL:
-		sigmsg = "Labyrinth zone moment?\nSRB2R Error: illegal instruction";
+		sigmsg = "Labyrinth zone moment?\nFatal error: illegal instruction";
 		signame = "SIGILL"; // illegal instruction - invalid function image
 		break;
 	case SIGFPE:
-		sigmsg = "Someone divided by zero again!\nSRB2R Error: mathematical exception";
+		sigmsg = "Someone divided by zero again!\nFatal error: mathematical exception";
 		signame = "SIGFPE"; // mathematical exception
 		break;
 	case SIGSEGV:
-		sigmsg = "Snooping into unallocated memory as usual, I see!\nSRB2R Error: segment violation";
+		sigmsg = "Snooping into unallocated memory as usual, I see!\nFatal error: segment violation";
 		signame = "SIGSEGV"; // segment violation
 		break;
 //	case SIGTERM:
@@ -355,11 +355,11 @@ static void I_ReportSignal(int num, int coredumped)
 //		sigttl = "SIGBREAK" // Ctrl-Break sequence
 //		break;
 	case SIGABRT:
-		sigmsg = "All abort!\nSRB2R Error: abnormal termination";
+		sigmsg = "All abort!\nFatal error: abnormal termination";
 		signame = "SIGABRT"; // abnormal termination triggered by abort call
 		break;
 	default:
-		sigmsg = "I'll have two number 9s, a number 9 large...\nSRB2R Error: termination by unknown signal:";
+		sigmsg = "I'll have two number 9s, a number 9 large...\nFatal error: termination by unknown signal:";
 
 		sprintf(ttl, "number %d", num);
 		if (coredumped)
