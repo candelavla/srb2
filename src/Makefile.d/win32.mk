@@ -3,9 +3,9 @@
 #
 
 ifndef MINGW64
-EXENAME?=srb2win.exe
+EXENAME?=srb2rvre_win32.exe
 else
-EXENAME?=srb2win64.exe
+EXENAME?=srb2rvre.exe
 endif
 
 sources+=win32/Srb2win.rc
