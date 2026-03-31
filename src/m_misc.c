@@ -794,8 +794,8 @@ static void M_PNGText(png_structp png_ptr, png_infop png_info_ptr, PNG_CONST png
 	"Location", "Interface", "Render Mode", "Revision", "Build Date", "Build Time"};
 	char titletxt[] = "Sonic Robo Blast 2 Cherry " VERSIONSTRING;
 	png_charp playertxt =  cv_playername.zstring;
-	char desctxt[] = "SRB2C Screenshot";
-	char Movietxt[] = "SRB2C Movie";
+	char desctxt[] = "SRB2RB Screenshot";
+	char Movietxt[] = "SRB2RB Movie";
 	size_t i;
 	char interfacetxt[] =
 #ifdef HAVE_SDL
