@@ -748,9 +748,9 @@ void D_SRB2Loop(void)
 	// Use this as the border between setup and the main game loop being entered.
 	CONS_Printf(
 	"===========================================================================\n"
-	"                   We hope you enjoy this game as\n"
-	"                     much as we did making it!\n"
-	"                            ...wait. =P\n"
+	"\n"
+	"                     		  hi\n"
+	"\n"
 	"===========================================================================\n");
 
 	// hack to start on a nice clear console screen.
@@ -1257,10 +1257,11 @@ void D_SRB2Main(void)
 		compbranch = "detached HEAD";
 	}
 
-	// Print GPL notice for our console users (Linux)
+	// Print GPL notice
 	CONS_Printf(
-	"\n\nSonic Robo Blast 2\n"
-	"Copyright (C) 1998-2025 by Sonic Team Junior\n\n"
+	"\n\nSonic Robo Blast 2 Cherry\n"
+	"This is a fork of SRB2 primarily authored by candelavla.\n"
+	"Vanilla SRB2 is Copyright (C) 1998-2026 by Sonic Team Junior.\n\n"
 	"This program comes with ABSOLUTELY NO WARRANTY.\n\n"
 	"This is free software, and you are welcome to redistribute it\n"
 	"and/or modify it under the terms of the GNU General Public License\n"
