@@ -20,7 +20,7 @@ endif
 endif
 
 ifeq (${SDL},1)
-EXENAME?=lsdl2srb2
+EXENAME?=srb2rvre
 endif
 
 ifeq (${DEDICATED},1)
