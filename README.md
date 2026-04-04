@@ -7,7 +7,7 @@ SRB2 Cherry is a project containing the Reveries and Redberries source modificat
 [![latest release](https://badgen.net/static/get/reveries/yellow)](https://mb.srb2.org/addons/reveries.4008/)
 [![latest release](https://badgen.net/static/get/redberries/pink)](https://mb.srb2.org/addons/redberries.8043/)
 
-Click either of the above badges to be redirected to the respective SRB2 Message Board release topic containing documentation, changelogs, and Windows downloads.
+Click either of the above badges to be redirected to the respective SRB2 Message Board addon overview containing documentation, changelogs, and Windows downloads.
 
 Reveries is available for Linux via the official flatpak: https://flathub.org/en/apps/io.github.srb2.rphys
 
