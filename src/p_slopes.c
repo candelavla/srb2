@@ -1053,10 +1053,12 @@ void P_SlopeLaunch(mobj_t *mo)
 		&& (mo->standingslope->normal.x != 0
 		||  mo->standingslope->normal.y != 0))
 	{
+		boolean playerlaunch = mo->player;
+		boolean isjumping = playerlaunch && (mo->player->pflags & (PF_JUMPED|PF_NOJUMPDAMAGE|PF_BOUNCING));
 		vector3_t slopemom;
 		slopemom.x = mo->momx;
 		slopemom.y = mo->momy;
-		if (mo->player && (mo->player->pflags & (PF_JUMPED|PF_NOJUMPDAMAGE|PF_BOUNCING))) // Increase the pre-rotation Z only if a player jumped off
+		if (isjumping) // Increase the pre-rotation Z only if a player jumped off
 			slopemom.z = FixedMul(10*FRACUNIT/7, mo->momz);
 		else
 			slopemom.z = mo->momz;
@@ -1065,13 +1067,15 @@ void P_SlopeLaunch(mobj_t *mo)
 
 		mo->momx = slopemom.x;
 		mo->momy = slopemom.y;
-		if (mo->player && (mo->player->pflags & (PF_JUMPED|PF_NOJUMPDAMAGE|PF_BOUNCING))) // Decrease the post-rotation Z, moreso if a player jumped off
+		if (isjumping) // Decrease the post-rotation Z, moreso if a player jumped off
 			mo->momz = FixedMul(7*FRACUNIT/10, slopemom.z);
-		else
+		else if (playerlaunch)
 			mo->momz = FixedMul(13*FRACUNIT/16, slopemom.z);
+		else
+			mo->momz = slopemom.z;
 
-	    if (mo->player)
-		    mo->player->powers[pw_justlaunched] = 1;
+		if (playerlaunch)
+			mo->player->powers[pw_justlaunched] = 1;
 	}
 	mo->standingslope = NULL;
 }
@@ -1163,8 +1167,7 @@ void P_HandleSlopeLanding(mobj_t *thing, pslope_t *slope)
 	}
 }
 
-// https://yourlogicalfallacyis.com/slippery-slope
-// Handles sliding down slopes, like if they were made of butter :)
+// Handles sliding down slopes
 void P_ButteredSlope(mobj_t *mo)
 {
 	fixed_t thrust;

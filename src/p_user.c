@@ -5228,7 +5228,7 @@ static void P_DoShieldAbility(player_t *player, boolean spinshieldhack)
 				// Flame burst
 				case SH_FLAMEAURA:
 					player->pflags |= PF_THOKKED|PF_SHIELDABILITY;
-					P_Thrust(player->mo, player->mo->angle, FixedMul(61*FRACUNIT - FixedSqrt(FixedDiv(player->speed, player->mo->scale)), player->mo->scale));
+					P_Thrust(player->mo, player->mo->angle, FixedMul(55*FRACUNIT - FixedSqrt(FixedDiv(player->speed, player->mo->scale)), player->mo->scale));
 					player->drawangle = player->mo->angle;
 					player->pflags &= ~(PF_NOJUMPDAMAGE|PF_SPINNING);
 					P_SetMobjState(player->mo, S_PLAY_ROLL);
@@ -11122,7 +11122,8 @@ static void P_MinecartThink(player_t *player)
 		sector_t *sec;
 		INT32 lnum = -1;
 		fixed_t dummy;
-
+		fixed_t currentSpeed = 0;
+		
 		// Just hit floor.
 		if (minecart->eflags & MFE_JUSTHITFLOOR)
 		{
@@ -11146,7 +11147,6 @@ static void P_MinecartThink(player_t *player)
 			mobj_t *detright = NULL;
 			mobj_t *sidelock = NULL;
 			boolean jumped = false;
-			fixed_t currentSpeed;
 
 			if (!axis)
 			{
@@ -11154,7 +11154,6 @@ static void P_MinecartThink(player_t *player)
 				return;
 			}
 
-			minecart->movefactor = 0;
 			P_ResetScore(player);
 			// Handle angle and position
 			P_GetAxisPosition(minecart->x, minecart->y, axis, &newx, &newy, &targetangle, &grind);
@@ -11189,6 +11188,11 @@ static void P_MinecartThink(player_t *player)
 
 			// How fast are we going?
 			currentSpeed = FixedHypot(minecart->momx, minecart->momy);
+			if (minecart->movefactor >= 5) // cut speed if returning from a derail
+			{
+				currentSpeed /= 2;
+			}
+			minecart->movefactor = 0;
 			angdiff = R_PointToAngle2(0, 0, minecart->momx, minecart->momy) - minecart->angle;
 			if (angdiff > ANGLE_90 && angdiff < ANGLE_270)
 				currentSpeed *= -1;
@@ -11209,9 +11213,9 @@ static void P_MinecartThink(player_t *player)
 					minecart->eflags &= ~MFE_ONGROUND;
 				minecart->z += P_MobjFlip(minecart);
 				if (sidelock)
-					P_ParabolicMove(minecart, sidelock->x, sidelock->y, sidelock->z, gravity, max(currentSpeed, 12 * FRACUNIT));
+					P_ParabolicMove(minecart, sidelock->x, sidelock->y, sidelock->z, gravity, max(currentSpeed, 12*FRACUNIT));
 				else
-					minecart->momz = 12 * FRACUNIT;
+					minecart->momz = 12*FRACUNIT;
 
 				S_StartSound(minecart, sfx_s3k51);
 				jumped = true;
@@ -11277,8 +11281,22 @@ static void P_MinecartThink(player_t *player)
 		else
 		{
 			minecart->movefactor++;
-			if ((P_IsObjectOnGround(minecart) && minecart->movefactor >= 5) // off rail
-			|| (abs(minecart->momx) < minecart->scale/2 && abs(minecart->momy) < minecart->scale/2)) // hit a wall
+			if (P_IsObjectOnGround(minecart) && minecart->movefactor >= 5) // off rail
+			{
+				if (minecart->standingslope)
+				{
+					P_ButteredSlope(minecart);
+				}
+				currentSpeed = FixedHypot(minecart->momx, minecart->momy);
+
+				if (currentSpeed < 1*minecart->scale)
+				{
+					P_KillMobj(minecart, NULL, NULL, 0);
+					return;
+				}
+			}
+			
+			if (abs(minecart->momx) < minecart->scale/2 && abs(minecart->momy) < minecart->scale/2) // hit a wall
 			{
 				P_KillMobj(minecart, NULL, NULL, 0);
 				return;
