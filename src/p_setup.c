@@ -361,7 +361,7 @@ static void P_ClearSingleMapHeaderInfo(INT16 i)
 	for (UINT8 n = 0; n < 8; n++)
 		mapheaderinfo[num]->nightstimer[n] = 0;
 	mapheaderinfo[num]->ssspheres = 1;
-	mapheaderinfo[num]->gravity = FRACUNIT*11/16;
+	mapheaderinfo[num]->gravity = FRACUNIT>>1;
 	mapheaderinfo[num]->keywords[0] = '\0';
 	snprintf(mapheaderinfo[num]->musname, 7, "%sM", G_BuildMapName(i));
 	mapheaderinfo[num]->musname[6] = 0;

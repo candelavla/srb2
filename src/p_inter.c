@@ -1841,10 +1841,10 @@ void P_TouchSpecialThing(mobj_t *special, mobj_t *toucher, boolean heightcheck)
 			if (player->powers[pw_carry] == CR_MINECART && toucher->tracer && !P_MobjWasRemoved(toucher->tracer) && toucher->tracer->health)
 			{
 				fixed_t maxz = max(toucher->z, special->z + 35*special->scale);
-
-				toucher->momx = toucher->tracer->momx/2;
-				toucher->momy = toucher->tracer->momy/2;
-				toucher->momz = toucher->tracer->momz + FixedHypot(toucher->tracer->momx, toucher->tracer->momy)/2;
+				
+				toucher->momx = 2*toucher->tracer->momx/3;
+				toucher->momy = 2*toucher->tracer->momy/3;
+				toucher->momz = toucher->tracer->momz + 2*FixedHypot(toucher->tracer->momx, toucher->tracer->momy)/3;
 				P_ResetPlayer(player);
 				player->pflags &= ~PF_APPLYAUTOBRAKE;
 				P_SetMobjState(toucher, S_PLAY_SPRING);
@@ -1857,6 +1857,7 @@ void P_TouchSpecialThing(mobj_t *special, mobj_t *toucher, boolean heightcheck)
 				toucher->y = special->y;
 				toucher->z = maxz;
 				P_SetThingPosition(toucher);
+				player->powers[pw_springlock] = 10;
 			}
 			return;
 

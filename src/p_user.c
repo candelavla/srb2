@@ -7962,6 +7962,11 @@ void P_ElementalFire(player_t *player, boolean cropcircle)
 				P_SetMobjState(flame, S_TEAM_SPINFIRE1);
 				flame->color = player->mo->color;
 			}
+			else
+			{
+				flame->color = SKINCOLOR_APRICOT;
+				flame->colorized = true;
+			}
 		}
 #undef limitangle
 #undef numangles
@@ -7996,6 +8001,11 @@ void P_ElementalFire(player_t *player, boolean cropcircle)
 			{
 				P_SetMobjState(flame, S_TEAM_SPINFIRE1);
 				flame->color = player->mo->color;
+			}
+			else
+			{
+				flame->color = SKINCOLOR_APRICOT;
+				flame->colorized = true;
 			}
 
 			flame->momx = 8; // this is a hack which is used to ensure it still behaves as a missile and can damage others
@@ -8710,7 +8720,7 @@ void P_MovePlayer(player_t *player)
 		P_ResetScore(player);
 
 	// Spawn trail when moving fast enough to ignore roll friction
-	if (player->pflags & PF_SPINNING && !(player->pflags & PF_STARTDASH) && FixedHypot(player->speed, player->mo->momz) >= FixedMul(18<<FRACBITS, player->mo->scale) && !(player->pflags & PF_JUMPED))
+	if (player->pflags & PF_SPINNING && !(player->pflags & PF_STARTDASH) && FixedHypot(player->speed, player->mo->momz) >= FixedMul(23<<FRACBITS, player->mo->scale) && !(player->pflags & PF_JUMPED))
 	{
 		P_SpawnSpinMobj(player, player->spinitem);
 		G_GhostAddSpin();
@@ -8729,7 +8739,7 @@ void P_MovePlayer(player_t *player)
 	}
 
 	if ((player->powers[pw_shield] & SH_NOSTACK) == SH_ELEMENTAL
-	&& (player->pflags & PF_SPINNING) && player->speed >= FixedMul(18<<FRACBITS, player->mo->scale) && onground && (leveltime & 1)
+	&& (player->pflags & PF_SPINNING) && player->speed >= FixedMul(23<<FRACBITS, player->mo->scale) && onground && (leveltime & 1)
 	&& !(player->mo->eflags & (MFE_UNDERWATER|MFE_TOUCHWATER)))
 		P_ElementalFire(player, false);
 
@@ -11190,7 +11200,7 @@ static void P_MinecartThink(player_t *player)
 			currentSpeed = FixedHypot(minecart->momx, minecart->momy);
 			if (minecart->movefactor >= 5) // cut speed if returning from a derail
 			{
-				currentSpeed /= 2;
+				currentSpeed = 3*currentSpeed/4;
 			}
 			minecart->movefactor = 0;
 			angdiff = R_PointToAngle2(0, 0, minecart->momx, minecart->momy) - minecart->angle;
@@ -11289,13 +11299,15 @@ static void P_MinecartThink(player_t *player)
 				}
 				currentSpeed = FixedHypot(minecart->momx, minecart->momy);
 
-				if (currentSpeed < minecart->scale)
+				if (currentSpeed < 3*minecart->scale)
 				{
 					P_KillMobj(minecart, NULL, NULL, 0);
 					return;
 				}
 
-				P_SpawnSparks(minecart, minecart->angle);
+				angle_t minemovedir = R_PointToAngle2(0, 0, minecart->momx, minecart->momy);
+				P_Thrust(minecart, minemovedir, -(minecart->scale>>2));
+				P_SpawnSparks(minecart, minemovedir);
 				if (minecart->movefactor%3 == 0)
 				{
 					S_StartSound(minecart, sfx_s3k7e);

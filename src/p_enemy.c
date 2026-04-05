@@ -1440,7 +1440,7 @@ static void P_ParabolicMove(mobj_t *actor, fixed_t x, fixed_t y, fixed_t z, fixe
 	y -= actor->y;
 	z -= actor->z;
 
-	dh = P_AproxDistance(x, y);
+	dh = FixedHypot(x, y);
 
 	actor->momx = FixedMul(FixedDiv(x, dh), speed);
 	actor->momy = FixedMul(FixedDiv(y, dh), speed);
@@ -14910,7 +14910,7 @@ void A_RolloutRock(void *data)
 		actor->momy = FixedMul(actor->momy, locvar1);
 	}
 
-	speed = P_AproxDistance(actor->momx, actor->momy); // recalculate speed for visual rolling
+	speed = FixedHypot(actor->momx, actor->momy); // recalculate speed for visual rolling
 
 	if (((actor->flags & MF_PUSHABLE) || !(actor->flags2 & MF2_STRONGBOX))
 		&& speed < actor->scale) // stop moving if speed is insignificant

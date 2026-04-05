@@ -1330,6 +1330,8 @@ fixed_t P_GetMobjGravity(mobj_t *mo)
 			mo->flags2 &= ~MF2_OBJECTFLIP;
 		mo->eflags |= MFE_VERTICALFLIP;
 	}
+	
+	gravityadd = FixedMul(11*FRACUNIT/8, gravityadd); // reveries gravity increase
 
 	// Less gravity underwater.
 	if (mo->eflags & MFE_UNDERWATER && !goopgravity)
@@ -3249,7 +3251,7 @@ void P_MobjCheckWater(mobj_t *mobj)
 					P_SetScale(splish, mobj->scale, true);
 			}
 
-			// skipping stone!
+			// waterskip
 			if (p && p->speed/2 > abs(mobj->momz)
 				&& ((p->pflags & (PF_SPINNING|PF_JUMPED)) == PF_SPINNING)
 				&& ((!(mobj->eflags & MFE_VERTICALFLIP) && thingtop - mobj->momz > mobj->watertop)
