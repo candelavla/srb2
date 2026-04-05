@@ -7962,11 +7962,6 @@ void P_ElementalFire(player_t *player, boolean cropcircle)
 				P_SetMobjState(flame, S_TEAM_SPINFIRE1);
 				flame->color = player->mo->color;
 			}
-			else
-			{
-				flame->color = SKINCOLOR_APRICOT;
-				flame->colorized = true;
-			}
 		}
 #undef limitangle
 #undef numangles
@@ -8001,11 +7996,6 @@ void P_ElementalFire(player_t *player, boolean cropcircle)
 			{
 				P_SetMobjState(flame, S_TEAM_SPINFIRE1);
 				flame->color = player->mo->color;
-			}
-			else
-			{
-				flame->color = SKINCOLOR_APRICOT;
-				flame->colorized = true;
 			}
 
 			flame->momx = 8; // this is a hack which is used to ensure it still behaves as a missile and can damage others
