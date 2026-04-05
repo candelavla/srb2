@@ -11294,6 +11294,15 @@ static void P_MinecartThink(player_t *player)
 					P_KillMobj(minecart, NULL, NULL, 0);
 					return;
 				}
+
+				P_SpawnSparks(minecart, minecart->angle);
+				if (minecart->movefactor%3 == 0)
+				{
+					S_StartSound(minecart, sfx_s3k7e);
+					#define mrad minecart->radius>>FRACBITS
+					P_SpawnMobjFromMobj(minecart, P_RandomRange(-mrad, mrad)<<FRACBITS, P_RandomRange(-mrad, mrad)<<FRACBITS, 0, MT_DUST);
+					#undef mrad
+				}
 			}
 			
 			if (abs(minecart->momx) < minecart->scale/2 && abs(minecart->momy) < minecart->scale/2) // hit a wall

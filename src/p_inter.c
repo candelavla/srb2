@@ -1844,10 +1844,10 @@ void P_TouchSpecialThing(mobj_t *special, mobj_t *toucher, boolean heightcheck)
 
 				toucher->momx = toucher->tracer->momx/2;
 				toucher->momy = toucher->tracer->momy/2;
-				toucher->momz = toucher->tracer->momz + P_AproxDistance(toucher->tracer->momx, toucher->tracer->momy)/2;
+				toucher->momz = toucher->tracer->momz + FixedHypot(toucher->tracer->momx, toucher->tracer->momy)/2;
 				P_ResetPlayer(player);
 				player->pflags &= ~PF_APPLYAUTOBRAKE;
-				P_SetMobjState(toucher, S_PLAY_FALL);
+				P_SetMobjState(toucher, S_PLAY_SPRING);
 				P_SetTarget(&toucher->tracer->target, NULL);
 				P_KillMobj(toucher->tracer, toucher, special, 0);
 				P_SetTarget(&toucher->tracer, NULL);
