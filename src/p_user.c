@@ -11289,7 +11289,7 @@ static void P_MinecartThink(player_t *player)
 				}
 				currentSpeed = FixedHypot(minecart->momx, minecart->momy);
 
-				if (currentSpeed < 1*minecart->scale)
+				if (currentSpeed < minecart->scale)
 				{
 					P_KillMobj(minecart, NULL, NULL, 0);
 					return;
