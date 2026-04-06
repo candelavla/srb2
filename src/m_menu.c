@@ -515,7 +515,7 @@ typedef enum
 // ---------------------
 static menuitem_t MPauseMenu[] =
 {
-	{IT_STRING | IT_CALL,    NULL, "Add-ons...",                M_Addons,               8},
+	{IT_STRING | IT_CALL,    NULL, "Addons...",                M_Addons,               8},
 	{IT_STRING | IT_SUBMENU, NULL, "Scramble Teams...",         &MISC_ScrambleTeamDef, 16},
 	{IT_STRING | IT_CALL,    NULL, "Emblem Hints...",           M_EmblemHints,         24},
 	{IT_STRING | IT_CALL,    NULL, "Switch Gametype/Level...",  M_MapChange,           32},
@@ -638,7 +638,7 @@ static menuitem_t MISC_HelpMenu[] =
 // Pause Menu Pandora's Box Options
 static menuitem_t SR_PandorasBox[] =
 {
-	{IT_STRING | IT_CALL, NULL, "Mid-game add-ons...", M_Addons,             0},
+	{IT_STRING | IT_CALL, NULL, "Mid-game addons...", M_Addons,             0},
 
 	{IT_STRING | IT_CVAR, NULL, "Rings",               &cv_dummyrings,      20},
 	{IT_STRING | IT_CVAR, NULL, "Lives",               &cv_dummylives,      30},
@@ -913,7 +913,7 @@ static menuitem_t MP_ServerMenu[] =
 	{IT_STRING|IT_CALL,              NULL, "Room...",                  M_RoomMenu,          10},
 	{IT_STRING|IT_CVAR|IT_CV_STRING, NULL, "Server Name",              &cv_servername,      20},
 	{IT_STRING|IT_CVAR,              NULL, "Max Players",              &cv_maxplayers,      46},
-	{IT_STRING|IT_CVAR,              NULL, "Allow Add-on Downloading", &cv_downloading,     56},
+	{IT_STRING|IT_CVAR,              NULL, "Allow Addon Downloading", &cv_downloading,     56},
 	{IT_STRING|IT_CALL,              NULL, "Select Gametype/Level...", M_MapChange,        100},
 	{IT_STRING|IT_CALL,              NULL, "More Options...",          M_ServerOptions,    130},
 	{IT_WHITESTRING|IT_CALL,         NULL, "Start",                    M_StartServer,      140},
@@ -1090,7 +1090,7 @@ static menuitem_t OP_ChangeControlsMenu[] =
 	{IT_CALL | IT_STRING2, NULL, "Grenade",          M_ChangeControl, GC_WEPSLOT5    },
 	{IT_CALL | IT_STRING2, NULL, "Explosion",        M_ChangeControl, GC_WEPSLOT6    },
 	{IT_CALL | IT_STRING2, NULL, "Rail",             M_ChangeControl, GC_WEPSLOT7    },
-	{IT_HEADER, NULL, "Add-ons", NULL, 0},
+	{IT_HEADER, NULL, "Addons", NULL, 0},
 	{IT_SPACE, NULL, NULL, NULL, 0}, // padding
 	{IT_CALL | IT_STRING2, NULL, "Custom Action 1",  M_ChangeControl, GC_CUSTOM1     },
 	{IT_CALL | IT_STRING2, NULL, "Custom Action 2",  M_ChangeControl, GC_CUSTOM2     },
@@ -1448,7 +1448,7 @@ static menuitem_t OP_SoundAdvancedMenu[] =
 
 static menuitem_t OP_DataOptionsMenu[] =
 {
-	{IT_STRING | IT_CALL,    NULL, "Add-on Options...",     M_AddonsOptions,     10},
+	{IT_STRING | IT_CALL,    NULL, "Addon Options...",     M_AddonsOptions,     10},
 	{IT_STRING | IT_CALL,    NULL, "Screenshot Options...", M_ScreenshotOptions, 20},
 
 	{IT_STRING | IT_SUBMENU, NULL, "\x85" "Erase Data...",  &OP_EraseDataDef,    40},
@@ -1516,7 +1516,7 @@ static menuitem_t OP_AddonsOptionsMenu[] =
 	{IT_HEADER,                      NULL, "Menu",                        NULL,                     0},
 	{IT_STRING|IT_CVAR,              NULL, "Location",                    &cv_addons_option,       12},
 	{IT_STRING|IT_CVAR|IT_CV_STRING, NULL, "Custom Folder",               &cv_addons_folder,       22},
-	{IT_STRING|IT_CVAR,              NULL, "Identify add-ons via",        &cv_addons_md5,          50},
+	{IT_STRING|IT_CVAR,              NULL, "Identify addons via",        &cv_addons_md5,          50},
 	{IT_STRING|IT_CVAR,              NULL, "Show unsupported file types", &cv_addons_showall,      60},
 
 	{IT_HEADER,                      NULL, "Search",                      NULL,                    78},
@@ -1535,7 +1535,7 @@ static menuitem_t OP_ServerOptionsMenu[] =
 	{IT_STRING | IT_CVAR | IT_CV_STRING,
 	                         NULL, "Server name",                      &cv_servername,           7},
 	{IT_STRING | IT_CVAR,    NULL, "Max Players",                      &cv_maxplayers,          21},
-	{IT_STRING | IT_CVAR,    NULL, "Allow Add-on Downloading",         &cv_downloading,         26},
+	{IT_STRING | IT_CVAR,    NULL, "Allow Addon Downloading",         &cv_downloading,         26},
 	{IT_STRING | IT_CVAR,    NULL, "Allow players to join",            &cv_allownewplayer,      31},
 	{IT_STRING | IT_CVAR,    NULL, "Minutes for reconnecting",         &cv_rejointimeout,       36},
 	{IT_STRING | IT_CVAR,    NULL, "Map progression",                  &cv_advancemap,          41},
@@ -4150,7 +4150,7 @@ static void M_DrawStaticBox(fixed_t x, fixed_t y, INT32 flags, fixed_t w, fixed_
 	staticx = (staticx + (w*4) + (M_RandomByte() % 4)) % (patch->width*2);
 
 	if (patch->height == h*2) // Is the patch 100 pixels tall? If so, reset "staticy"...
-		staticy = 0; // ...in case that one add-on would randomise it and a later add-on wouldn't
+		staticy = 0; // ...in case that one addon would randomise it and a later addon wouldn't
 	else // Otherwise, as we already make "staticx" near-sequential, I think that making "staticy"...
 		staticy = M_RandomRange(0, (patch->height*2) - 1); // ...fully random instead of sequential increases the... randomness
 
@@ -6364,7 +6364,7 @@ static boolean M_AddonsRefresh(void)
 		{
 			S_StartSound(NULL, sfx_lose);
 			if (refreshdirmenu & REFRESHDIR_MAX)
-				message = va("%c%s\x80\nMaximum number of add-ons reached.\nA file could not be loaded.\nIf you wish to play with this add-on, restart the game to clear existing ones.\n\n(Press any button/key)\n", ('\x80' + (highlightflags>>V_CHARCOLORSHIFT)), refreshdirname);
+				message = va("%c%s\x80\nMaximum number of addons reached.\nA file could not be loaded.\nIf you wish to play with this addon, restart the game to clear existing ones.\n\n(Press any button/key)\n", ('\x80' + (highlightflags>>V_CHARCOLORSHIFT)), refreshdirname);
 			else
 				message = va("%c%s\x80\nA file was not loaded.\nCheck the console log for more information.\n\n(Press any button/key)\n", ('\x80' + (highlightflags>>V_CHARCOLORSHIFT)), refreshdirname);
 		}
@@ -6885,7 +6885,7 @@ static void M_Retry(INT32 choice)
 		M_RetryResponse(KEY_ENTER);
 		return;
 	}
-	M_StartMessage(M_GetText("Retry this act from the last starpost?\n\n(Press 'Y Key' or 'Confirm Button' to respawn)\n"),M_RetryResponse,MM_YESNO);
+	M_StartMessage(M_GetText("Retry this act from the last starpost?\n\n(Press 'Y Key' or 'Confirm Button' to retry)\n"),M_RetryResponse,MM_YESNO);
 }
 
 static void M_SelectableClearMenus(INT32 choice)
@@ -8077,7 +8077,7 @@ static void M_SinglePlayerMenu(INT32 choice)
 
 
 	// Reset the item positions, to avoid them sinking farther down every time the menu is opened if one is unavailable
-	// Note that they're reset, not simply "not moved again", in case mid-game add-ons re-enable an option
+	// Note that they're reset, not simply "not moved again", in case mid-game addons re-enable an option
 	SP_MainMenu[spstartgame]   .alphaKey = 76;
 	SP_MainMenu[sprecordattack].alphaKey = 84;
 	SP_MainMenu[spnightsmode]  .alphaKey = 92;
@@ -8089,7 +8089,7 @@ static void M_SinglePlayerMenu(INT32 choice)
 	levellistmode = LLM_RECORDATTACK;
 	if (M_GametypeHasLevels(-1))
 		SP_MainMenu[sprecordattack].status = (M_SecretUnlocked(SECRET_RECORDATTACK, clientGamedata)) ? IT_CALL|IT_STRING : IT_SECRET;
-	else // If Record Attack is nonexistent in the current add-on...
+	else // If Record Attack is nonexistent in the current addon...
 	{
 		SP_MainMenu[sprecordattack].status = IT_NOTHING|IT_DISABLED; // ...hide and disable the Record Attack option...
 		SP_MainMenu[spstartgame].alphaKey += 8; // ...and lower Start Game by 8 pixels to close the gap
@@ -8099,7 +8099,7 @@ static void M_SinglePlayerMenu(INT32 choice)
 	levellistmode = LLM_NIGHTSATTACK;
 	if (M_GametypeHasLevels(-1))
 		SP_MainMenu[spnightsmode].status = (M_SecretUnlocked(SECRET_NIGHTSMODE, clientGamedata)) ? IT_CALL|IT_STRING : IT_SECRET;
-	else // If NiGHTS Mode is nonexistent in the current add-on...
+	else // If NiGHTS Mode is nonexistent in the current addon...
 	{
 		SP_MainMenu[spnightsmode].status = IT_NOTHING|IT_DISABLED; // ...hide and disable the NiGHTS Mode option...
 		// ...and lower the above options' display positions by 8 pixels to close the gap
@@ -8124,9 +8124,9 @@ static void M_SinglePlayerMenu(INT32 choice)
 		SP_MainMenu[spmarathon].status = (M_SecretUnlocked(SECRET_RECORDATTACK, clientGamedata)) ? IT_CALL|IT_STRING|IT_CALL_NOTMODIFIED : IT_SECRET;
 
 
-	if (tutorialmap) // If there's a tutorial available in the current add-on...
+	if (tutorialmap) // If there's a tutorial available in the current addon...
 		SP_MainMenu[sptutorial].status = IT_CALL | IT_STRING; // ...always unlock Tutorial
-	else // But if there's no tutorial available in the current add-on...
+	else // But if there's no tutorial available in the current addon...
 	{
 		SP_MainMenu[sptutorial].status = IT_NOTHING|IT_DISABLED; // ...hide and disable the Tutorial option...
 		// ...and lower the above options' display positions by 8 pixels to close the gap
@@ -10445,19 +10445,19 @@ static void M_ReplayTimeAttack(INT32 choice)
 
 			case DFILE_ERROR_NOTLOADED:
 				demofileoverride = DFILE_OVERRIDE_LOAD;
-				M_StartMessage(M_GetText("Add-ons for this replay\nhave not been loaded.\n\nAttempt to load files?\n\n(Press 'Y Key' or 'Confirm Button' to agree)\n"), M_StartTimeAttackReplay, MM_YESNO);
+				M_StartMessage(M_GetText("Addons for this replay\nhave not been loaded.\n\nAttempt to load files?\n\n(Press 'Y Key' or 'Confirm Button' to agree)\n"), M_StartTimeAttackReplay, MM_YESNO);
 				break;
 
 			case DFILE_ERROR_OUTOFORDER:
-				M_StartMessage(M_GetText("Add-ons for this replay\nwere loaded out of order.\n\n(Press any button/key)\n"), NULL, MM_NOTHING);
+				M_StartMessage(M_GetText("Addons for this replay\nwere loaded out of order.\n\n(Press any button/key)\n"), NULL, MM_NOTHING);
 				break;
 
 			case DFILE_ERROR_INCOMPLETEOUTOFORDER:
-				M_StartMessage(M_GetText("Add-ons for this replay\nhave not been loaded,\nand some are in the wrong order.\n\n(Press any button/key)\n"), NULL, MM_NOTHING);
+				M_StartMessage(M_GetText("Addons for this replay\nhave not been loaded,\nand some are in the wrong order.\n\n(Press any button/key)\n"), NULL, MM_NOTHING);
 				break;
 
 			case DFILE_ERROR_CANNOTLOAD:
-				M_StartMessage(M_GetText("Add-ons for this replay\ncould not be loaded.\n\n(Press any button/key)\n"), NULL, MM_NOTHING);
+				M_StartMessage(M_GetText("Addons for this replay\ncould not be loaded.\n\n(Press any button/key)\n"), NULL, MM_NOTHING);
 				break;
 
 			case DFILE_ERROR_EXTRAFILES:
@@ -11404,7 +11404,7 @@ static void M_ConnectMenuModChecks(INT32 choice)
 
 	if (modifiedgame)
 	{
-		M_StartMessage(M_GetText("You have add-ons loaded.\nYou won't be able to join netgames!\n\nTo play online, restart the game\nand don't load any addons.\nSRB2 will automatically add\neverything you need when you join.\n\n(Press any button/key)\n"),M_ConnectMenu,MM_KEYHANDLER);
+		M_StartMessage(M_GetText("You have addons loaded.\nYou won't be able to join netgames!\n\nTo play online, restart the game\nand don't load any addons.\nSRB2 will automatically add\neverything you need when you join.\n\n(Press any button/key)\n"),M_ConnectMenu,MM_KEYHANDLER);
 		return;
 	}
 
@@ -11618,7 +11618,7 @@ static void M_ServerOptions(INT32 choice)
 	{
 		OP_ServerOptionsMenu[ 1].status = IT_GRAYEDOUT; // Server name
 		OP_ServerOptionsMenu[ 2].status = IT_GRAYEDOUT; // Max players
-		OP_ServerOptionsMenu[ 3].status = IT_GRAYEDOUT; // Allow add-on downloading
+		OP_ServerOptionsMenu[ 3].status = IT_GRAYEDOUT; // Allow addon downloading
 		OP_ServerOptionsMenu[ 4].status = IT_GRAYEDOUT; // Allow players to join
 		OP_ServerOptionsMenu[36].status = IT_GRAYEDOUT; // Master server
 		OP_ServerOptionsMenu[37].status = IT_GRAYEDOUT; // Minimum delay between joins
