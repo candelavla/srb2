@@ -2149,7 +2149,7 @@ static void M_OpenGLOptionsMenu(void)
 	if (rendermode == render_opengl)
 		M_SetupNextMenu(&OP_OpenGLOptionsDef);
 	else
-		M_StartMessage(M_GetText("You must be in OpenGL mode\nto access this menu.\n\n(Press a key)\n"), NULL, MM_NOTHING);
+		M_StartMessage(M_GetText("You must be in OpenGL mode\nto access this menu.\n\n(Press any button/key)\n"), NULL, MM_NOTHING);
 }
 
 menu_t OP_OpenGLOptionsDef = DEFAULTMENUSTYLE(
@@ -3494,7 +3494,7 @@ boolean M_Responder(event_t *ev)
 					if (((currentMenu->menuitems[itemOn].status & IT_CALLTYPE) & IT_CALL_NOTMODIFIED) && usedCheats)
 					{
 						S_StartSound(NULL, sfx_skid);
-						M_StartMessage(M_GetText("This cannot be done in a cheated game.\n\n(Press a key)\n"), NULL, MM_NOTHING);
+						M_StartMessage(M_GetText("This cannot be done in a cheated game.\n\n(Press any button/key)\n"), NULL, MM_NOTHING);
 						return true;
 					}
 #endif
@@ -6253,7 +6253,7 @@ static void M_Addons(INT32 choice)
 
 	if (!preparefilemenu(false))
 	{
-		M_StartMessage(va("No files/folders found.\n\n%s\n\n(Press a key)\n",LOCATIONSTRING1),NULL,MM_NOTHING);
+		M_StartMessage(va("No files/folders found.\n\n%s\n\n(Press any button/key)\n",LOCATIONSTRING1),NULL,MM_NOTHING);
 			// (recommendedflags == V_SKYMAP ? LOCATIONSTRING2 : LOCATIONSTRING1))
 		return;
 	}
@@ -6336,7 +6336,7 @@ static char *M_AddonsHeaderPath(void)
 
 #define UNEXIST S_StartSound(NULL, sfx_lose);\
 		M_SetupNextMenu(MISC_AddonsDef.prevMenu);\
-		M_StartMessage(va("\x82%s\x80\nThis folder no longer exists!\nAborting to main menu.\n\n(Press a key)\n", M_AddonsHeaderPath()),NULL,MM_NOTHING)
+		M_StartMessage(va("\x82%s\x80\nThis folder no longer exists!\nAborting to main menu.\n\n(Press any button/key)\n", M_AddonsHeaderPath()),NULL,MM_NOTHING)
 
 #define CLEARNAME Z_Free(refreshdirname);\
 					refreshdirname = NULL
@@ -6364,14 +6364,14 @@ static boolean M_AddonsRefresh(void)
 		{
 			S_StartSound(NULL, sfx_lose);
 			if (refreshdirmenu & REFRESHDIR_MAX)
-				message = va("%c%s\x80\nMaximum number of add-ons reached.\nA file could not be loaded.\nIf you wish to play with this add-on, restart the game to clear existing ones.\n\n(Press a key)\n", ('\x80' + (highlightflags>>V_CHARCOLORSHIFT)), refreshdirname);
+				message = va("%c%s\x80\nMaximum number of add-ons reached.\nA file could not be loaded.\nIf you wish to play with this add-on, restart the game to clear existing ones.\n\n(Press any button/key)\n", ('\x80' + (highlightflags>>V_CHARCOLORSHIFT)), refreshdirname);
 			else
-				message = va("%c%s\x80\nA file was not loaded.\nCheck the console log for more information.\n\n(Press a key)\n", ('\x80' + (highlightflags>>V_CHARCOLORSHIFT)), refreshdirname);
+				message = va("%c%s\x80\nA file was not loaded.\nCheck the console log for more information.\n\n(Press any button/key)\n", ('\x80' + (highlightflags>>V_CHARCOLORSHIFT)), refreshdirname);
 		}
 		else if (refreshdirmenu & (REFRESHDIR_WARNING|REFRESHDIR_ERROR))
 		{
 			S_StartSound(NULL, sfx_skid);
-			message = va("%c%s\x80\nA file was loaded with %s.\nCheck the console log for more information.\n\n(Press a key)\n", ('\x80' + (highlightflags>>V_CHARCOLORSHIFT)), refreshdirname, ((refreshdirmenu & REFRESHDIR_ERROR) ? "errors" : "warnings"));
+			message = va("%c%s\x80\nA file was loaded with %s.\nCheck the console log for more information.\n\n(Press any button/key)\n", ('\x80' + (highlightflags>>V_CHARCOLORSHIFT)), refreshdirname, ((refreshdirmenu & REFRESHDIR_ERROR) ? "errors" : "warnings"));
 		}
 
 		if (message)
@@ -6666,7 +6666,7 @@ static void M_HandleAddons(INT32 choice)
 								if (!preparefilemenu(false))
 								{
 									S_StartSound(NULL, sfx_skid);
-									M_StartMessage(va("%c%s\x80\nThis folder is empty.\n\n(Press a key)\n", ('\x80' + (highlightflags>>V_CHARCOLORSHIFT)), M_AddonsHeaderPath()),NULL,MM_NOTHING);
+									M_StartMessage(va("%c%s\x80\nThis folder is empty.\n\n(Press any button/key to dimiss)\n", ('\x80' + (highlightflags>>V_CHARCOLORSHIFT)), M_AddonsHeaderPath()),NULL,MM_NOTHING);
 									menupath[menupathindex[++menudepthleft]] = 0;
 
 									if (!preparefilemenu(true))
@@ -6685,7 +6685,7 @@ static void M_HandleAddons(INT32 choice)
 							else
 							{
 								S_StartSound(NULL, sfx_lose);
-								M_StartMessage(va("%c%s\x80\nThis folder is too deep to navigate to!\n\n(Press a key)\n", ('\x80' + (highlightflags>>V_CHARCOLORSHIFT)), M_AddonsHeaderPath()),NULL,MM_NOTHING);
+								M_StartMessage(va("%c%s\x80\nThis folder is too deep to navigate to!\n\n(Press any button/key to dismiss)\n", ('\x80' + (highlightflags>>V_CHARCOLORSHIFT)), M_AddonsHeaderPath()),NULL,MM_NOTHING);
 								menupath[menupathindex[menudepthleft]] = 0;
 							}
 							break;
@@ -6699,7 +6699,7 @@ static void M_HandleAddons(INT32 choice)
 							}
 							break;
 						case EXT_TXT:
-							M_StartMessage(va("%c%s\x80\nThis file may not be a console script.\nAttempt to run anyways? \n\n(Press 'Y' to confirm)\n", ('\x80' + (highlightflags>>V_CHARCOLORSHIFT)), dirmenu[dir_on[menudepthleft]]+DIR_STRING),M_AddonExec,MM_YESNO);
+							M_StartMessage(va("%c%s\x80\nThis file may not be a console script.\nAttempt to run anyways? \n\n(Press 'Y Key' or 'Confirm Button' to run)\n", ('\x80' + (highlightflags>>V_CHARCOLORSHIFT)), dirmenu[dir_on[menudepthleft]]+DIR_STRING),M_AddonExec,MM_YESNO);
 							break;
 						case EXT_CFG:
 							M_AddonExec(KEY_ENTER);
@@ -6803,7 +6803,7 @@ static void M_ConfirmEnterGame(INT32 choice)
 	(void)choice;
 	if (!cv_allowteamchange.value)
 	{
-		M_StartMessage(M_GetText("The server is not allowing\nteam changes at this time.\nPress a key.\n"), NULL, MM_NOTHING);
+		M_StartMessage(M_GetText("The server is not allowing\nteam changes at this time.\nPress any button/key.\n"), NULL, MM_NOTHING);
 		return;
 	}
 	M_ClearMenus(true);
@@ -6831,7 +6831,7 @@ static void M_ConfirmTeamChange(INT32 choice)
 	(void)choice;
 	if (!cv_allowteamchange.value && cv_dummyteam.value)
 	{
-		M_StartMessage(M_GetText("The server is not allowing\nteam changes at this time.\nPress a key.\n"), NULL, MM_NOTHING);
+		M_StartMessage(M_GetText("The server is not allowing\nteam changes at this time.\nPress any button/key.\n"), NULL, MM_NOTHING);
 		return;
 	}
 
@@ -6885,7 +6885,7 @@ static void M_Retry(INT32 choice)
 		M_RetryResponse(KEY_ENTER);
 		return;
 	}
-	M_StartMessage(M_GetText("Retry this act from the last starpost?\n\n(Press 'Y' to confirm)\n"),M_RetryResponse,MM_YESNO);
+	M_StartMessage(M_GetText("Retry this act from the last starpost?\n\n(Press 'Y Key' or 'Confirm Button' to respawn)\n"),M_RetryResponse,MM_YESNO);
 }
 
 static void M_SelectableClearMenus(INT32 choice)
@@ -6942,7 +6942,7 @@ static void M_DestroyRobots(INT32 choice)
 {
 	(void)choice;
 
-	M_StartMessage(M_GetText("Do you want to destroy all\nrobots in the current level?\n\n(Press 'Y' to confirm)\n"),M_DestroyRobotsResponse,MM_YESNO);
+	M_StartMessage(M_GetText("Do you want to destroy all\nrobots in the current level?\n\n(Press 'Y Key' or 'Confirm Button' to annihilate)\n"),M_DestroyRobotsResponse,MM_YESNO);
 }
 
 static void M_LevelSelectWarp(INT32 choice)
@@ -8214,7 +8214,7 @@ static void M_StartTutorial(INT32 choice)
 
 	if (choice != INT32_MAX && G_GetControlScheme(gamecontrol, gcl_tutorial_check, num_gcl_tutorial_check) != gcs_fps)
 	{
-		M_StartMessage("Do you want to try the \202recommended \202movement controls\x80?\n\nWe will set them just for this tutorial.\n\nPress 'Y' or 'Enter' to confirm\nPress 'N' or any key to keep \nyour current controls.\n",M_TutorialControlResponse,MM_YESNO);
+		M_StartMessage("Do you want to try the \202recommended \202movement controls\x80?\n\nWe will set them just for this tutorial.\n\nPress 'Y Key' or 'Confirm Button' to agree\nPress 'N Key' or 'Cancel Button' key to keep \nyour current controls.\n",M_TutorialControlResponse,MM_YESNO);
 		return;
 	}
 	else if (choice != INT32_MAX)
@@ -8911,13 +8911,13 @@ static void M_HandleLoadSave(INT32 choice)
 			{
 				loadgamescroll = 0;
 				S_StartSound(NULL, sfx_skid);
-				M_StartMessage("Are you sure you want to play\n\x85ultimate mode\x80? It isn't remotely fair,\nand you don't even get an emblem for it.\n\n(Press 'Y' to confirm)\n",M_SaveGameUltimateResponse,MM_YESNO);
+				M_StartMessage("Are you sure you want to play\n\x85ultimate mode\x80? It isn't remotely fair,\nand you don't even get an emblem for it.\n\n(Press 'Y Key' or 'Confirm Button' to begin)\n",M_SaveGameUltimateResponse,MM_YESNO);
 			}
 			else if (saveSlotSelected != NOSAVESLOT && savegameinfo[saveSlotSelected-1].lives == -42 && usedCheats)
 			{
 				loadgamescroll = 0;
 				S_StartSound(NULL, sfx_skid);
-				M_StartMessage(M_GetText("This cannot be done in a cheated game.\n\n(Press a key)\n"), NULL, MM_NOTHING);
+				M_StartMessage(M_GetText("This cannot be done in a cheated game.\n\n(Press any button/key)\n"), NULL, MM_NOTHING);
 			}
 			else if (saveSlotSelected == NOSAVESLOT || savegameinfo[saveSlotSelected-1].lives != -666) // don't allow loading of "bad saves"
 			{
@@ -8943,7 +8943,7 @@ static void M_HandleLoadSave(INT32 choice)
 			{
 				loadgamescroll = 0;
 				S_StartSound(NULL, sfx_skid);
-				M_StartMessage(va("Are you sure you want to delete\nsave file %d?\n\n(Press 'Y' to confirm)\n", saveSlotSelected),M_SaveGameDeleteResponse,MM_YESNO);
+				M_StartMessage(va("Are you sure you want to delete\nsave file %d?\n\n(Press 'Y Key' or 'Confirm Button' to delete)\n", saveSlotSelected),M_SaveGameDeleteResponse,MM_YESNO);
 			}
 			else if (!loadgameoffset)
 			{
@@ -10440,44 +10440,28 @@ static void M_ReplayTimeAttack(INT32 choice)
 		switch (error)
 		{
 			case DFILE_ERROR_NOTDEMO:
-				M_StartMessage(M_GetText("An error occurred loading this replay.\n\n(Press a key)\n"), NULL, MM_NOTHING);
+				M_StartMessage(M_GetText("An error occurred loading this replay.\n\n(Press any button/key)\n"), NULL, MM_NOTHING);
 				break;
 
 			case DFILE_ERROR_NOTLOADED:
 				demofileoverride = DFILE_OVERRIDE_LOAD;
-				M_StartMessage(M_GetText("Add-ons for this replay\nhave not been loaded.\n\nAttempt to load files?\n\n(Press 'Y' to confirm)\n"), M_StartTimeAttackReplay, MM_YESNO);
+				M_StartMessage(M_GetText("Add-ons for this replay\nhave not been loaded.\n\nAttempt to load files?\n\n(Press 'Y Key' or 'Confirm Button' to agree)\n"), M_StartTimeAttackReplay, MM_YESNO);
 				break;
 
 			case DFILE_ERROR_OUTOFORDER:
-				/*
-				demofileoverride = DFILE_OVERRIDE_SKIP;
-				M_StartMessage(M_GetText("Add-ons for this replay\nwere loaded out of order.\n\nAttempt to playback anyway?\n\n(Press 'Y' to confirm)\n"), M_StartTimeAttackReplay, MM_YESNO);
-				*/
-				M_StartMessage(M_GetText("Add-ons for this replay\nwere loaded out of order.\n\n(Press a key)\n"), NULL, MM_NOTHING);
+				M_StartMessage(M_GetText("Add-ons for this replay\nwere loaded out of order.\n\n(Press any button/key)\n"), NULL, MM_NOTHING);
 				break;
 
 			case DFILE_ERROR_INCOMPLETEOUTOFORDER:
-				/*
-				demofileoverride = DFILE_OVERRIDE_LOAD;
-				M_StartMessage(M_GetText("Add-ons for this replay\nhave not been loaded,\nand some are in the wrong order.\n\nAttempt to load files?\n\n(Press 'Y' to confirm)\n"), M_StartTimeAttackReplay, MM_YESNO);
-				*/
-				M_StartMessage(M_GetText("Add-ons for this replay\nhave not been loaded,\nand some are in the wrong order.\n\n(Press a key)\n"), NULL, MM_NOTHING);
+				M_StartMessage(M_GetText("Add-ons for this replay\nhave not been loaded,\nand some are in the wrong order.\n\n(Press any button/key)\n"), NULL, MM_NOTHING);
 				break;
 
 			case DFILE_ERROR_CANNOTLOAD:
-				/*
-				demofileoverride = DFILE_OVERRIDE_SKIP;
-				M_StartMessage(M_GetText("Add-ons for this replay\ncould not be loaded.\n\nAttempt to playback anyway?\n\n(Press 'Y' to confirm)\n"), M_StartTimeAttackReplay, MM_YESNO);
-				*/
-				M_StartMessage(M_GetText("Add-ons for this replay\ncould not be loaded.\n\n(Press a key)\n"), NULL, MM_NOTHING);
+				M_StartMessage(M_GetText("Add-ons for this replay\ncould not be loaded.\n\n(Press any button/key)\n"), NULL, MM_NOTHING);
 				break;
 
 			case DFILE_ERROR_EXTRAFILES:
-				/*
-				demofileoverride = DFILE_OVERRIDE_SKIP;
-				M_StartMessage(M_GetText("You have more files loaded\nthan the replay does.\n\nAttempt to playback anyway?\n\n(Press 'Y' to confirm)\n"), M_StartTimeAttackReplay, MM_YESNO);
-				*/
-				M_StartMessage(M_GetText("You have more files loaded\nthan the replay does.\n\n(Press a key)\n"), NULL, MM_NOTHING);
+				M_StartMessage(M_GetText("You have more files loaded\nthan the replay does.\n\n(Press any button/key)\n"), NULL, MM_NOTHING);
 				break;
 		}
 
@@ -10570,11 +10554,11 @@ static void M_SetGuestReplay(INT32 choice)
 		break;
 	case 4: // guest
 	default:
-		M_StartMessage(M_GetText("Are you sure you want to\ndelete the guest replay data?\n\n(Press 'Y' to confirm)\n"),M_EraseGuest,MM_YESNO);
+		M_StartMessage(M_GetText("Are you sure you want to\ndelete the guest replay data?\n\n(Press 'Y Key' or 'Confirm Button' to delete)\n"),M_EraseGuest,MM_YESNO);
 		return;
 	}
 	if (FIL_FileExists(va("%s"PATHSEP"replay"PATHSEP"%s"PATHSEP"%s-guest.lmp", srb2home, timeattackfolder, G_BuildMapName(cv_nextmap.value))))
-		M_StartMessage(M_GetText("Are you sure you want to\noverwrite the guest replay data?\n\n(Press 'Y' to confirm)\n"),which,MM_YESNO);
+		M_StartMessage(M_GetText("Are you sure you want to\noverwrite the guest replay data?\n\n(Press 'Y Key' or 'Confirm Button' to overwrite)\n"),which,MM_YESNO);
 	else
 		which(0);
 }
@@ -10636,7 +10620,7 @@ static void M_MarathonLiveEventBackup(INT32 choice)
 	M_StopMessage(0);
 	stopstopmessage = true;
 
-	if (choice == KEY_DEL)
+	if (choice == KEY_BACKSPACE)
 	{
 		if (FIL_FileExists(liveeventbackup)) // just in case someone deleted it while we weren't looking.
 			remove(liveeventbackup);
@@ -10659,11 +10643,10 @@ static void M_Marathon(INT32 choice)
 		M_StartMessage(\
 			"\x82Live event backup detected.\n\x80\
 			Do you want to resurrect the last run?\n\
-			(Fs in chat if we crashed on stream.)\n\
 			\n\
-			Press 'Y' or 'Enter' to resume,\n\
-			'Del' to delete, or any other\n\
-			key to continue to Marathon Run.",M_MarathonLiveEventBackup,MM_YESNO);
+			Press 'Y Key' or 'Confirm Button' to resume,\n\
+			'Backspace' or 'Select Button' to delete,\n\
+			or anything else to ignore and continue.",M_MarathonLiveEventBackup,MM_YESNO);
 		return;
 	}
 
@@ -11421,7 +11404,7 @@ static void M_ConnectMenuModChecks(INT32 choice)
 
 	if (modifiedgame)
 	{
-		M_StartMessage(M_GetText("You have add-ons loaded.\nYou won't be able to join netgames!\n\nTo play online, restart the game\nand don't load any addons.\nSRB2 will automatically add\neverything you need when you join.\n\n(Press a key)\n"),M_ConnectMenu,MM_KEYHANDLER);
+		M_StartMessage(M_GetText("You have add-ons loaded.\nYou won't be able to join netgames!\n\nTo play online, restart the game\nand don't load any addons.\nSRB2 will automatically add\neverything you need when you join.\n\n(Press any button/key)\n"),M_ConnectMenu,MM_KEYHANDLER);
 		return;
 	}
 
@@ -13047,7 +13030,7 @@ static void M_EraseDataResponse(INT32 ch)
 
 static void M_EraseData(INT32 choice)
 {
-	const char *eschoice, *esstr = M_GetText("Are you sure you want to erase\n%s?\n\n(Press 'Y Key' or 'Confirm Button' to erase)\n");
+	const char *eschoice, *esstr = M_GetText("Are you sure you want to erase\n%s?\n\n(Press 'Y Key' or 'Confirm Button' to delete)\n");
 
 	erasecontext = (UINT8)choice;
 
@@ -13225,7 +13208,7 @@ static void M_AssignGamepad(INT32 choice)
 			M_StartMessage("This gamepad is used by another\n"
 			               "player. Reset the gamepad\n"
 			               "for that player first.\n\n"
-			               "(Press a key)\n", NULL, MM_NOTHING);
+			               "(Press any button/key)\n", NULL, MM_NOTHING);
 			return;
 		}
 	}
@@ -14284,14 +14267,13 @@ void M_QuitResponse(INT32 ch)
 	I_Quit();
 }
 
-const char *QuitDialogMessages[22] = {
+const char *QuitDialogMessages[21] = {
 	("Your girlfriend has tied explosives\nto Eggman, and will activate\nthem if you quit the game!"),
 	("I bet you wish you didn't have to restart\nthe game to unload all of your addons."),
 	("Aw no!\nThis isn't happening!"),
 	("Forget your studies!\nPlay some more!"),
 	("You're trying to say you like Sonic 3D Blast\nbetter than this, right?"),
-	("Don't leave yet, there's a\nsol emerald around that corner!"),
-	("Fresh redberries and the greenest flowers\n await, but only if you don't quit the game."),
+	("Fresh redberries and the greenest flowers\nawait, but only if you don't quit the game."),
 	("C'mon ya big drip, where ya goin'?"),
 
 	("If you stay, I won't tell anyone\nthat you broke Robotnik's Rules."),
@@ -14300,12 +14282,12 @@ const char *QuitDialogMessages[22] = {
 	("Did you get all those Chaos Emeralds?"),
 	("When you're done playing,\nremember to join #srb2fun.\nThe place is never empty!"),
 	("Mephiles told me the Iblis Trigger\nwas last seen quitting SRB2!"),
-	("I am the all-powerful Quit Message!\nOnly the Ultimate Cheat can defeat me."),
+	("You can rest easy knowing Knuckles\nwill protect the emeralds while you're away."),
 
 	("No...\nI want... to exist...!"),
 	("Talk about low budget games!\nNo loops or momentum?\nI'm outta here!"),
 	("Quitting is like taking candy from a baby,\nwhich I'm sure is fine by you. Jerk."),
-	("Why don't you go back and try\njumping on that house to\nsee what happens?"),
+	("Why don't you go back and try jumping on\nthat red house to see what happens?"),
 	("It's not that games end.\nWe just give up on them."),
 	("You'll be back to play soon, though...\n...right?"),
 	("Aww, is Freak Show Zone too\ndifficult for you?")
