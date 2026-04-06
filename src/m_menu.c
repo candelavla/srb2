@@ -14296,5 +14296,5 @@ const char *QuitDialogMessages[21] = {
 static void M_QuitSRB2(INT32 choice)
 {
 	(void)choice;
-	M_StartMessage(M_GetText(va("%s\n\n\n%s", QuitDialogMessages[M_RandomKey(22)], "(Press 'Y Key' or 'Confirm Button' to quit)")), M_QuitResponse, MM_YESNO);
+	M_StartMessage(M_GetText(va("%s\n\n\n%s", QuitDialogMessages[M_RandomKey(21)], "(Press 'Y Key' or 'Confirm Button' to quit)")), M_QuitResponse, MM_YESNO);
 }
