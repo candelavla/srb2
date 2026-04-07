@@ -11804,9 +11804,11 @@ void A_BrakLobShot(void *data)
 
 	// Look up actor's current gravity situation
 	g = FixedMul(gravity, P_GetSectorGravityFactor(actor->subsector->sector));
+	
+	g = FixedMul(11*FRACUNIT/8, g);
 
 	// Look up distance between actor and its target
-	x = P_AproxDistance(actor->target->x - actor->x, actor->target->y - actor->y);
+	x = R_PointToDist2(actor->x, actor->y, actor->target->x, actor->target->y);
 	if (!aimDirect)
 	{
 		// Distance should actually be a third of the way over
@@ -11922,6 +11924,8 @@ void A_NapalmScatter(void *data)
 
 	// Look up actor's current gravity situation
 	g = FixedMul(gravity, P_GetSectorGravityFactor(actor->subsector->sector));
+	
+	g = FixedMul(11*FRACUNIT/8, g);
 
 	// vy = (g*(airtime-1))/2
 	vy = FixedMul(g,(airtime-(1<<FRACBITS)))>>1;
@@ -12665,9 +12669,11 @@ void A_Boss5Jump(void *data)
 
 	// Look up actor's current gravity situation
 	g = FixedMul(gravity, P_GetSectorGravityFactor(actor->subsector->sector));
+	
+	g = FixedMul(11*FRACUNIT/8, g);
 
 	// Look up distance between actor and its tracer
-	x = P_AproxDistance(actor->tracer->x - actor->x, actor->tracer->y - actor->y);
+	x = R_PointToDist2(actor->x, actor->y, actor->tracer->x, actor->tracer->y);
 	// Look up height difference between actor and its tracer
 	y = actor->tracer->z - actor->z;
 
