@@ -4585,7 +4585,7 @@ void P_DoJump(player_t *player, boolean soundandstate, boolean allowflip)
 			player->mo->momz = baseline<<1;
 		else if (player->powers[pw_super] && !(player->charflags & SF_NOSUPERJUMPBOOST))
 		{
-			player->mo->momz = baseline*4/3;
+			player->mo->momz = 13*baseline/10;
 
 			// Add a boost for super characters with float/slowfall and multiability.
 			if (player->charability == CA_JUMPBOOST)
@@ -5192,20 +5192,22 @@ static void P_DoShieldAbility(player_t *player, boolean spinshieldhack)
 			case SH_ATTRACT:
 				player->pflags &= ~PF_SPINNING;
 				player->secondjump = 1;
-				player->homing = 2;
+				player->homing = TICRATE;
 				lockonshield = P_LookForEnemies(player, true, false);
+				player->pflags |= PF_THOKKED|PF_SHIELDABILITY;
+				player->pflags &= ~PF_NOJUMPDAMAGE;
+				P_SetMobjState(player->mo, S_PLAY_ROLL);
 				P_SetTarget(&player->mo->target, P_SetTarget(&player->mo->tracer, lockonshield));
 				if (lockonshield)
 					{
 						player->mo->angle = R_PointToAngle2(player->mo->x, player->mo->y, lockonshield->x, lockonshield->y);
-						player->pflags |= PF_THOKKED|PF_SHIELDABILITY;
-						player->pflags &= ~PF_NOJUMPDAMAGE;
-						P_SetMobjState(player->mo, S_PLAY_ROLL);
 						S_StartSound(player->mo, sfx_s3k40);
-						player->homing = 3*TICRATE;
+						player->homing = TICRATE;
 					}
 					else
 					{
+						P_SetObjectMomZ(player->mo, -(11<<FRACBITS), false);
+						P_InstaThrust(player->mo, player->mo->angle, max(FixedMul(player->normalspeed, player->mo->scale), player->speed));
 						S_StartSound(player->mo, sfx_s3ka6);
 						player->secondjump = 0;
 					}
@@ -5222,7 +5224,7 @@ static void P_DoShieldAbility(player_t *player, boolean spinshieldhack)
 						P_SetMobjState(player->mo, S_PLAY_ROLL);
 						S_StartSound(player->mo, sfx_s3k44);
 						player->secondjump = 1;
-						P_SetObjectMomZ(player->mo, -24*FRACUNIT, false);
+						P_SetObjectMomZ(player->mo, -(24<<FRACBITS), false);
 					}
 					break;
 				// Flame burst
@@ -5521,7 +5523,7 @@ static void P_DoJumpStuff(player_t *player, ticcmd_t *cmd, boolean spinshieldhac
 							{
 								P_SetMobjState(player->mo, S_PLAY_ROLL);
 								player->mo->angle = R_PointToAngle2(player->mo->x, player->mo->y, lockonthok->x, lockonthok->y);
-								player->homing = 3*TICRATE;
+								player->homing = 2*TICRATE;
 							}
 							else
 							{
@@ -5684,12 +5686,14 @@ static void P_DoJumpStuff(player_t *player, ticcmd_t *cmd, boolean spinshieldhac
 				player->pflags &= ~(PF_THOKKED|PF_SHIELDABILITY);
 				player->secondjump = 0;
 				player->glidetime = 0;
-				P_SetObjectMomZ(player->mo, 6<<FRACBITS, false);
+				player->mo->momx /= 9;
+				player->mo->momy /= 9;
+				P_SetObjectMomZ(player->mo, 9<<FRACBITS, false);
 				if (player->mo->eflags & MFE_UNDERWATER)
 				{
-					player->mo->momz = FixedMul(player->mo->momz, FRACUNIT/3);
+					player->mo->momz /= 3;
 				}
-				player->homing = 0;
+				player->homing = 9;
 			}
 		}
 

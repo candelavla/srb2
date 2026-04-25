@@ -164,9 +164,6 @@ boolean P_DoSpring(mobj_t *spring, mobj_t *object)
 	boolean final = false;
 	UINT8 strong = 0;
 
-	vertispeed = 19*vertispeed/16; //gravity adjustment
-	horizspeed = 19*horizspeed/16;
-
 	// Object was already sprung this tic
 	if (object->eflags & MFE_SPRUNG)
 		return false;
@@ -178,6 +175,9 @@ boolean P_DoSpring(mobj_t *spring, mobj_t *object)
 	// "Even in Death" is a song from Volume 8, not a command
 	if (!spring->health || !object->health)
 		return false;
+		
+	vertispeed = 19*vertispeed/16; //gravity adjustment
+	horizspeed = 19*horizspeed/16;
 
 	if (object->player)
 	{
@@ -428,6 +428,7 @@ boolean P_DoSpring(mobj_t *spring, mobj_t *object)
 		}
 
 		P_ResetPlayer(object->player);
+		object->player->weapondelay = 2;
 
 		if (vertispeed)
 		{
