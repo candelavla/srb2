@@ -4903,6 +4903,13 @@ static void ForceSkin_OnChange(void)
 //Allows the player's name to be changed if cv_mute is off.
 static void Name_OnChange(void)
 {
+	if (strlen(cv_playername.string) == 0 || strlen(cv_playername.string) > MAXPLAYERNAME)
+	{
+		CONS_Alert(CONS_NOTICE, M_GetText("Name must be between 1 and %i characters long!\n"), MAXPLAYERNAME);
+		CV_StealthSet(&cv_playername, player_names[consoleplayer]);
+		return;
+	}
+
 	if ((cv_mute.value || players[consoleplayer].muted) && !(server || IsPlayerAdmin(consoleplayer)))
 	{
 		CONS_Alert(CONS_NOTICE, M_GetText("You may not change your name when chat is muted.\n"));
@@ -4914,6 +4921,13 @@ static void Name_OnChange(void)
 
 static void Name2_OnChange(void)
 {
+	if (strlen(cv_playername2.string) == 0 || strlen(cv_playername2.string) > MAXPLAYERNAME)
+	{
+		CONS_Alert(CONS_NOTICE, M_GetText("Name must be between 1 and %i characters long!\n"), MAXPLAYERNAME);
+		CV_StealthSet(&cv_playername2, player_names[secondarydisplayplayer]);
+		return;
+	}
+
 	if (cv_mute.value || players[consoleplayer].muted) //Secondary player can't be admin.
 	{
 		CONS_Alert(CONS_NOTICE, M_GetText("You may not change your name when chat is muted.\n"));
