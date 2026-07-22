@@ -4632,8 +4632,14 @@ void P_DoJump(player_t *player, boolean soundandstate, boolean allowflip)
 	player->mo->eflags &= ~MFE_APPLYPMOMZ;
 
 	player->pflags |= P_GetJumpFlags(player);
-
-	player->pflags &= ~PF_SPINNING;
+	
+	// cut speed by 10 percent if jumping out of a roll
+	if (player->pflags & PF_SPINNING)
+	{
+		player->pflags &= ~PF_SPINNING;
+		player->mo->momx = FixedMul(player->mo->momx, 9*FRACUNIT/10);
+		player->mo->momy = FixedMul(player->mo->momy, 9*FRACUNIT/10);
+	}
 
 	player->jerboatime = 0;
 
@@ -5207,7 +5213,7 @@ static void P_DoShieldAbility(player_t *player, boolean spinshieldhack)
 					else
 					{
 						P_SetObjectMomZ(player->mo, -(11<<FRACBITS), false);
-						P_InstaThrust(player->mo, player->mo->angle, max(FixedMul(player->normalspeed, player->mo->scale), player->speed));
+						P_Thrust(player->mo, player->mo->angle, max(FixedMul(player->normalspeed, player->mo->scale) - player->speed, 0));
 						S_StartSound(player->mo, sfx_s3ka6);
 						player->secondjump = 0;
 					}
