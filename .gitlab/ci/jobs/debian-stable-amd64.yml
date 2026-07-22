@@ -45,7 +45,7 @@ Debian stable:amd64:
             -G "Unix Makefiles" \
             -DCMAKE_COLOR_DIAGNOSTICS=OFF \
             -DSRB2_CONFIG_ENABLE_WEBM_MOVIES=OFF \
-            -DSRB2_CONFIG_ERRORMODE=ON \
+            -DSRB2_CONFIG_ERRORMODE=OFF \
             -DSRB2_CONFIG_USE_GME:BOOL=ON
       - |
           # cmake

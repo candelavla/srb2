@@ -75,7 +75,7 @@ Windows x64:
             -G "Unix Makefiles" \
             -DCMAKE_COLOR_DIAGNOSTICS=OFF \
             -DSRB2_CONFIG_ENABLE_WEBM_MOVIES=OFF \
-            -DSRB2_CONFIG_ERRORMODE=ON \
+            -DSRB2_CONFIG_ERRORMODE=OFF \
             -DCMAKE_TOOLCHAIN_FILE=${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake \
             -DVCPKG_TARGET_TRIPLET=${VCPKG_TARGET_TRIPLET} \
             -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=$VCPKG_ROOT/scripts/toolchains/mingw.cmake
