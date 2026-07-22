@@ -476,7 +476,7 @@ static int call_mapped(Hook_State *hook, const hook_t *map)
 
 	for (k = 0; k < map->numHooks; ++k)
 	{
-		if (hook->mobj_type > 0 && (P_MobjWasRemoved(hook->mobj) || !ISINLEVEL))
+		if (hook->mobj_type > 0 && hook->hook_type != MOBJ_HOOK(HurtMsg) && (P_MobjWasRemoved(hook->mobj) || !ISINLEVEL))
 			return k;
 
 		get_hook(hook, map->ids, k);
@@ -509,17 +509,19 @@ static int call_mobj_type_hooks(Hook_State *hook, mobjtype_t mobj_type)
 	int numCalls = call_mapped(hook, &mobjHookIds[mobj_type][hook->hook_type]);
 
 	if (numCalls > 0 && mobj_type == MT_NULL && (
-		   hook->hook_type == MOBJ_HOOK(MobjThinker    )
-		|| hook->hook_type == MOBJ_HOOK(MobjCollide    )
-		|| hook->hook_type == MOBJ_HOOK(MobjLineCollide)
-		|| hook->hook_type == MOBJ_HOOK(MobjMoveCollide)
-		|| hook->hook_type == MOBJ_HOOK(MobjFuse       )
-		|| hook->hook_type == MOBJ_HOOK(MobjThinker    )
-		|| hook->hook_type == MOBJ_HOOK(BossThinker    )
-		|| hook->hook_type == MOBJ_HOOK(MobjMoveBlocked)
-		|| hook->hook_type == MOBJ_HOOK(MobjHitFloor   )
-		|| hook->hook_type == MOBJ_HOOK(MobjHitCeiling )
-		|| hook->hook_type == MOBJ_HOOK(FollowMobj     )
+		   hook->hook_type == MOBJ_HOOK(MobjThinker        )
+		|| hook->hook_type == MOBJ_HOOK(MobjCollide        )
+		|| hook->hook_type == MOBJ_HOOK(MobjLineCollide    )
+		|| hook->hook_type == MOBJ_HOOK(MobjMoveCollide    )
+		|| hook->hook_type == MOBJ_HOOK(MobjFuse           )
+		|| hook->hook_type == MOBJ_HOOK(MobjThinker        )
+		|| hook->hook_type == MOBJ_HOOK(BossThinker        )
+		|| hook->hook_type == MOBJ_HOOK(ShouldBlockMobj    )
+		|| hook->hook_type == MOBJ_HOOK(ShouldBlockMobjMove)
+		|| hook->hook_type == MOBJ_HOOK(MobjMoveBlocked    )
+		|| hook->hook_type == MOBJ_HOOK(MobjHitFloor       )
+		|| hook->hook_type == MOBJ_HOOK(MobjHitCeiling     )
+		|| hook->hook_type == MOBJ_HOOK(FollowMobj         )
 	))
 		LUA_UsageWarning(L, va(
 			"%s hooks not attached to a specific mobj type are deprecated and will be removed.",
@@ -837,6 +839,7 @@ int LUA_HookMobjLineCollide(mobj_t *mobj, line_t *line)
 	{
 		LUA_PushUserdata(gL, mobj, META_MOBJ);
 		LUA_PushUserdata(gL, line, META_LINE);
+		lua_getref(gL, mobjmovement_ref);
 		call_hooks(&hook, 1, res_force);
 	}
 	return hook.status;
@@ -849,6 +852,7 @@ int LUA_HookTouchSpecial(mobj_t *special, mobj_t *toucher)
 	{
 		LUA_PushUserdata(gL, special, META_MOBJ);
 		LUA_PushUserdata(gL, toucher, META_MOBJ);
+		lua_getref(gL, mobjmovement_ref);
 		call_hooks(&hook, 1, res_true);
 	}
 	return hook.status;
@@ -896,6 +900,19 @@ int LUA_HookMobjDeath(mobj_t *target, mobj_t *inflictor, mobj_t *source, UINT8 d
 			MOBJ_HOOK(MobjDeath), res_true);
 }
 
+int LUA_HookMobjCollide(mobj_t *mobj1, mobj_t *mobj2, int hook_type)
+{
+	Hook_State hook;
+	if (prepare_mobj_hook(&hook, 0, hook_type, mobj1))
+	{
+		LUA_PushUserdata(gL, mobj1, META_MOBJ);
+		LUA_PushUserdata(gL, mobj2, META_MOBJ);
+		lua_getref(gL, mobjmovement_ref);
+		call_hooks(&hook, 1, res_force);
+	}
+	return hook.status;
+}
+
 int LUA_HookMobjMoveBlocked(mobj_t *t1, mobj_t *t2, line_t *line)
 {
 	Hook_State hook;
@@ -904,6 +921,7 @@ int LUA_HookMobjMoveBlocked(mobj_t *t1, mobj_t *t2, line_t *line)
 		LUA_PushUserdata(gL, t1, META_MOBJ);
 		LUA_PushUserdata(gL, t2, META_MOBJ);
 		LUA_PushUserdata(gL, line, META_LINE);
+		lua_getref(gL, mobjmovement_ref);
 		call_hooks(&hook, 1, res_true);
 	}
 	return hook.status;
@@ -915,6 +933,7 @@ int LUA_HookMobjHitFloor(mobj_t *mobj)
 	if (prepare_mobj_hook(&hook, 0, MOBJ_HOOK(MobjHitFloor), mobj))
 	{
 		LUA_PushUserdata(gL, mobj, META_MOBJ);
+		lua_getref(gL, mobjmovement_ref);
 		call_hooks(&hook, 1, res_force);
 	}
 	return hook.status;
@@ -926,6 +945,7 @@ int LUA_HookMobjHitCeiling(mobj_t *mobj)
 	if (prepare_mobj_hook(&hook, 0, MOBJ_HOOK(MobjHitCeiling), mobj))
 	{
 		LUA_PushUserdata(gL, mobj, META_MOBJ);
+		lua_getref(gL, mobjmovement_ref);
 		call_hooks(&hook, 1, res_force);
 	}
 	return hook.status;
