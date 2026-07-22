@@ -2047,7 +2047,7 @@ static player_t *G_GetInputPlayer(UINT8 which)
 	{
 		if (splitscreen)
 			return &players[secondarydisplayplayer];
-		else if (playeringame[1] && players[1].bot == BOT_2PHUMAN)
+		else if (players[1].ingame && players[1].bot == BOT_2PHUMAN)
 			return &players[1];
 	}
 
@@ -2086,7 +2086,7 @@ void G_OnGamepadDisconnect(UINT8 which)
 	if (gamestate != GS_LEVEL || paused || netgame || splitscreen)
 		return;
 
-	if (which == 0 || (which == 1 && playeringame[1] && players[1].bot == BOT_2PHUMAN))
+	if (which == 0 || (which == 1 && players[1].ingame && players[1].bot == BOT_2PHUMAN))
 		COM_ImmedExecute("pause");
 }
 

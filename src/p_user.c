@@ -8711,6 +8711,7 @@ void P_MovePlayer(player_t *player)
 		{
 			// Tails-gets-tired Stuff
 			if (player->panim == PA_ABILITY && !P_IsPlayerInState(player, S_PLAY_FLY_TIRED))
+			{
 				P_SetMobjState(player->mo, S_PLAY_FLY_TIRED);
 				player->fly1 = 0;
 			}
@@ -11352,7 +11353,7 @@ static void P_MinecartThink(player_t *player)
 				P_SpawnSparks(minecart, minemovedir);
 				if (minecart->movefactor%3 == 0)
 				{
-					S_StartSound(minecart, sfx_s3k7e);
+					S_StartSoundFromMobj(minecart, sfx_s3k7e);
 					#define mrad minecart->radius>>FRACBITS
 					P_SpawnMobjFromMobj(minecart, P_RandomRange(-mrad, mrad)<<FRACBITS, P_RandomRange(-mrad, mrad)<<FRACBITS, 0, MT_DUST);
 					#undef mrad

@@ -301,76 +301,7 @@ static boolean P_SetPlayerMobjState(mobj_t *mobj, statenum_t state)
 		P_DoPityCheck(player);
 	}
 
-<<<<<<< HEAD
-	// Set animation state
-	// The pflags version of this was just as convoluted.
-	switch(state)
-	{
-	case S_PLAY_STND:
-	case S_PLAY_WAIT:
-	case S_PLAY_NIGHTS_STAND:
-		player->panim = PA_IDLE;
-		break;
-	case S_PLAY_EDGE:
-		player->panim = PA_EDGE;
-		break;
-	case S_PLAY_WALK:
-	case S_PLAY_SKID:
-	case S_PLAY_FLOAT:
-		player->panim = PA_WALK;
-		break;
-	case S_PLAY_RUN:
-	case S_PLAY_FLOAT_RUN:
-		player->panim = PA_RUN;
-		break;
-	case S_PLAY_DASH:
-		player->panim = PA_DASH;
-		break;
-	case S_PLAY_PAIN:
-	case S_PLAY_STUN:
-		player->panim = PA_PAIN;
-		break;
-	case S_PLAY_ROLL:
-	case S_PLAY_NIGHTS_ATTACK:
-		player->panim = PA_ROLL;
-		break;
-	case S_PLAY_JUMP:
-		player->panim = PA_JUMP;
-		break;
-	case S_PLAY_SPRING:
-		player->panim = PA_SPRING;
-		break;
-	case S_PLAY_FALL:
-	case S_PLAY_NIGHTS_FLOAT:
-		player->panim = PA_FALL;
-		break;
-	case S_PLAY_FLY:
-	case S_PLAY_FLY_TIRED:
-	case S_PLAY_SWIM:
-	case S_PLAY_GLIDE:
-	case S_PLAY_BOUNCE:
-	case S_PLAY_BOUNCE_LANDING:
-	case S_PLAY_TWINSPIN:
-		player->panim = PA_ABILITY;
-		break;
-	case S_PLAY_SPINDASH:
-	case S_PLAY_FIRE:
-	case S_PLAY_FIRE_FINISH:
-	case S_PLAY_MELEE:
-	case S_PLAY_MELEE_FINISH:
-	case S_PLAY_MELEE_LANDING:
-		player->panim = PA_ABILITY2;
-		break;
-	case S_PLAY_RIDE:
-		player->panim = PA_RIDE;
-		break;
-	default:
-		player->panim = PA_ETC;
-		break;
-	}
-=======
 	player->panim = GetPlayerAnimationFromState(player, state);
->>>>>>> stjr/next
 
 	if (recursion++) // if recursion detected,
 		memset(seenstate = tempstate, 0, sizeof tempstate); // clear state table
@@ -3044,22 +2975,15 @@ nightsdone:
 
 			// hit the ceiling
 			if (mariomode)
-<<<<<<< HEAD
 			{
-				S_StartSound(mo, sfx_mario1);
+				S_StartSoundFromMobj(mo, sfx_mario1);
 			}
 
 			mo->momz = 0;
-=======
-				S_StartSoundFromMobj(mo, sfx_mario1);
-
-			if (!mo->player->climbing)
-				mo->momz = 0;
 
 			// Player mobjs can't be removed via Lua, so just check if the return value is non-zero
 			if (LUA_HookMobjHitCeiling(mo))
 				return;
->>>>>>> stjr/next
 		}
 	}
 }

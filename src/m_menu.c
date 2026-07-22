@@ -9125,7 +9125,7 @@ static void M_HandleLoadSave(INT32 choice)
 			if (saveSlotSelected != NOSAVESLOT && savegameinfo[saveSlotSelected-1].lives != -42)
 			{
 				loadgamescroll = 0;
-				S_StartSoundFromEveyrywhere(sfx_skid);
+				S_StartSoundFromEverywhere(sfx_skid);
 				M_StartMessage(va("Are you sure you want to delete\nsave file %d?\n\n(Press 'Y Key' or 'Confirm Button' to delete)\n", saveSlotSelected),M_SaveGameDeleteResponse,MM_YESNO);
 			}
 			else if (!loadgameoffset)
