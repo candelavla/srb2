@@ -95,8 +95,7 @@ static void B_BuildTailsTiccmd(mobj_t *sonic, mobj_t *tails, ticcmd_t *cmd)
 
 	// Bot AI isn't programmed in analog.
 	// fox 5/14/2026 - just set pflags to avoid mudding settings.
-	// Also set PF_AUTOBRAKE to decouple from P2 settings; bot seems to prefer it.
-	bot->pflags = (bot->pflags & ~PF_ANALOGMODE) | PF_DIRECTIONCHAR | PF_AUTOBRAKE;
+	bot->pflags = (bot->pflags & ~PF_ANALOGMODE)|PF_DIRECTIONCHAR;
 
 	// We can't follow Sonic if he's not around!
 	if (!sonic || sonic->health <= 0)
