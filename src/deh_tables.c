@@ -5251,6 +5251,7 @@ struct int_const_s const INT_CONST[] = {
 	{"RW_RAIL",RW_RAIL},
 
 	// Character flags (skinflags_t)
+	{"SF_JETFUME",SF_JETFUME},
 	{"SF_SUPER",SF_SUPER},
 	{"SF_NOSUPERSPIN",SF_NOSUPERSPIN},
 	{"SF_NOSPINDASHDUST",SF_NOSPINDASHDUST},

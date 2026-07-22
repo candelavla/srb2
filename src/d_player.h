@@ -32,6 +32,7 @@
 // Extra abilities/settings for skins (combinable stuff)
 typedef enum
 {
+	SF_JETFUME          = 0,    // DUMMY flag, this does nothing in reveries
 	SF_SUPER            = 1,    // Can turn super in singleplayer/co-op mode?
 	SF_NOSUPERSPIN      = 1<<1, // Should spin frames be played while super?
 	SF_NOSPINDASHDUST   = 1<<2, // Spawn dust particles when charging a spindash?
