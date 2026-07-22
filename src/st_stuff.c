@@ -694,7 +694,7 @@ static void ST_drawRaceNum(INT32 time)
 	{
 		height -= (2 - bounce);
 		if (!(P_AutoPause() || paused) && !bounce)
-				S_StartSound(0, ((racenum == racego) ? sfx_s3kad : sfx_s3ka7));
+				S_StartSoundFromEverywhere(((racenum == racego) ? sfx_s3kad : sfx_s3ka7));
 	}
 	V_DrawScaledPatch(((BASEVIDWIDTH - racenum->width)/2), height, V_PERPLAYER, racenum);
 }
@@ -913,7 +913,7 @@ static void ST_drawLivesArea(void)
 				notgreyedout = (stplyr->lives > 0);
 				for (i = 0; i < MAXPLAYERS; i++)
 				{
-					if (!playeringame[i])
+					if (!players[i].ingame)
 						continue;
 
 					if (players[i].lives < 1)
@@ -1037,7 +1037,7 @@ static void ST_drawInput(void)
 	const INT32 accent = V_HUDTRANS|V_SNAPTOLEFT|V_SNAPTOBOTTOM|(color ? skincolors[color].ramp[4] : 0);
 	INT32 col;
 	UINT8 offs;
-	UINT32 flags =  hudinfo[HUD_INPUT].f|V_HUDTRANS;
+	UINT32 flags = V_PERPLAYER|hudinfo[HUD_INPUT].f|V_HUDTRANS;
 
 	INT32 x = hudinfo[HUD_INPUT].x, y = hudinfo[HUD_INPUT].y;
 
@@ -1073,7 +1073,7 @@ static void ST_drawInput(void)
 				10, 10, flags|29);
 			V_DrawFill(x+3+stplyr->cmd.sidemove/9,
 				y+1-stplyr->cmd.forwardmove/9,
-				10, 10, accent);
+				10, 10, V_PERPLAYER|accent);
 		}
 		else
 		{
@@ -1100,9 +1100,9 @@ static void ST_drawInput(void)
 			V_DrawFill(x+ 4, y+ 9,  1,  1, flags|29);
 			V_DrawFill(x+ 5, y+ 8,  1,  1, flags|29);
 		}
-		V_DrawFill(x- 2, y+ 5-offs,  6,  6, col);
-		V_DrawFill(x+ 4, y+ 6-offs,  1,  4, col);
-		V_DrawFill(x+ 5, y+ 7-offs,  1,  2, col);
+		V_DrawFill(x- 2, y+ 5-offs,  6,  6, V_PERPLAYER|col);
+		V_DrawFill(x+ 4, y+ 6-offs,  1,  4, V_PERPLAYER|col);
+		V_DrawFill(x+ 5, y+ 7-offs,  1,  2, V_PERPLAYER|col);
 
 		// ^
 		if (stplyr->cmd.forwardmove > 0)
@@ -1120,9 +1120,9 @@ static void ST_drawInput(void)
 			V_DrawFill(x+ 9, y+ 4,  1,  1, flags|29);
 			V_DrawFill(x+10, y+ 3,  1,  1, flags|29);
 		}
-		V_DrawFill(x+ 5, y- 2-offs,  6,  6, col);
-		V_DrawFill(x+ 6, y+ 4-offs,  4,  1, col);
-		V_DrawFill(x+ 7, y+ 5-offs,  2,  1, col);
+		V_DrawFill(x+ 5, y- 2-offs,  6,  6, V_PERPLAYER|col);
+		V_DrawFill(x+ 6, y+ 4-offs,  4,  1, V_PERPLAYER|col);
+		V_DrawFill(x+ 7, y+ 5-offs,  2,  1, V_PERPLAYER|col);
 
 		// >
 		if (stplyr->cmd.sidemove > 0)
@@ -1138,9 +1138,9 @@ static void ST_drawInput(void)
 			V_DrawFill(x+11, y+ 9,  1,  1, flags|29);
 			V_DrawFill(x+10, y+ 8,  1,  1, flags|29);
 		}
-		V_DrawFill(x+12, y+ 5-offs,  6,  6, col);
-		V_DrawFill(x+11, y+ 6-offs,  1,  4, col);
-		V_DrawFill(x+10, y+ 7-offs,  1,  2, col);
+		V_DrawFill(x+12, y+ 5-offs,  6,  6, V_PERPLAYER|col);
+		V_DrawFill(x+11, y+ 6-offs,  1,  4, V_PERPLAYER|col);
+		V_DrawFill(x+10, y+ 7-offs,  1,  2, V_PERPLAYER|col);
 
 		// v
 		if (stplyr->cmd.forwardmove < 0)
@@ -1154,9 +1154,9 @@ static void ST_drawInput(void)
 			col = flags|16;
 			V_DrawFill(x+ 5, y+17,  6,  1, flags|29);
 		}
-		V_DrawFill(x+ 5, y+12-offs,  6,  6, col);
-		V_DrawFill(x+ 6, y+11-offs,  4,  1, col);
-		V_DrawFill(x+ 7, y+10-offs,  2,  1, col);
+		V_DrawFill(x+ 5, y+12-offs,  6,  6, V_PERPLAYER|col);
+		V_DrawFill(x+ 6, y+11-offs,  4,  1, V_PERPLAYER|col);
+		V_DrawFill(x+ 7, y+10-offs,  2,  1, V_PERPLAYER|col);
 	}
 
 #define drawbutt(xoffs, yoffs, butt, symb)\
@@ -1191,7 +1191,7 @@ static void ST_drawInput(void)
 			ycomp = 3;
 
 		if (ycomp > 0)
-			V_DrawFill(x+16+13-xcomp, y+11-ycomp, 3, 3, accent); // point (behind)
+			V_DrawFill(x+16+13-xcomp, y+11-ycomp, 3, 3, V_PERPLAYER|accent); // point (behind)
 
 		precision = max(3, abs(xcomp));
 		for (i = 0; i < precision; i++) // line
@@ -1202,7 +1202,7 @@ static void ST_drawInput(void)
 		}
 
 		if (ycomp <= 0)
-			V_DrawFill(x+16+13-xcomp, y+11-ycomp, 3, 3, accent); // point (in front)
+			V_DrawFill(x+16+13-xcomp, y+11-ycomp, 3, 3, V_PERPLAYER|accent); // point (in front)
 	}
 
 #undef drawbutt
@@ -1927,7 +1927,7 @@ static void ST_drawNiGHTSHUD(void)
 		total_spherecount = total_ringcount = 0;
 		for (i = 0; i < MAXPLAYERS; i++)
 		{
-			if (!playeringame[i])
+			if (!players[i].ingame)
 				continue;
 			total_spherecount += players[i].spheres;
 			total_ringcount += players[i].rings;
@@ -2092,7 +2092,7 @@ static void ST_drawNiGHTSHUD(void)
 			tic_t lowest_time = stplyr->nightstime;
 			INT32 i;
 			for (i = 0; i < MAXPLAYERS; i++)
-				if (playeringame[i] && players[i].powers[pw_carry] == CR_NIGHTSMODE && players[i].nightstime < lowest_time)
+				if (players[i].ingame && players[i].powers[pw_carry] == CR_NIGHTSMODE && players[i].nightstime < lowest_time)
 					lowest_time = players[i].nightstime;
 			realnightstime = lowest_time/TICRATE;
 		}
@@ -2338,7 +2338,7 @@ static void ST_drawTextHUD(void)
 					INT32 i;
 					for (i = 0; i < MAXPLAYERS; i++)
 					{
-						if (!playeringame[i])
+						if (!players[i].ingame)
 							continue;
 
 						if (&players[i] == stplyr)
@@ -2370,7 +2370,7 @@ static void ST_drawTextHUD(void)
 
 			for (i = 0; i < MAXPLAYERS; i++)
 			{
-				if (!playeringame[i] || players[i].spectator || players[i].bot)
+				if (!players[i].ingame || players[i].spectator || players[i].bot)
 					continue;
 				if (players[i].lives <= 0)
 					continue;
@@ -2537,7 +2537,7 @@ static INT32 ST_drawEmeraldHuntIcon(mobj_t *hunt, patch_t **patches, INT32 offse
 	INT32 interval, i;
 	if (stplyr->mo == NULL)
 		return 0;  // player just joined after spectating, can happen on custom gamemodes.
-	UINT32 dist = ((UINT32)P_AproxDistance(P_AproxDistance(stplyr->mo->x - hunt->x, stplyr->mo->y - hunt->y), stplyr->mo->z - hunt->z))>>FRACBITS;
+	UINT32 dist = ((UINT32)P_GetMobjDistance3D(stplyr->mo, hunt))>>FRACBITS;
 
 	if (dist < 128)
 	{
@@ -2598,7 +2598,7 @@ static void ST_doHuntIconsAndSound(void)
 	}
 
 	if (!(P_AutoPause() || paused) && interval > 0 && leveltime && leveltime % interval == 0 && renderisnewtic)
-		S_StartSound(NULL, sfx_emfind);
+		S_StartSoundFromEverywhere(sfx_emfind);
 }
 
 static boolean ST_doItemFinderIconsAndSound(void)
@@ -2675,7 +2675,7 @@ static boolean ST_doItemFinderIconsAndSound(void)
 	}
 
 	if (!(P_AutoPause() || paused) && interval > 0 && leveltime && leveltime % interval == 0 && renderisnewtic)
-		S_StartSound(NULL, sfx_emfind);
+		S_StartSoundFromEverywhere(sfx_emfind);
 
 	return true;
 }
@@ -2724,7 +2724,7 @@ static void ST_overlayDrawer(void)
 		{
 			for (i = 0; i < MAXPLAYERS; i++)
 			{
-				if (!playeringame[i])
+				if (!players[i].ingame)
 					continue;
 
 				if (&players[i] == stplyr)
@@ -2735,7 +2735,7 @@ static void ST_overlayDrawer(void)
 			}
 		}
 
-		if (i == MAXPLAYERS && deadtimer >= 0)
+		if (i == MAXPLAYERS && deadtimer >= 0 && LUA_HudEnabled(hud_gameover))
 		{
 			INT32 lvlttlx = min(6*deadtimer, BASEVIDWIDTH/2);
 			UINT32 flags = V_PERPLAYER|(stplyr->spectator ? V_HUDTRANSHALF : V_HUDTRANS);
@@ -2786,7 +2786,7 @@ static void ST_overlayDrawer(void)
 			ST_drawRaceHUD();
 
 		// Emerald Hunt Indicators
-		if (!ST_doItemFinderIconsAndSound())
+		if (!ST_doItemFinderIconsAndSound() && LUA_HudEnabled(hud_itemhunt))
 			ST_doHuntIconsAndSound();
 
 		if(!P_IsLocalPlayer(stplyr))

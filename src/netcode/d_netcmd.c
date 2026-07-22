@@ -37,6 +37,7 @@
 #include "d_clisrv.h"
 #include "server_connection.h"
 #include "net_command.h"
+#include "i_net.h"
 #include "d_net.h"
 #include "../v_video.h"
 #include "../d_main.h"
@@ -46,6 +47,7 @@
 #include "mserv.h"
 #include "../z_zone.h"
 #include "../lua_script.h"
+#include "../lua_archive.h"
 #include "../lua_hook.h"
 #include "../m_cond.h"
 #include "../m_anigif.h"
@@ -205,7 +207,7 @@ static CV_PossibleValue_t matchboxes_cons_t[] = {{0, "Normal"}, {1, "Mystery"}, 
 static CV_PossibleValue_t chances_cons_t[] = {{0, "MIN"}, {9, "MAX"}, {0, NULL}};
 static CV_PossibleValue_t pause_cons_t[] = {{0, "Server"}, {1, "All"}, {0, NULL}};
 
-consvar_t cv_showinput = CVAR_INIT ("showinput", "Off", CV_ALLOWLUA, CV_OnOff, NULL);
+consvar_t cv_showinput = CVAR_INIT ("showinput", "Off", CV_SAVE|CV_ALLOWLUA, CV_OnOff, NULL);
 consvar_t cv_showinputjoy = CVAR_INIT ("showinputjoy", "Off", CV_ALLOWLUA, CV_OnOff, NULL);
 
 #ifdef NETGAME_DEVMODE
@@ -434,6 +436,8 @@ consvar_t cv_freedemocamera = CVAR_INIT("freedemocamera", "Off", CV_SAVE, CV_OnO
 
 // NOTE: this should be in hw_main.c, but we can't put it there as it breaks dedicated build
 consvar_t cv_glallowshaders = CVAR_INIT ("gr_allowcustomshaders", "On", CV_NETVAR, CV_OnOff, NULL);
+
+consvar_t cv_http_enable = CVAR_INIT ("http_enable", "On", CV_SAVE, CV_OnOff, NULL);
 
 char timedemo_name[256];
 boolean timedemo_csv;
@@ -948,6 +952,8 @@ void D_RegisterClientCommands(void)
 
 	CV_RegisterVar(&cv_freedemocamera);
 
+	CV_RegisterVar(&cv_http_enable);
+
 	// add cheat commands
 	COM_AddCommand("noclip", Command_CheatNoClip_f, COM_LUA);
 	COM_AddCommand("god", Command_CheatGod_f, COM_LUA);
@@ -1017,7 +1023,7 @@ boolean EnsurePlayerNameIsGood(char *name, INT32 playernum)
 	// Check if a player is currently using the name, case-insensitively.
 	for (ix = 0; ix < MAXPLAYERS; ix++)
 	{
-		if (ix != playernum && playeringame[ix]
+		if (ix != playernum && players[ix].ingame
 			&& strcasecmp(name, player_names[ix]) == 0)
 		{
 			// We shouldn't kick people out just because
@@ -1135,7 +1141,7 @@ void CleanupPlayerName(INT32 playernum, const char *newname)
 		// no stealing another player's name
 		for (i = 0; i < MAXPLAYERS; i++)
 		{
-			if (i != playernum && playeringame[i]
+			if (i != playernum && players[i].ingame
 				&& strcasecmp(tmpname, player_names[i]) == 0)
 			{
 				break;
@@ -1187,6 +1193,13 @@ static void SetPlayerName(INT32 playernum, char *newname)
 	{
 		if (strcasecmp(newname, player_names[playernum]) != 0)
 		{
+			if (!LUA_HookNameChange(&players[playernum], newname))
+			{
+				// Name change rejected by Lua
+				if (playernum == consoleplayer)
+					CV_StealthSet(&cv_playername, player_names[consoleplayer]);
+				return;
+			}
 			if (netgame)
 				HU_AddChatText(va("\x82*%s renamed to %s", player_names[playernum], newname), false);
 
@@ -1251,7 +1264,7 @@ static void ForceAllSkins(INT32 forcedskin)
 {
 	for (INT32 i = 0; i < MAXPLAYERS; ++i)
 	{
-		if (playeringame[i])
+		if (players[i].ingame)
 			SetPlayerSkinByNum(i, forcedskin);
 	}
 }
@@ -1289,6 +1302,9 @@ static void SendNameAndColor(void)
 	char *p;
 
 	p = buf;
+
+	if (dedicated)
+		return;
 
 	// don't allow inaccessible colors
 	if (!skincolors[cv_playercolor.value].accessible)
@@ -1729,7 +1745,7 @@ void D_MapChange(INT32 mapnum, INT32 newgametype, boolean pultmode, boolean rese
 				{
 					//CL_RemoveSplitscreenPlayer();
 					botingame = false;
-					playeringame[1] = false;
+					players[1].ingame = false;
 				}
 			}
 			else if (!botingame)
@@ -1737,7 +1753,7 @@ void D_MapChange(INT32 mapnum, INT32 newgametype, boolean pultmode, boolean rese
 				//CL_AddSplitscreenPlayer();
 				botingame = true;
 				secondarydisplayplayer = 1;
-				playeringame[1] = true;
+				players[1].ingame = true;
 				players[1].bot = 1;
 				SendNameAndColor2();
 			}
@@ -1752,7 +1768,7 @@ void D_MapChange(INT32 mapnum, INT32 newgametype, boolean pultmode, boolean rese
 	{
 		UINT8 flags = 0;
 		const char *mapname = G_BuildMapName(mapnum);
-		I_Assert(W_CheckNumForName(mapname) != LUMPERROR);
+		I_Assert(G_MapFileExists(mapname) == true);
 		buf_p = buf;
 		if (pultmode)
 			flags |= 1;
@@ -2054,8 +2070,8 @@ static void Command_Map_f(void)
 static void Got_Mapcmd(UINT8 **cp, INT32 playernum)
 {
 	char mapname[MAX_WADPATH+1];
-	UINT8 flags;
-	INT32 resetplayer = 1, lastgametype;
+	UINT8 flags, newgametype;
+	INT32 resetplayer = 1, lastgametype = gametype;
 	UINT8 skipprecutscene, FLS;
 	INT16 mapnumber;
 
@@ -2071,6 +2087,12 @@ static void Got_Mapcmd(UINT8 **cp, INT32 playernum)
 		chmappending--;
 
 	flags = READUINT8(*cp);
+	newgametype = READUINT8(*cp);
+	READSTRINGN(*cp, mapname, MAX_WADPATH);
+
+	mapnumber = G_GetMapNumber(mapname);
+	if (!mapnumber) // Not valid???
+		return;
 
 	ultimatemode = ((flags & 1) != 0);
 	if (netgame || multiplayer)
@@ -2078,13 +2100,8 @@ static void Got_Mapcmd(UINT8 **cp, INT32 playernum)
 
 	resetplayer = ((flags & (1<<1)) == 0);
 
-	lastgametype = gametype;
-	gametype = READUINT8(*cp);
-
-	if (gametype < 0 || gametype >= gametypecount)
-		gametype = lastgametype;
-	else
-		G_SetGametype(gametype);
+	if (newgametype < gametypecount)
+		G_SetGametype(newgametype);
 
 	if (gametype != lastgametype)
 		D_GameTypeChanged(lastgametype); // emulate consvar_t behavior for gametype
@@ -2092,8 +2109,6 @@ static void Got_Mapcmd(UINT8 **cp, INT32 playernum)
 	skipprecutscene = ((flags & (1<<2)) != 0);
 
 	FLS = ((flags & (1<<3)) != 0);
-
-	READSTRINGN(*cp, mapname, MAX_WADPATH);
 
 	if (netgame)
 		P_SetRandSeed(READUINT32(*cp));
@@ -2113,7 +2128,6 @@ static void Got_Mapcmd(UINT8 **cp, INT32 playernum)
 		players[0].skincolor = skins[players[0].skin]->prefcolor;
 	}
 
-	mapnumber = M_MapNumber(mapname[3], mapname[4]);
 	LUA_HookInt(mapnumber, HOOK(MapChange));
 
 	G_InitNew(ultimatemode, mapname, resetplayer, skipprecutscene, FLS);
@@ -2529,7 +2543,7 @@ static void MutePlayer(boolean mute)
 	}
 
 	data[0] = nametonum(COM_Argv(1));
-	if (data[0] >= MAXPLAYERS || !playeringame[data[0]])
+	if (data[0] >= MAXPLAYERS || !players[data[0]].ingame)
 	{
 		CONS_Alert(CONS_NOTICE, M_GetText("There is no player %u!\n"), (unsigned int)data[0]);
 		return;
@@ -2572,7 +2586,7 @@ static void Got_MutePlayer(UINT8 **cp, INT32 playernum)
 		return;
 	}
 
-	if (player >= MAXPLAYERS || !playeringame[player])
+	if (player >= MAXPLAYERS || !players[player].ingame)
 	{
 		CONS_Alert(CONS_WARNING, M_GetText("Illegal mute received from player %s\n"), player_names[playernum]);
 		if (server)
@@ -2679,7 +2693,7 @@ static void Command_ServerTeamChange_f(void)
 
 	NetPacket.packet.playernum = nametonum(COM_Argv(1));
 
-	if (NetPacket.packet.playernum == -1 || !playeringame[NetPacket.packet.playernum])
+	if (NetPacket.packet.playernum == -1 || !players[NetPacket.packet.playernum].ingame)
 	{
 		CONS_Alert(CONS_NOTICE, M_GetText("There is no player %s!\n"), COM_Argv(1));
 		return;
@@ -2967,24 +2981,23 @@ static void Got_Teamchange(UINT8 **cp, INT32 playernum)
 
 void D_SetPassword(const char *pw)
 {
-	adminpassmd5 = Z_Realloc(adminpassmd5, sizeof(*adminpassmd5) * ++adminpasscount, PU_STATIC, NULL);
-	D_MD5PasswordPass((const UINT8 *)pw, strlen(pw), BASESALT, &adminpassmd5[adminpasscount-1]);
+	adminpass = Z_Realloc(adminpass, sizeof(*adminpass) * ++adminpasscount, PU_STATIC, NULL);
+	adminpass[adminpasscount-1] = Z_StrDup(pw);
 }
 
 void D_ClearPassword(void)
 {
-	Z_Free(adminpassmd5);
-	adminpassmd5 = NULL;
+	UINT32 i;
+	for (i = 0; i < adminpasscount; i++)
+		Z_Free(adminpass[i]);
+	Z_Free(adminpass);
+	adminpass = NULL;
 	adminpasscount = 0;
 }
 
 // Remote Administration
 static void Command_Changepassword_f(void)
 {
-#ifdef NOMD5
-	// If we have no MD5 support then completely disable XD_LOGIN responses for security.
-	CONS_Alert(CONS_NOTICE, "Remote administration commands are not supported in this build.\n");
-#else
 	if (client) // cannot change remotely
 	{
 		CONS_Printf(M_GetText("Only the server can use this.\n"));
@@ -2999,16 +3012,11 @@ static void Command_Changepassword_f(void)
 
 	D_SetPassword(COM_Argv(1));
 	CONS_Printf(M_GetText("Password added.\n"));
-#endif
 }
 
 // Remote Administration
 static void Command_Clearpassword_f(void)
 {
-#ifdef NOMD5
-	// If we have no MD5 support then completely disable XD_LOGIN responses for security.
-	CONS_Alert(CONS_NOTICE, "Remote administration commands are not supported in this build.\n");
-#else
 	if (client) // cannot change remotely
 	{
 		CONS_Printf(M_GetText("Only the server can use this.\n"));
@@ -3017,16 +3025,12 @@ static void Command_Clearpassword_f(void)
 
 	D_ClearPassword();
 	CONS_Printf(M_GetText("Passwords cleared.\n"));
-#endif
 }
 
 static void Command_Login_f(void)
 {
-#ifdef NOMD5
-	// If we have no MD5 support then completely disable XD_LOGIN responses for security.
-	CONS_Alert(CONS_NOTICE, "Remote administration commands are not supported in this build.\n");
-#else
 	const char *pw;
+	doomcom_t *doomcom = D_NewPacket(PT_LOGIN, servernode, 16);
 
 	if (!netgame)
 	{
@@ -3042,19 +3046,15 @@ static void Command_Login_f(void)
 		return;
 	}
 
+	if (reqpass)
+		Z_Free(reqpass);
+
 	pw = COM_Argv(1);
-
-	// Do the base pass to get what the server has (or should?)
-	D_MD5PasswordPass((const UINT8 *)pw, strlen(pw), BASESALT, &netbuffer->u.md5sum);
-
-	// Do the final pass to get the comparison the server will come up with
-	D_MD5PasswordPass(netbuffer->u.md5sum, 16, va("PNUM%02d", consoleplayer), &netbuffer->u.md5sum);
+	reqpass = Z_StrDup(pw);
 
 	CONS_Printf(M_GetText("Sending login... (Notice only given if password is correct.)\n"));
 
-	netbuffer->packettype = PT_LOGIN;
-	HSendPacket(servernode, true, 0, 16);
-#endif
+	HSendPacket(doomcom, true, 0);
 }
 
 boolean IsPlayerAdmin(INT32 playernum)
@@ -3135,7 +3135,7 @@ static void Command_Verify_f(void)
 
 	WRITEUINT8(temp, playernum);
 
-	if (playeringame[playernum])
+	if (players[playernum].ingame)
 		SendNetXCmd(XD_VERIFIED, buf, 1);
 }
 
@@ -3188,7 +3188,7 @@ static void Command_RemoveAdmin_f(void)
 
 	WRITEUINT8(temp, playernum);
 
-	if (playeringame[playernum])
+	if (players[playernum].ingame)
 		SendNetXCmd(XD_DEMOTED, buf, 1);
 }
 
@@ -3516,9 +3516,6 @@ static void Command_Addfile(void)
 		// calculate and check md5
 		{
 			UINT8 md5sum[16];
-#ifdef NOMD5
-			memset(md5sum,0,16);
-#else
 			FILE *fhandle;
 
 			if ((fhandle = W_OpenWadFile(&fn, true)) != NULL)
@@ -3543,7 +3540,6 @@ static void Command_Addfile(void)
 					continue;
 				}
 			}
-#endif
 			WRITEMEM(buf_p, md5sum, 16);
 		}
 
@@ -4096,7 +4092,7 @@ static void CoopStarposts_OnChange(void)
 
 	for (i = 0; i < MAXPLAYERS; i++)
 	{
-		if (!playeringame[i])
+		if (!players[i].ingame)
 			continue;
 
 		if (!players[i].spectator)
@@ -4113,7 +4109,7 @@ static void CoopStarposts_OnChange(void)
 
 	for (i = 0; i < MAXPLAYERS; i++)
 	{
-		if (!playeringame[i])
+		if (!players[i].ingame)
 			continue;
 
 		if (!players[i].spectator)
@@ -4154,7 +4150,7 @@ static void CoopLives_OnChange(void)
 
 	for (i = 0; i < MAXPLAYERS; i++)
 	{
-		if (!playeringame[i])
+		if (!players[i].ingame)
 			continue;
 
 		if (!players[i].spectator)
@@ -4177,7 +4173,7 @@ static void ExitMove_OnChange(void)
 	if (cv_exitmove.value)
 	{
 		for (i = 0; i < MAXPLAYERS; ++i)
-			if (playeringame[i] && players[i].mo)
+			if (players[i].ingame && players[i].mo)
 			{
 				if (players[i].mo->target && players[i].mo->target->type == MT_SIGN)
 					P_SetTarget(&players[i].mo->target, NULL);
@@ -4339,7 +4335,7 @@ void D_GameTypeChanged(INT32 lastgametype)
 	{
 		INT32 i;
 		for (i = 0; i < MAXPLAYERS; i++)
-			if (playeringame[i])
+			if (players[i].ingame)
 			{
 				players[i].ctfteam = 0;
 				players[i].spectator = (gametyperules & GTR_NOSPECTATORSPAWN) ? false : true;
@@ -4352,7 +4348,7 @@ void D_GameTypeChanged(INT32 lastgametype)
 	{
 		INT32 i;
 		for (i = 0; i < MAXPLAYERS; i++)
-			if (playeringame[i])
+			if (players[i].ingame)
 				players[i].ctfteam = 0;
 
 		if (server || (IsPlayerAdmin(consoleplayer)))
@@ -4414,7 +4410,7 @@ static void SoundTest_OnChange(void)
 	}
 
 	S_StopSounds();
-	S_StartSound(NULL, cv_soundtest.value);
+	S_StartSoundFromEverywhere(cv_soundtest.value);
 }
 
 static void AutoBalance_OnChange(void)
@@ -4462,7 +4458,7 @@ retryscramble:
 	// Put each player's node in the array.
 	for (i = 0; i < MAXPLAYERS; i++)
 	{
-		if (playeringame[i] && !players[i].spectator)
+		if (players[i].ingame && !players[i].spectator)
 		{
 			scrambleplayers[playercount] = i;
 			playercount++;
@@ -4637,7 +4633,7 @@ static void Command_ExitLevel_f(void)
 			INT32 i;
 			for (i = 0; i < MAXPLAYERS; i++)
 			{
-				if (!playeringame[i] || players[i].spectator || players[i].bot)
+				if (!players[i].ingame || players[i].spectator || players[i].bot)
 					continue;
 				if (players[i].quittime > 30 * TICRATE)
 					continue;
@@ -5133,7 +5129,7 @@ static void Command_ShowScores_f(void)
 
 	for (i = 0; i < MAXPLAYERS; i++)
 	{
-		if (playeringame[i])
+		if (players[i].ingame)
 			// FIXME: %lu? what's wrong with %u? ~Callum (produces warnings...)
 			CONS_Printf(M_GetText("%s's score is %u\n"), player_names[i], players[i].score);
 	}

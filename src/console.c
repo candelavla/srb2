@@ -34,6 +34,7 @@
 #include "m_menu.h"
 #include "filesrch.h"
 #include "m_misc.h"
+#include "lua_libs.h"
 
 #ifdef _WINDOWS
 #include "win32/win_main.h"
@@ -147,7 +148,7 @@ static CV_PossibleValue_t backcolor_cons_t[] = {{0, "White"}, 		{1, "Black"},		{
 												{9, "Gold"},		{10,"Yellow"},		{11,"Emerald"},
 												{12,"Green"},		{13,"Cyan"},		{14,"Steel"},
 												{15,"Periwinkle"},	{16,"Blue"},		{17,"Purple"},
-												{18,"Lavender"},
+												{18,"Lavender"},	{19,"Gray"},
 												{0, NULL}};
 
 
@@ -329,6 +330,7 @@ void CON_SetupBackColormapEx(INT32 color, boolean prompt)
 		case 16:	palindex = 159;	break; 	// Blue
 		case 17:	palindex = 187; shift = 7; 	break; 	// Purple
 		case 18:	palindex = 199; shift = 7; 	break; 	// Lavender
+		case 19:	palindex = 15; shift = 7;	break; 	// Gray
 		// Default green
 		default:	palindex = 111; break;
 	}
@@ -918,6 +920,22 @@ static void CON_InputDelChar(void)
 // ----
 //
 
+//
+// Same as CON_Responder, but is process before everything else, so it cannot be blocked.
+//
+boolean CON_PreResponder(event_t *ev)
+{
+	if (ev->type == ev_keydown && shiftdown == 1 && ev->key == KEY_ESCAPE)
+	{
+		I_SetTextInputMode(con_destlines == 0 ? true : textinputmodeenabledbylua); // inverse, since this is changed next tic.
+		consoletoggle = true;
+		return true;
+	}
+
+	return false;
+}
+
+//
 // Handles console key input
 //
 boolean CON_Responder(event_t *ev)
@@ -953,7 +971,10 @@ boolean CON_Responder(event_t *ev)
 
 		if (key_is_console)
 		{
-			I_SetTextInputMode(con_destlines == 0); // inverse, since this is changed next tic.
+			if (con_destlines == 0 && I_GetTextInputMode())
+				return false; // some other component is holding keyboard input, don't hijack it!
+
+			I_SetTextInputMode(con_destlines == 0 ? true : textinputmodeenabledbylua); // inverse, since this is changed next tic.
 			consoletoggle = true;
 			return true;
 		}
@@ -973,7 +994,7 @@ boolean CON_Responder(event_t *ev)
 		// escape key toggle off console
 		if (key == KEY_ESCAPE)
 		{
-			I_SetTextInputMode(false);
+			I_SetTextInputMode(textinputmodeenabledbylua);
 			consoletoggle = true;
 			return true;
 		}
@@ -1341,11 +1362,11 @@ static void CON_Print(char *msg)
 		return;
 
 	if (*msg == '\3') // chat text, makes ding sound
-		S_StartSound(NULL, sfx_radio);
+		S_StartSoundFromEverywhere(sfx_radio);
 	else if (*msg == '\4') // chat action, dings and is in yellow
 	{
 		*msg = '\x82'; // yellow
-		S_StartSound(NULL, sfx_radio);
+		S_StartSoundFromEverywhere(sfx_radio);
 	}
 
 	Lock_state();

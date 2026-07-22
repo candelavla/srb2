@@ -3,14 +3,6 @@ SRB2 Cherry is a project containing the Reveries and Redberries source modificat
 
 [Sonic Robo Blast 2](https://srb2.org/) is a 3D Sonic the Hedgehog fangame based on a modified version of [Doom Legacy](http://doomlegacy.sourceforge.net/).
 
-## Installation
-[![latest release](https://badgen.net/static/get/reveries/yellow)](https://mb.srb2.org/addons/reveries.4008/)
-[![latest release](https://badgen.net/static/get/redberries/pink)](https://mb.srb2.org/addons/redberries.8043/)
-
-Click either of the above badges to be redirected to the respective SRB2 Message Board addon overview containing documentation, changelogs, and Windows downloads.
-
-Reveries is available for Linux via the official flatpak: https://flathub.org/en/apps/io.github.srb2.rphys
-
 ## Compiling
 
 This guide is only for Linux, I do not officially support compilation on other OS but https://github.com/Bijman/srb2bld may be able to help you with that.

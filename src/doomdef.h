@@ -106,8 +106,6 @@
 
 FILE *fopenfile(const char*, const char*);
 
-//#define NOMD5
-
 // If you don't disable ALL debug first, you get ALL debug enabled
 #if !defined (NDEBUG)
 #ifndef PACKETDROP
@@ -253,6 +251,19 @@ extern char logfilename[1024];
 // and the structure of some networking packets and commands.
 #define MAXSKINS 255
 #define MAXCHARACTERSLOTS (MAXSKINS * 3) // Should be higher than MAXSKINS.
+
+#define MAXMAPS 16386
+
+#define MAX_MAP_NAME_SIZE 256 // This is an arbitrary limit to prevent exceedingly long map names.
+
+#define NEXTMAP_TITLE (MAXMAPS)
+#define NEXTMAP_EVALUATION (MAXMAPS+2)
+#define NEXTMAP_CREDITS (MAXMAPS+3)
+#define NEXTMAP_ENDING (MAXMAPS+4)
+
+#define NUM_NEXTMAPS 4
+
+#define NUMBASEMAPS 1035 // MAP01 to MAPZZ
 
 #define COLORRAMPSIZE 16
 #define MAXCOLORNAME 32
@@ -467,6 +478,8 @@ extern skincolor_t skincolors[MAXSKINCOLORS];
 #define NEWTICRATE (TICRATE*NEWTICRATERATIO)
 
 #define MUSICRATE 1000 // sound timing is calculated by milliseconds
+
+#define MAX_MUSIC_NAME 64
 
 #define RING_DIST 512*FRACUNIT // how close you need to be to a ring to attract it
 

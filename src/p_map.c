@@ -406,7 +406,7 @@ boolean P_DoSpring(mobj_t *spring, mobj_t *object)
 			{
 				pflags = PF_SPINNING;
 				P_SetMobjState(object, S_PLAY_ROLL);
-				S_StartSound(object, sfx_spin);
+				S_StartSoundFromMobj(object, sfx_spin);
 			}
 			else
 				P_SetMobjState(object, S_PLAY_ROLL);
@@ -490,7 +490,7 @@ springstate:
 		{
 			if (object->player->charability == CA_TWINSPIN || object->player->charability2 == CA2_MELEE)
 				P_TwinSpinRejuvenate(object->player, (object->player->charability == CA_TWINSPIN ? object->player->thokitem : object->player->revitem));
-			S_StartSound(object, sfx_sprong); // strong spring. sprong.
+			S_StartSoundFromMobj(object, sfx_sprong); // strong spring. sprong.
 		}
 	}
 
@@ -504,9 +504,13 @@ static void P_DoFan(mobj_t *fan, mobj_t *object)
 	fixed_t speed = fan->info->mass; // fans use this for the vertical thrust
 	SINT8 flipval = P_MobjFlip(fan); // virtually everything here centers around the thruster's gravity, not the object's!
 
+<<<<<<< HEAD
 	speed = 19*speed/16; //gravity adjustment
 
 	if (p && object->state == &states[object->info->painstate]) // can't use fans when player is in pain!
+=======
+	if (p && P_IsPlayerInState(p, S_PLAY_PAIN)) // can't use fans when player is in pain!
+>>>>>>> stjr/next
 		return;
 
 	// is object's top below thruster's position? if not, calculate distance between their bottoms
@@ -584,7 +588,7 @@ static void P_DoPterabyteCarry(player_t *player, mobj_t *ptera)
 	P_SetTarget(&player->mo->tracer, ptera);
 	player->pflags &= ~PF_APPLYAUTOBRAKE;
 	player->powers[pw_carry] = CR_PTERABYTE;
-	S_StartSound(player->mo, sfx_s3k4a);
+	S_StartSoundFromMobj(player->mo, sfx_s3k4a);
 	P_UnsetThingPosition(player->mo);
 	player->mo->x = ptera->x;
 	player->mo->y = ptera->y;
@@ -624,7 +628,7 @@ static void P_DoTailsCarry(player_t *sonic, player_t *tails)
 
 	// Search in case another player is already being carried by this fox.
 	for (p = 0; p < MAXPLAYERS; p++)
-		if (playeringame[p] && players[p].mo
+		if (players[p].ingame && players[p].mo
 		&& players[p].powers[pw_carry] == CR_PLAYER && players[p].mo->tracer == tails->mo)
 			return;
 
@@ -653,7 +657,7 @@ static void P_DoTailsCarry(player_t *sonic, player_t *tails)
 		P_ResetPlayer(sonic);
 		P_SetTarget(&sonic->mo->tracer, tails->mo);
 		sonic->powers[pw_carry] = CR_PLAYER;
-		S_StartSound(sonic->mo, sfx_s3k4a);
+		S_StartSoundFromMobj(sonic->mo, sfx_s3k4a);
 		P_UnsetThingPosition(sonic->mo);
 		sonic->mo->x = tails->mo->x;
 		sonic->mo->y = tails->mo->y;
@@ -698,7 +702,7 @@ static void P_SlapStick(mobj_t *fang, mobj_t *pole)
 
 	var1 = var2 = 0;
 	A_Scream(pole->tracer->tracer);
-	S_StartSound(fang, sfx_altdi1);
+	S_StartSoundFromMobj(fang, sfx_altdi1);
 
 	P_SetTarget(&pole->tracer->tracer, NULL);
 	P_SetMobjState(pole->tracer, pole->info->xdeathstate);
@@ -809,9 +813,9 @@ static unsigned PIT_DoCheckThing(mobj_t *thing)
 		{
 			mobj_t *iter;
 			if (thing->flags & MF_SOLID)
-				S_StartSound(tmthing, thing->info->deathsound);
+				S_StartSoundFromMobj(tmthing, thing->info->deathsound);
 			for (iter = thing->subsector->sector->thinglist; iter; iter = iter->snext)
-				if (iter->type == thing->type && iter->health > 0 && iter->flags & MF_SOLID && (iter == thing || P_AproxDistance(P_AproxDistance(thing->x - iter->x, thing->y - iter->y), thing->z - iter->z) < 56*thing->scale))//FixedMul(56*FRACUNIT, thing->scale))
+				if (iter->type == thing->type && iter->health > 0 && iter->flags & MF_SOLID && (iter == thing || P_AreMobjsClose3D(thing, iter, 56*thing->scale)))//FixedMul(56*FRACUNIT, thing->scale))
 					P_KillMobj(iter, tmthing, tmthing, 0);
 		}
 		else
@@ -836,9 +840,9 @@ static unsigned PIT_DoCheckThing(mobj_t *thing)
 			return CHECKTHING_NOCOLLIDE; // underneath
 
 		if (thing->flags & MF_SOLID)
-			S_StartSound(tmthing, thing->info->deathsound);
+			S_StartSoundFromMobj(tmthing, thing->info->deathsound);
 		for (iter = thing->subsector->sector->thinglist; iter; iter = iter->snext)
-			if (iter->type == thing->type && iter->health > 0 && iter->flags & MF_SOLID && (iter == thing || P_AproxDistance(P_AproxDistance(thing->x - iter->x, thing->y - iter->y), thing->z - iter->z) < 56*thing->scale))//FixedMul(56*FRACUNIT, thing->scale))
+			if (iter->type == thing->type && iter->health > 0 && iter->flags & MF_SOLID && (iter == thing || P_AreMobjsClose3D(thing, iter, 56*thing->scale)))//FixedMul(56*FRACUNIT, thing->scale))
 				P_KillMobj(iter, tmthing, tmthing, 0);
 		return CHECKTHING_COLLIDE;
 	}
@@ -1000,10 +1004,10 @@ static unsigned PIT_DoCheckThing(mobj_t *thing)
 		if (((thing->flags2 & MF2_AMBUSH) && (tmthing->z <= thing->z + thing->height) && (tmthing->z + tmthing->height >= thing->z))
 			|| ref != tmthing)
 		{
-			fixed_t dm = min(FixedHypot(ref->momx, ref->momy), 16*FRACUNIT);
+			fixed_t dm = min(P_GetMobjMomentum2D(ref), 16*FRACUNIT);
 			angle_t ang = R_PointToAngle2(0, 0, ref->momx, ref->momy) - thing->angle;
 			fixed_t s = FINESINE((ang >> ANGLETOFINESHIFT) & FINEMASK);
-			S_StartSound(tmthing, thing->info->activesound);
+			S_StartSoundFromMobj(tmthing, thing->info->activesound);
 			thing->extravalue2 += 2*FixedMul(s, dm)/3;
 			return CHECKTHING_COLLIDE;
 		}
@@ -1069,7 +1073,7 @@ static unsigned PIT_DoCheckThing(mobj_t *thing)
 			thing->momy = tmthing->momy;
 			tmthing->momx = tempmomx;
 			tmthing->momy = tempmomy;
-			S_StartSound(thing, thing->info->painsound);
+			S_StartSoundFromMobj(thing, thing->info->painsound);
 		}
 	}
 
@@ -1084,7 +1088,7 @@ static unsigned PIT_DoCheckThing(mobj_t *thing)
 		fixed_t dx = thing->x - tmthing->x;
 		fixed_t dy = thing->y - tmthing->y;
 		fixed_t dz = thing->z - tmthing->z;
-		fixed_t dm = FixedHypot(dz, FixedHypot(dx, dy));
+		fixed_t dm = GetDistance3D(0, 0, 0, dx, dy, dz);
 		thing->momx += FixedDiv(dx, dm);
 		thing->momy += FixedDiv(dy, dm);
 		thing->momz += FixedDiv(dz, dm);
@@ -1125,7 +1129,7 @@ static unsigned PIT_DoCheckThing(mobj_t *thing)
 			tmthing->momy /= -8;
 			tmthing->momz /= -8;
 			if (thing->info->activesound)
-				S_StartSound(thing, thing->info->activesound);
+				S_StartSoundFromMobj(thing, thing->info->activesound);
 			P_SetMobjState(thing, thing->info->meleestate);
 			P_SetTarget(&thing->tracer, tmthing->tracer);
 			return CHECKTHING_COLLIDE;
@@ -1144,7 +1148,7 @@ static unsigned PIT_DoCheckThing(mobj_t *thing)
 			thing->momx = P_ReturnThrustX(tmthing, tmthing->angle, 2*tmthing->extravalue1*tmthing->scale/3);
 			thing->momy = P_ReturnThrustY(tmthing, tmthing->angle, 2*tmthing->extravalue1*tmthing->scale/3);
 			if (thing->info->activesound)
-				S_StartSound(thing, thing->info->activesound);
+				S_StartSoundFromMobj(thing, thing->info->activesound);
 			P_SetMobjState(thing, thing->info->meleestate);
 			if (tmthing->tracer)
 				P_SetTarget(&thing->tracer, tmthing->tracer->target);
@@ -1182,7 +1186,7 @@ static unsigned PIT_DoCheckThing(mobj_t *thing)
 			if (!damagetype && thing->flags & MF_FIRE) // BURN!
 				damagetype = DMG_FIRE;
 			if (P_DamageMobj(tmthing, thing, thing, 1, damagetype) && (damagetype = (thing->info->mass>>8)))
-				S_StartSound(thing, damagetype);
+				S_StartSoundFromMobj(thing, damagetype);
 			return CHECKTHING_COLLIDE;
 		}
 		return CHECKTHING_NOCOLLIDE;
@@ -1200,7 +1204,7 @@ static unsigned PIT_DoCheckThing(mobj_t *thing)
 			if (!damagetype && tmthing->flags & MF_FIRE) // BURN!
 				damagetype = DMG_FIRE;
 			if (P_DamageMobj(thing, tmthing, tmthing, 1, damagetype) && (damagetype = (tmthing->info->mass>>8)))
-				S_StartSound(tmthing, damagetype);
+				S_StartSoundFromMobj(tmthing, damagetype);
 			return CHECKTHING_COLLIDE;
 		}
 		return CHECKTHING_NOCOLLIDE;
@@ -1425,7 +1429,7 @@ static unsigned PIT_DoCheckThing(mobj_t *thing)
 		}
 
 		if (thing->type != MT_GARGOYLE || P_IsObjectOnGround(thing))
-			S_StartSound(thing, thing->info->activesound);
+			S_StartSoundFromMobj(thing, thing->info->activesound);
 
 		P_SetTarget(&thing->target, tmthing);
 	}
@@ -2295,7 +2299,7 @@ void P_CheckHoopPosition(mobj_t *hoopthing, fixed_t x, fixed_t y, fixed_t z, fix
 	(void)radius; //unused
 	for (i = 0; i < MAXPLAYERS; i++)
 	{
-		if (!playeringame[i] || !players[i].mo || players[i].spectator)
+		if (!players[i].ingame || !players[i].mo || players[i].spectator)
 			continue;
 
 		if (abs(players[i].mo->x - x) >= hoopblockdist ||
@@ -3035,7 +3039,7 @@ static boolean P_ThingHeightClip(mobj_t *thing)
 	if (tmfloorz > oldfloorz+thing->height)
 		return true;
 
-	bouncing = thing->player && thing->state-states == S_PLAY_BOUNCE_LANDING && P_IsObjectOnGround(thing);
+	bouncing = thing->player && P_IsPlayerInState(thing->player, S_PLAY_BOUNCE_LANDING) && P_IsObjectOnGround(thing);
 
 	if ((onfloor || bouncing) && !(thing->flags & MF_NOGRAVITY) && floormoved)
 	{
@@ -3135,7 +3139,7 @@ static void P_HitCameraSlideLine(line_t *ld, camera_t *thiscam)
 	lineangle >>= ANGLETOFINESHIFT;
 	deltaangle >>= ANGLETOFINESHIFT;
 
-	movelen = P_AproxDistance(tmxmove, tmymove);
+	movelen = GetDistance2D(0, 0, tmxmove, tmymove);
 	newlen = FixedMul(movelen, FINECOSINE(deltaangle));
 
 	tmxmove = FixedMul(newlen, FINECOSINE(lineangle));
@@ -3181,7 +3185,7 @@ static void P_HitSlideLine(line_t *ld)
 	lineangle >>= ANGLETOFINESHIFT;
 	deltaangle >>= ANGLETOFINESHIFT;
 
-	movelen = R_PointToDist2(0, 0, tmxmove, tmymove);
+	movelen = GetDistance2D(0, 0, tmxmove, tmymove);
 	newlen = FixedMul(movelen, FINECOSINE(deltaangle));
 
 	tmxmove = FixedMul(newlen, FINECOSINE(lineangle));
@@ -3221,7 +3225,7 @@ static void P_HitBounceLine(line_t *ld)
 	lineangle >>= ANGLETOFINESHIFT;
 	deltaangle >>= ANGLETOFINESHIFT;
 
-	movelen = P_AproxDistance(tmxmove, tmymove);
+	movelen = GetDistance2D(0, 0, tmxmove, tmymove);
 
 	tmxmove = FixedMul(movelen, FINECOSINE(deltaangle));
 	tmymove = FixedMul(movelen, FINESINE(deltaangle));
@@ -3479,12 +3483,12 @@ static void PTR_GlideClimbTraverse(line_t *li)
 
 			if (!slidemo->player->climbing)
 			{
-				S_StartSound(slidemo, sfx_s3k4a);
+				S_StartSoundFromMobj(slidemo, sfx_s3k4a);
 				slidemo->player->climbing = 5;
 				if (slidemo->player->powers[pw_super])
 				{
 					P_Earthquake(slidemo, slidemo, 256*FRACUNIT);
-					S_StartSound(slidemo, sfx_s3k49);
+					S_StartSoundFromMobj(slidemo, sfx_s3k49);
 				}
 			}
 
@@ -4179,7 +4183,7 @@ static boolean PIT_RadiusAttack(mobj_t *thing)
 	dy = abs(thing->y - bombspot->y);
 	dz = abs(thing->z + (thing->height>>1) - bombspot->z);
 
-	dist = P_AproxDistance(P_AproxDistance(dx, dy), dz);
+	dist = GetDistance3D(0, 0, 0, dx, dy, dz);
 	dist -= thing->radius;
 
 	if (dist < 0)

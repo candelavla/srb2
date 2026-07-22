@@ -116,7 +116,7 @@ void HWR_ProcessPolygon(FSurfaceInfo *pSurf, FOutVector *pOutVerts, FUINT iNumPt
 		polygonArray[polygonArraySize].texture = current_texture;
 		polygonArray[polygonArraySize].shader = (shader_target != SHADER_NONE) ? HWR_GetShaderFromTarget(shader_target) : shader_target;
 		polygonArray[polygonArraySize].horizonSpecial = horizonSpecial;
-		// default to maximum value so skybox ánd horizon lines come first
+		// default to maximum value so skybox and horizon lines come first
 		polygonArray[polygonArraySize].hash = INT32_MIN+polygonArraySize;
 		polygonArraySize++;
 
@@ -131,7 +131,7 @@ void HWR_ProcessPolygon(FSurfaceInfo *pSurf, FOutVector *pOutVerts, FUINT iNumPt
 			}
 			DIGEST(hash, PolyFlags);
 			DIGEST(hash, pSurf->PolyColor.rgba);
-			if (cv_glshaders.value && gl_shadersavailable)
+			if (HWR_UseShader())
 			{
 				DIGEST(hash, shader_target);
 				DIGEST(hash, pSurf->TintColor.rgba);
@@ -236,7 +236,7 @@ void HWR_RenderBatches(void)
 
 	// set state for first batch
 
-	if (cv_glshaders.value && gl_shadersavailable)
+	if (HWR_UseShader())
 	{
 		GL_SetShader(currentShader);
 	}
@@ -320,7 +320,7 @@ void HWR_RenderBatches(void)
 				nextSurfaceInfo = polygonArray[nextIndex].surf;
 				if (nextPolyFlags & PF_NoTexture)
 					nextTexture = 0;
-				if (currentShader != nextShader && cv_glshaders.value && gl_shadersavailable)
+				if (currentShader != nextShader && HWR_UseShader())
 				{
 					changeState = true;
 					changeShader = true;
@@ -335,7 +335,7 @@ void HWR_RenderBatches(void)
 					changeState = true;
 					changePolyFlags = true;
 				}
-				if (cv_glshaders.value && gl_shadersavailable)
+				if (HWR_UseShader())
 				{
 					if (currentSurfaceInfo.PolyColor.rgba != nextSurfaceInfo.PolyColor.rgba ||
 						currentSurfaceInfo.TintColor.rgba != nextSurfaceInfo.TintColor.rgba ||

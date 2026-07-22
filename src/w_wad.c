@@ -66,9 +66,7 @@
 #include "md5.h"
 #include "lua_script.h"
 #include "lua_hook.h"
-#ifdef SCANTHINGS
-#include "p_setup.h" // P_ScanThings
-#endif
+
 #include "m_misc.h" // M_MapNumber
 #include "g_game.h" // G_SetGameModified
 
@@ -134,6 +132,8 @@ void W_Shutdown(void)
 			Z_Free(wad->lumpinfo[wad->numlumps].longname);
 			Z_Free(wad->lumpinfo[wad->numlumps].fullname);
 		}
+		M_AATreeFree(wad->startfolders);
+		M_AATreeFree(wad->endfolders);
 
 		Z_Free(wad->lumpinfo);
 		Z_Free(wad);
@@ -281,22 +281,6 @@ static void W_LoadDehackedLumps(UINT16 wadnum, boolean mainfile)
 				DEH_LoadDehackedLumpPwad(wadnum, lump, mainfile);
 			}
 	}
-
-#ifdef SCANTHINGS
-	// Scan maps for emblems 'n shit
-	{
-		lumpinfo_t *lump_p = wadfiles[wadnum]->lumpinfo;
-		for (lump = 0; lump < wadfiles[wadnum]->numlumps; lump++, lump_p++)
-		{
-			const char *name = lump_p->name;
-			if (name[0] == 'M' && name[1] == 'A' && name[2] == 'P' && name[5]=='\0')
-			{
-				INT16 mapnum = (INT16)M_MapNumber(name[3], name[4]);
-				P_ScanThings(mapnum, wadnum, lump + ML_THINGS);
-			}
-		}
-	}
-#endif
 }
 
 /** Compute MD5 message digest for bytes read from STREAM of this filname.
@@ -309,7 +293,6 @@ static void W_LoadDehackedLumps(UINT16 wadnum, boolean mainfile)
   * \return 0 if MD5 checksum was made, and is at resblock, 1 if error was found
   */
 
-#ifndef NOMD5
 static INT32 W_MakeFileMD5(const char *filename, void *resblock)
 {
 	FILE *fhandle;
@@ -330,7 +313,6 @@ static INT32 W_MakeFileMD5(const char *filename, void *resblock)
 	}
 	return 1;
 }
-#endif
 
 // Invalidates the cache of lump numbers. Call this whenever a wad is added.
 static void W_InvalidateLumpnumCache(void)
@@ -855,9 +837,7 @@ UINT16 W_InitFile(const char *filename, boolean mainfile, boolean startup)
 	wadfile_t *wadfile;
 	restype_t type;
 	UINT16 numlumps = 0;
-#ifndef NOMD5
 	size_t i;
-#endif
 	UINT8 md5sum[16];
 	int important;
 
@@ -898,7 +878,6 @@ UINT16 W_InitFile(const char *filename, boolean mainfile, boolean startup)
 
 	important = !important;
 
-#ifndef NOMD5
 	//
 	// w-waiiiit!
 	// Let's not add a wad file if the MD5 matches
@@ -919,7 +898,6 @@ UINT16 W_InitFile(const char *filename, boolean mainfile, boolean startup)
 			return W_InitFileError(filename, false);
 		}
 	}
-#endif
 
 	switch(type = ResourceFileDetect(filename))
 	{
@@ -966,6 +944,8 @@ UINT16 W_InitFile(const char *filename, boolean mainfile, boolean startup)
 	fseek(handle, 0, SEEK_END);
 	wadfile->filesize = (unsigned)ftell(handle);
 	wadfile->type = type;
+	wadfile->startfolders = M_AATreeAlloc(0);
+	wadfile->endfolders = M_AATreeAlloc(0);
 
 	// already generated, just copy it over
 	M_Memcpy(&wadfile->md5sum, &md5sum, 16);
@@ -989,6 +969,8 @@ UINT16 W_InitFile(const char *filename, boolean mainfile, boolean startup)
 
 	// The below hack makes me load this here.
 	W_LoadTrnslateLumps(numwadfiles - 1);
+	// Load maps from file
+	P_LoadMapsFromFile(numwadfiles - 1, !startup);
 
 	// TODO: HACK ALERT - Load Lua & SOC stuff right here. I feel like this should be out of this place, but... Let's stick with this for now.
 	switch (wadfile->type)
@@ -1157,6 +1139,8 @@ UINT16 W_InitFolder(const char *path, boolean mainfile, boolean startup)
 	wadfile->lumpinfo = lumpinfo;
 	wadfile->important = important;
 	wadfile->filesize = 0;
+	wadfile->startfolders = M_AATreeAlloc(0);
+	wadfile->endfolders = M_AATreeAlloc(0);
 
 	for (i = 0; i < numlumps; i++)
 		wadfile->filesize += lumpinfo[i].disksize;
@@ -1173,6 +1157,7 @@ UINT16 W_InitFolder(const char *path, boolean mainfile, boolean startup)
 
 	W_ReadFileShaders(wadfile);
 	W_LoadTrnslateLumps(numwadfiles - 1);
+	P_LoadMapsFromFile(numwadfiles - 1, !startup);
 	W_LoadDehackedLumpsPK3(numwadfiles - 1, mainfile);
 
 	lua_lumploading++;
@@ -1323,6 +1308,16 @@ W_CheckNumForMarkerStartPwad (const char *name, UINT16 wad, UINT16 startlump)
 	return marker;
 }
 
+static INT32 W_CheckFolderKeys(void* key1, void* key2)
+{
+	return strcmp((char *)key1, (char *)key2);
+}
+
+static void W_DeallocFolderKey(void* key)
+{
+	Z_Free(key);
+}
+
 // Look for the first lump from a folder.
 UINT16 W_CheckNumForFolderStartPK3(const char *name, UINT16 wad, UINT16 startlump)
 {
@@ -1330,6 +1325,11 @@ UINT16 W_CheckNumForFolderStartPK3(const char *name, UINT16 wad, UINT16 startlum
 	INT32 i;
 	lumpinfo_t *lump_p = wadfiles[wad]->lumpinfo + startlump;
 	name_length = strlen(name);
+
+	void *val = M_AATreeGet(wadfiles[wad]->startfolders, Z_StrDup(name), W_CheckFolderKeys, W_DeallocFolderKey);
+	if (val != NULL)
+		return (uintptr_t)val;
+
 	for (i = startlump; i < wadfiles[wad]->numlumps; i++, lump_p++)
 	{
 		if (strnicmp(name, lump_p->fullname, name_length) == 0)
@@ -1337,9 +1337,11 @@ UINT16 W_CheckNumForFolderStartPK3(const char *name, UINT16 wad, UINT16 startlum
 			/* SLADE is special and puts a single directory entry. Skip that. */
 			if (strlen(lump_p->fullname) == name_length)
 				i++;
+			M_AATreeSet(wadfiles[wad]->startfolders, Z_StrDup(name), (void *)(uintptr_t)i, W_CheckFolderKeys, W_DeallocFolderKey);
 			return i;
 		}
 	}
+	M_AATreeSet(wadfiles[wad]->startfolders, Z_StrDup(name), (void *)INT16_MAX, W_CheckFolderKeys, W_DeallocFolderKey);
 	return INT16_MAX;
 }
 
@@ -1350,11 +1352,18 @@ UINT16 W_CheckNumForFolderEndPK3(const char *name, UINT16 wad, UINT16 startlump)
 {
 	INT32 i;
 	lumpinfo_t *lump_p = wadfiles[wad]->lumpinfo + startlump;
+	size_t name_length = strlen(name);
+	
+	void *val = M_AATreeGet(wadfiles[wad]->endfolders, Z_StrDup(name), W_CheckFolderKeys, W_DeallocFolderKey);
+	if (val != NULL)
+		return (uintptr_t)val;
+	
 	for (i = startlump; i < wadfiles[wad]->numlumps; i++, lump_p++)
 	{
-		if (strnicmp(name, lump_p->fullname, strlen(name)))
+		if (strnicmp(name, lump_p->fullname, name_length))
 			break;
 	}
+	M_AATreeSet(wadfiles[wad]->endfolders, Z_StrDup(name), (void *)(uintptr_t)i, W_CheckFolderKeys, W_DeallocFolderKey);
 	return i;
 }
 
@@ -1397,6 +1406,14 @@ char *W_GetLumpFolderNamePK3(UINT16 wad, UINT16 lump)
 	strncpy(foldername, fullname + start, namelen);
 
 	return foldername;
+}
+
+const char *W_GetFilenameFromFullname(const char *path)
+{
+	const char *slash = strrchr(path, '/');
+	if (slash)
+		return slash + 1;
+	return path;
 }
 
 void W_GetFolderLumpsPwad(const char *name, UINT16 wad, UINT32 **list, UINT16 *list_capacity, UINT16 *numlumps)
@@ -2546,7 +2563,6 @@ void *W_CachePatchLongName(const char *name, INT32 tag)
 		return W_CachePatchNum(W_GetNumForLongPatchName("MISSING"), tag);
 	return W_CachePatchNum(num, tag);
 }
-#ifndef NOMD5
 #define MD5_LEN 16
 
 /**
@@ -2566,7 +2582,6 @@ static void PrintMD5String(const UINT8 *md5, char *buf)
 		md5[8], md5[9], md5[10], md5[11],
 		md5[12], md5[13], md5[14], md5[15]);
 }
-#endif
 /** Verifies a file's MD5 is as it should be.
   * For releases, used as cheat prevention -- if the MD5 doesn't match, a
   * fatal error is thrown. In debug mode, an MD5 mismatch only triggers a
@@ -2579,10 +2594,6 @@ static void PrintMD5String(const UINT8 *md5, char *buf)
   */
 void W_VerifyFileMD5(UINT16 wadfilenum, const char *matchmd5)
 {
-#ifdef NOMD5
-	(void)wadfilenum;
-	(void)matchmd5;
-#else
 	UINT8 realmd5[MD5_LEN];
 	INT32 ix;
 
@@ -2616,7 +2627,6 @@ void W_VerifyFileMD5(UINT16 wadfilenum, const char *matchmd5)
 #endif
 			(M_GetText("File is old, is corrupt or has been modified:\n%s\nFound MD5: %s\nWanted MD5: %s\n"), wadfiles[wadfilenum]->filename, actualmd5text, matchmd5);
 	}
-#endif
 }
 
 // Verify versions for different archive

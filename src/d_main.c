@@ -94,6 +94,7 @@
 #endif
 
 #include "lua_script.h"
+#include "lua_hud.h"
 
 // Version numbers for netplay :upside_down_face:
 int    VERSION;
@@ -227,6 +228,9 @@ void D_ProcessEvents(void)
 					break;
 			}
 		}
+
+		if (CON_PreResponder(ev))
+			continue;
 
 		// Screenshots over everything so that they can be taken anywhere.
 		if (M_ScreenshotResponder(ev))
@@ -578,7 +582,7 @@ static void D_Display(void)
 		V_SetPalette(0);
 
 	// draw pause pic
-	if (paused && cv_showhud.value && (!menuactive || netgame))
+	if (paused && cv_showhud.value && LUA_HudEnabled(hud_pause) && (!menuactive || netgame))
 	{
 #if 0
 		INT32 py;
@@ -958,13 +962,7 @@ void D_StartTitle(void)
 
 			if (server)
 			{
-				char mapname[6];
-
-				strlcpy(mapname, G_BuildMapName(spstage_start), sizeof (mapname));
-				strlwr(mapname);
-				mapname[5] = '\0';
-
-				COM_BufAddText(va("map %s\n", mapname));
+				COM_BufAddText(va("map %s\n", G_BuildMapName(spstage_start)));
 			}
 		}
 
@@ -1335,8 +1333,14 @@ void D_SRB2Main(void)
 		else
 		{
 			// use user specific config file
+			if (M_CheckParm("-workdir") && M_IsNextParm())
+				snprintf(srb2home, sizeof srb2home, "%s", M_GetNextParm());
+			else
 #ifdef DEFAULTDIR
-			snprintf(srb2home, sizeof srb2home, "%s" PATHSEP DEFAULTDIR, userhome);
+				snprintf(srb2home, sizeof srb2home, "%s" PATHSEP DEFAULTDIR, userhome);
+#else // DEFAULTDIR
+				snprintf(srb2home, sizeof srb2home, "%s", userhome);
+#endif // DEFAULTDIR
 			snprintf(downloaddir, sizeof downloaddir, "%s" PATHSEP "DOWNLOAD", srb2home);
 			if (dedicated)
 				snprintf(configfile, sizeof configfile, "%s" PATHSEP "d"CONFIGFILENAME, srb2home);
@@ -1348,24 +1352,13 @@ void D_SRB2Main(void)
 			strcatbf(liveeventbackup, srb2home, PATHSEP);
 
 			snprintf(luafiledir, sizeof luafiledir, "%s" PATHSEP "luafiles", srb2home);
-#else // DEFAULTDIR
-			snprintf(srb2home, sizeof srb2home, "%s", userhome);
-			snprintf(downloaddir, sizeof downloaddir, "%s", userhome);
-			if (dedicated)
-				snprintf(configfile, sizeof configfile, "%s" PATHSEP "d"CONFIGFILENAME, userhome);
-			else
-				snprintf(configfile, sizeof configfile, "%s" PATHSEP CONFIGFILENAME, userhome);
-
-			// can't use sprintf since there is %u in savegamename
-			strcatbf(savegamename, userhome, PATHSEP);
-			strcatbf(liveeventbackup, userhome, PATHSEP);
-
-			snprintf(luafiledir, sizeof luafiledir, "%s" PATHSEP "luafiles", userhome);
-#endif // DEFAULTDIR
 		}
 
 		configfile[sizeof configfile - 1] = '\0';
 	}
+
+	// make sure workdir exists
+	I_mkdir(srb2home, 0755);
 
 	// Create addons dir
 	snprintf(addonsdir, sizeof addonsdir, "%s%s%s", srb2home, PATHSEP, "addons");
@@ -1378,15 +1371,16 @@ void D_SRB2Main(void)
 
 	P_SetRandSeed(M_RandomizedSeed());
 
-	if (M_CheckParm("-password") && M_IsNextParm())
-		D_SetPassword(M_GetNextParm());
-
 	// player setup menu colors must be initialized before
 	// any wad file is added, as they may contain colors themselves
 	M_InitPlayerSetupColors();
 
 	CONS_Printf("Z_Init(): Init zone memory allocation daemon. \n");
 	Z_Init();
+
+	if (M_CheckParm("-password") && M_IsNextParm())
+		D_SetPassword(M_GetNextParm());
+	G_InitMaps();
 
 	clientGamedata = M_NewGameDataStruct();
 	serverGamedata = M_NewGameDataStruct();
@@ -1689,7 +1683,7 @@ void D_SRB2Main(void)
 	{
 		pstartmap = bootmap;
 
-		if (pstartmap < 1 || pstartmap > NUMMAPS)
+		if (pstartmap < 1 || pstartmap > numgamemaps)
 			I_Error("Cannot warp to map %d (out of range)\n", pstartmap);
 		else
 		{
@@ -1736,7 +1730,7 @@ void D_SRB2Main(void)
 		if (server && !M_CheckParm("+map"))
 		{
 			// Prevent warping to nonexistent levels
-			if (W_CheckNumForName(G_BuildMapName(pstartmap)) == LUMPERROR)
+			if (!G_MapFileExists(G_BuildMapName(pstartmap)))
 				I_Error("Could not warp to %s (map not found)\n", G_BuildMapName(pstartmap));
 			else
 			{

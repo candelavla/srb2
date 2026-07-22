@@ -1055,6 +1055,7 @@ static const char *credits[] = {
 	"\"bitten2up\"",
 	"\"candelavla\"",
 	"Colette \"fickleheart\" Bordelon",
+	"\"candelavla\"",
 	"Andrew \"orospakr\" Clunis",
 	"Sally \"TehRealSalt\" Cochenour",
 	"Gregor \"Oogaland\" Dick",
@@ -1647,7 +1648,7 @@ void F_GameEvaluationTicker(void)
 			|| finalecount == (7*TICRATE)/2
 			|| finalecount == ((7*TICRATE)/2)+5)
 		{
-			S_StartSound(NULL, sfx_s3k5c);
+			S_StartSoundFromEverywhere(sfx_s3k5c);
 			sparklloop = 10;
 		}
 	}
@@ -1686,7 +1687,7 @@ void F_GameEvaluationTicker(void)
 		M_SilentUpdateUnlockablesAndEmblems(serverGamedata);
 
 		if (M_UpdateUnlockablesAndExtraEmblems(clientGamedata))
-			S_StartSound(NULL, sfx_s3k68);
+			S_StartSoundFromEverywhere(sfx_s3k68);
 
 		G_SaveGameData(clientGamedata);
 	}
@@ -3823,7 +3824,7 @@ void F_ContinueTicker(void)
 			cont_spr2[1][2] = 0;
 
 		if (continuetime == (3*TICRATE)-10)
-			S_StartSound(NULL, sfx_cdfm56); // or 31
+			S_StartSoundFromEverywhere(sfx_cdfm56); // or 31
 		else if (continuetime == 5)
 		{
 			cont_spr2[0][0] = P_GetSkinSprite2(contskins[0], SPR2_CNT2, NULL);
@@ -3904,7 +3905,7 @@ boolean F_ContinueResponder(event_t *event)
 
 	keypressed = true;
 	imcontinuing = true;
-	S_StartSound(NULL, sfx_kc6b);
+	S_StartSoundFromEverywhere(sfx_kc6b);
 	I_FadeSong(0, MUSICRATE, &S_StopMusic);
 
 	return true;
@@ -3994,7 +3995,7 @@ void F_EndCutScene(void)
 			F_StartGameEvaluation();
 		else if (cutnum == introtoplay-1)
 			D_StartTitle();
-		else if (nextmap < 1100-1)
+		else if (!G_IsGameEndMap(nextmap+1))
 			G_NextLevel();
 		else
 			G_EndGame();
@@ -4601,9 +4602,9 @@ void F_TextPromptDrawer(void)
 		players[j].powers[pw_nocontrol] = 1;\
 		if (players[j].mo)\
 		{\
-			if (players[j].mo->state == states+S_PLAY_STND && players[j].mo->tics != -1)\
+			if (P_IsPlayerInState(&players[j], S_PLAY_STND) && players[j].mo->tics != -1)\
 				players[j].mo->tics++;\
-			else if (players[j].mo->state == states+S_PLAY_WAIT)\
+			else if (P_IsPlayerInState(&players[j], S_PLAY_WAIT))\
 				P_SetMobjState(players[j].mo, S_PLAY_STND);\
 		}\
 	}
@@ -4705,7 +4706,7 @@ void F_TextPromptTicker(void)
 					{
 						F_AdvanceToNextPage();
 						if (promptactive)
-							S_StartSound(NULL, sfx_menu1);
+							S_StartSoundFromEverywhere(sfx_menu1);
 					}
 					keypressed = true; // prevent repeat events
 				}

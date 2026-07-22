@@ -240,7 +240,8 @@ Finish_update (void)
 
 	if (registered)
 	{
-		if (HMS_update())
+		// ms is idempotent, so register and update is the same thing
+		if (HMS_register())
 		{
 			Lock_state();
 			{
@@ -541,12 +542,7 @@ Update_parameters (void)
 static void RoomId_OnChange(void)
 {
 	if (ms_RoomId != cv_masterserver_room_id.value)
-	{
-		UnregisterServer();
-		ms_RoomId = cv_masterserver_room_id.value;
-		if (Online())
-			RegisterServer();
-	}
+		UpdateServer();
 }
 
 static void MasterServer_OnChange(void)

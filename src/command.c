@@ -2169,14 +2169,14 @@ void CV_AddValue(consvar_t *var, INT32 increment)
 					if(increment > 0) // Going up!
 					{
 						newvalue++;
-						if (newvalue == NUMMAPS)
+						if (newvalue == numgamemaps)
 							newvalue = 0;
 					}
 					else // Going down!
 					{
 						newvalue--;
 						if (newvalue == -1)
-							newvalue = NUMMAPS-1;
+							newvalue = numgamemaps-1;
 					}
 
 					if (newvalue == oldvalue)
@@ -2184,7 +2184,6 @@ void CV_AddValue(consvar_t *var, INT32 increment)
 
 					if(!mapheaderinfo[newvalue])
 						continue; // Don't allocate the header.  That just makes memory usage skyrocket.
-
 				} while (newvalue != oldvalue && !M_CanShowLevelInList(newvalue, gt));
 
 				var->value = newvalue + 1;
