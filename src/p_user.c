@@ -4725,7 +4725,7 @@ void P_DoSpinDashDust(player_t *player)
 //
 static void P_DoSpinAbility(player_t *player, ticcmd_t *cmd)
 {
-	boolean canstand = true; // can we stand on the ground? (mostly relevant for slopes)
+	boolean canstand; // can we stand on the ground? (mostly relevant for slopes)
 
 	if (player->rsprung == 4 && player->panim == PA_SPRING) // restrict spin inputs but allow turtle roll
 	{
@@ -4788,8 +4788,7 @@ static void P_DoSpinAbility(player_t *player, ticcmd_t *cmd)
 			case CA2_SPINDASH: // Spinning and Spindashing
 				 // Start revving
 				if ((cmd->buttons & BT_SPIN) && (player->speed < FixedMul(5<<FRACBITS, player->mo->scale) || P_IsPlayerInState(player, S_PLAY_GLIDE_LANDING))
-					&& !player->mo->momz && onground && !(player->pflags & (PF_SPINDOWN|PF_SPINNING))
-						&& canstand)
+					&& !player->mo->momz && onground && !(player->pflags & (PF_SPINDOWN|PF_SPINNING)))
 				{
 					player->mo->momx >>= 1;
 					player->mo->momy >>= 1;
@@ -4836,8 +4835,7 @@ static void P_DoSpinAbility(player_t *player, ticcmd_t *cmd)
 				// down the spin button and not spinning.
 				// AKA Just go into a spin on the ground, you idiot. ;)
 				else if ((cmd->buttons & BT_SPIN || ((twodlevel || (player->mo->flags2 & MF2_TWOD)) && cmd->forwardmove < -20))
-					&& !player->climbing && !player->mo->momz && onground && (player->speed >= FixedMul(5<<FRACBITS, player->mo->scale)
-						|| !canstand) && !(player->pflags & (PF_SPINDOWN|PF_SPINNING)))
+					&& !player->climbing && !player->mo->momz && onground && (player->speed >= FixedMul(5<<FRACBITS, player->mo->scale)) && !(player->pflags & (PF_SPINDOWN|PF_SPINNING)))
 				{
 					player->pflags |= (PF_SPINDOWN|PF_SPINNING);
 					P_SetMobjState(player->mo, S_PLAY_ROLL);
@@ -4968,7 +4966,7 @@ static void P_DoSpinAbility(player_t *player, ticcmd_t *cmd)
 		&& player->speed < 5*player->mo->scale && canstand)
 	{
 		if ((player->mo->subsector->sector->specialflags & SSF_FORCESPIN) || (player->mo->ceilingz - player->mo->floorz < P_GetPlayerHeight(player)))
-			P_InstaThrust(player->mo, player->mo->angle, 10*player->mo->scale);
+			P_InstaThrust(player->mo, player->mo->angle, 5*player->mo->scale);
 		else
 		{
 			player->skidtime = 0;
