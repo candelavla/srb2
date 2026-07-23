@@ -101,7 +101,7 @@ typedef long ssize_t;
 #endif
 
 const char *nongnu_strcasestr(const char *in, const char *what);
-#define stristr strcasestr
+#define stristr nongnu_strcasestr
 
 int startswith (const char *base, const char *tag);
 int endswith (const char *base, const char *tag);
