@@ -5681,7 +5681,7 @@ static void measurekeywords(mapsearchfreq_t *fr,
 			qp && fr->total < 255;
 			qp = strtok(0, " "))
 	{
-		if (( sp = strcasestr(s, qp) ))
+		if (( sp = stristr(s, qp) ))
 		{
 			if (wanttable)
 			{
@@ -5772,7 +5772,7 @@ INT32 G_FindMap(const char *mapname, char **foundmapnamep,
 		if (apromapnum == 0 || wanttable)
 		{
 			/* LEVEL 1--match keywords verbatim */
-			if (( aprop = strcasestr(realmapname, mapname) ))
+			if (( aprop = stristr(realmapname, mapname) ))
 			{
 				if (wanttable)
 				{
