@@ -100,7 +100,7 @@ typedef long ssize_t;
 	#define strnicmp(x,y,n) strncasecmp(x,y,n)
 #endif
 
-char *nongnu_strcasestr(const char *in, const char *what);
+char *nongnu_strcasestr(char *in, char *what);
 #ifndef _GNU_SOURCE
 #define strcasestr nongnu_strcasestr
 #endif

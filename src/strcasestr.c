@@ -35,7 +35,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 static inline int
 trycmp (char **pp, char *cp,
-		const char *q, size_t qn)
+		char *q, size_t qn)
 {
 	char *p;
 	p = (*pp);
@@ -61,15 +61,15 @@ swapp (char ***ppap, char ***ppbp, char **cpap, char **cpbp)
 }
 
 char *
-nongnu_strcasestr (const char *s, const char *q)
+nongnu_strcasestr (char *s, char *q)
 {
 	size_t  qn;
 
 	char    uc;
 	char    lc;
 
-	char   *up;
-	char   *lp;
+	char    *up;
+	char    *lp;
 
 	char **ppa;
 	char **ppb;
