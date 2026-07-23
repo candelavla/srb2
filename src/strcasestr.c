@@ -65,11 +65,11 @@ nongnu_strcasestr (char *s, char *q)
 {
 	size_t  qn;
 
-	char    uc;
-	char    lc;
+	char   uc;
+	char   lc;
 
-	char    *up;
-	char    *lp;
+	char  *up;
+	char  *lp;
 
 	char **ppa;
 	char **ppb;
