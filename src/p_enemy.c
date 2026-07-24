@@ -7117,15 +7117,15 @@ nomissile:
 
 	if (actor->flags & MF_FLOAT && !(actor->flags2 & MF2_SKULLFLY))
 	{ // Float up/down to your target's position. Stay above them, but not out of jump range.
-		fixed_t target_min = actor->target->floorz+FixedMul(64*FRACUNIT, actor->scale);
+		fixed_t target_min = actor->target->floorz+FixedMul(72*FRACUNIT, actor->scale);
 		if (target_min < actor->target->z - actor->height)
 			target_min = actor->target->z - actor->height;
-		if (target_min < actor->floorz+FixedMul(33*FRACUNIT, actor->scale))
-			target_min = actor->floorz+FixedMul(33*FRACUNIT, actor->scale);
-		if (actor->z > target_min+FixedMul(16*FRACUNIT, actor->scale))
-			actor->momz = FixedMul((-actor->info->speed<<(FRACBITS-1)), actor->scale);
+		if (target_min < actor->floorz+FixedMul(48*FRACUNIT, actor->scale))
+			target_min = actor->floorz+FixedMul(48*FRACUNIT, actor->scale);
+		if (actor->z > target_min+FixedMul(24*FRACUNIT, actor->scale))
+			actor->momz = FixedMul((((-actor->info->speed)/3)<<FRACBITS), actor->scale);
 		else if (actor->z < target_min)
-			actor->momz = FixedMul(actor->info->speed<<(FRACBITS-1), actor->scale);
+			actor->momz = FixedMul((actor->info->speed/3)<<FRACBITS, actor->scale);
 		else
 			actor->momz = FixedMul(actor->momz,7*FRACUNIT/8);
 	}
@@ -7326,7 +7326,7 @@ void A_Boss2Pogo(void *data)
 
 			goop->fuse = 10*TICRATE;
 		}
-		actor->reactiontime -= 1; // only shoot goop twice
+		actor->reactiontime -= 1; // loop twice
 		if (actor->info->attacksound)
 			S_StartAttackSound(actor, actor->info->attacksound);
 		actor->flags2 |= MF2_JUSTATTACKED;
@@ -13419,6 +13419,9 @@ void A_Boss5Calm(void *data)
 	mobj_t *actor = data;
 	if (LUA_CallAction(A_BOSS5CALM, actor))
 		return;
+		
+	if (actor->health > 2 && (actor->flags2 & MF2_FRET)) //explosively calm!
+		P_SpawnMobjFromMobj(actor, 0, 0, 0, MT_PROXIMITYTNT);
 
 	actor->flags |= MF_SHOOTABLE;
 	actor->flags2 &= ~MF2_FRET;
@@ -13495,7 +13498,6 @@ void A_Boss5PinchShot(void *data)
 {
 	mobj_t *actor = data;
 	INT32 locvar1 = var1;
-	INT32 locvar2 = var2;
 	fixed_t zoffset;
 	mobj_t *missile;
 
@@ -13506,9 +13508,9 @@ void A_Boss5PinchShot(void *data)
 		return;
 
 	if (actor->eflags & MFE_VERTICALFLIP)
-		zoffset = actor->z + actor->height - FixedMul((48 + locvar2)*FRACUNIT, actor->scale);
+		zoffset = actor->z + actor->height - FixedMul(60*FRACUNIT, actor->scale);
 	else
-		zoffset = actor->z + FixedMul((48 + locvar2)*FRACUNIT, actor->scale);
+		zoffset = actor->z + FixedMul(60*FRACUNIT, actor->scale);
 
 	missile = P_SpawnPointMissile(actor, actor->x, actor->y, zoffset, locvar1,
 										actor->x, actor->y, zoffset);
@@ -13539,10 +13541,6 @@ void A_Boss5MakeItRain(void *data)
 		return;
 
 	actor->flags2 |= MF2_STRONGBOX;
-
-	var1 = locvar1;
-	var2 = offset + 90;
-	A_TrapShot(actor);
 
 	for (i = 0; i < 8; i++)
 	{

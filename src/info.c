@@ -1313,7 +1313,7 @@ state_t states[NUMSTATES] =
 	{SPR_EGGO,  0,   1, NULL,                    0, 0, S_EGGMOBILE3_STND, 0},    // S_EGGMOBILE3_STND
 	{SPR_EGGO,   FF_ANIMATE, 24, NULL, 1, 2, S_EGGMOBILE3_ATK2, 0},  // S_EGGMOBILE3_SHOCK
 	{SPR_EGGO, 6|FF_ANIMATE, 24, NULL, 1, 2, S_EGGMOBILE3_ATK2, 0}, // S_EGGMOBILE3_ATK1
-	{SPR_EGGO,  2,   2, NULL,                    0, 0, S_EGGMOBILE3_ATK3A, 0},   // S_EGGMOBILE3_ATK2
+	{SPR_EGGO,  2,   6, A_Shockwave, MT_SHOCKWAVE, 0, S_EGGMOBILE3_ATK3A, 0},   // S_EGGMOBILE3_ATK2
 	{SPR_EGGO,  3,   2, A_BossFireShot, MT_TORPEDO, 2, S_EGGMOBILE3_ATK3B, 0},   // S_EGGMOBILE3_ATK3A
 	{SPR_EGGO,  3,   2, A_BossFireShot, MT_TORPEDO, 4, S_EGGMOBILE3_ATK3C, 0},   // S_EGGMOBILE3_ATK3B
 	{SPR_EGGO,  3,   2, A_BossFireShot, MT_TORPEDO, 3, S_EGGMOBILE3_ATK3D, 0},   // S_EGGMOBILE3_ATK3C
@@ -1334,7 +1334,7 @@ state_t states[NUMSTATES] =
 	{SPR_FAKE, 0,  1, NULL,                     0, 0, S_FAKEMOBILE, 0},       // S_FAKEMOBILE_INIT
 	{SPR_FAKE, 0,  1, A_Boss3Path,              0, 0, S_FAKEMOBILE, 0},       // S_FAKEMOBILE
 	{SPR_FAKE, 0, 22, NULL,                     0, 0, S_FAKEMOBILE_ATK2, 0},  // S_FAKEMOBILE_ATK1
-	{SPR_FAKE, 0,  2, NULL,                     0, 0, S_FAKEMOBILE_ATK3A, 0}, // S_FAKEMOBILE_ATK2
+	{SPR_FAKE, 0,  6, A_Shockwave, MT_SHOCKWAVE,   0, S_FAKEMOBILE_ATK3A, 0}, // S_FAKEMOBILE_ATK2
 	{SPR_FAKE, 0,  2, A_BossFireShot, MT_TORPEDO2, 2, S_FAKEMOBILE_ATK3B, 0}, // S_FAKEMOBILE_ATK3A
 	{SPR_FAKE, 0,  2, A_BossFireShot, MT_TORPEDO2, 4, S_FAKEMOBILE_ATK3C, 0}, // S_FAKEMOBILE_ATK3B
 	{SPR_FAKE, 0,  2, A_BossFireShot, MT_TORPEDO2, 3, S_FAKEMOBILE_ATK3D, 0}, // S_FAKEMOBILE_ATK3C
@@ -1441,7 +1441,7 @@ state_t states[NUMSTATES] =
 	{SPR_PLAY,         0, 0, A_Boss5Calm, 0, 0, S_FANG_CHECKPATH2, 0}, // S_FANG_CHECKPATH1
 	{SPR_PLAY,         0, 0, A_Repeat, 0, S_FANG_PATHINGCONT1, S_FANG_SKID1, 0}, // S_FANG_CHECKPATH2
 
-	{SPR_PLAY,         0, 0, A_Boss5PinchShot, MT_POPSHOT, -16, S_FANG_PATHINGCONT2, 0}, // S_FANG_PATHINGCONT1
+	{SPR_PLAY,         0, 0, A_Boss5PinchShot, MT_CYBRAKDEMON_NAPALM_BOMB_SMALL, -16, S_FANG_PATHINGCONT2, 0}, // S_FANG_PATHINGCONT1
 	{SPR_PLAY,         0, 0, A_PlayActiveSound, 0, 0, S_FANG_PATHINGCONT3, 0}, // S_FANG_PATHINGCONT2
 	{SPR_PLAY, SPR2_LAND, 2, A_Thrust, 0, 1, S_FANG_PATHING, 0}, // S_FANG_PATHINGCONT3
 
@@ -5691,7 +5691,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		8,                 // spawnhealth
 		S_EGGMOBILE_STND,  // seestate
 		sfx_None,          // seesound
-		45,                // reactiontime
+		15,                // reactiontime
 		sfx_None,          // attacksound
 		S_EGGMOBILE_PAIN,  // painstate
 		MT_THOK,           // painchance
@@ -5701,7 +5701,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		S_EGGMOBILE_DIE1,  // deathstate
 		S_EGGMOBILE_FLEE1, // xdeathstate
 		sfx_s3kb4,         // deathsound
-		4,                 // speed
+		10,                 // speed
 		36*FRACUNIT,       // radius
 		84*FRACUNIT,       // height
 		0,                 // display offset
@@ -5836,7 +5836,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		S_EGGMOBILE2_DIE1, // deathstate
 		S_EGGMOBILE2_FLEE1,// xdeathstate
 		sfx_s3kb4,         // deathsound
-		2*FRACUNIT,        // speed
+		3*FRACUNIT,        // speed
 		36*FRACUNIT,       // radius
 		84*FRACUNIT,       // height
 		0,                 // display offset
@@ -5944,7 +5944,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		S_EGGMOBILE3_DIE1,  // deathstate
 		S_EGGMOBILE3_FLEE1, // xdeathstate
 		sfx_s3kb4,          // deathsound
-		8*FRACUNIT,         // speed
+		10*FRACUNIT,         // speed
 		36*FRACUNIT,        // radius
 		116*FRACUNIT,       // height
 		0,                  // display offset
@@ -5971,7 +5971,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		S_FAKEMOBILE_DIE1,  // deathstate
 		S_NULL,             // xdeathstate
 		sfx_mswarp,         // deathsound
-		8*FRACUNIT,         // speed
+		10*FRACUNIT,         // speed
 		36*FRACUNIT,        // radius
 		116*FRACUNIT,       // height
 		0,                  // display offset
@@ -9799,7 +9799,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		S_XPLD1,        // deathstate
 		S_NULL,         // xdeathstate
 		sfx_cybdth,     // deathsound
-		20*FRACUNIT,    // speed
+		40*FRACUNIT,    // speed
 		11*FRACUNIT,    // radius
 		8*FRACUNIT,     // height
 		0,              // display offset
@@ -9826,7 +9826,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		S_XPLD1,        // deathstate
 		S_NULL,         // xdeathstate
 		sfx_cybdth,     // deathsound
-		20*FRACUNIT,    // speed
+		30*FRACUNIT,    // speed
 		11*FRACUNIT,    // radius
 		8*FRACUNIT,     // height
 		0,              // display offset
@@ -12958,7 +12958,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		S_NULL,         // deathstate
 		S_NULL,         // xdeathstate
 		sfx_s3k4e,      // deathsound
-		0,              // speed
+		8*FRACUNIT,              // speed
 		64*FRACUNIT,    // radius
 		40*FRACUNIT,    // height
 		0,              // display offset

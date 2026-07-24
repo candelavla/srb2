@@ -4586,11 +4586,14 @@ static void P_Boss4MoveSpikeballs(mobj_t *mobj, angle_t angle, fixed_t fz)
 {
 	INT32 s;
 	mobj_t *base = mobj, *seg;
-	fixed_t dist, bz = mobj->watertop+(8<<FRACBITS);
+	fixed_t dist, bz = mobj->watertop+(24<<FRACBITS);
 	while ((base = base->tracer))
 	{
-		for (seg = base, dist = 172*FRACUNIT, s = 9; seg; seg = seg->hnext, dist += 124*FRACUNIT, --s)
+		for (seg = base, dist = 172*FRACUNIT, s = 9; seg; seg = seg->hnext, dist += 128*FRACUNIT, --s)
+		{
+			P_SetScale(seg, mobj->scale+((mobj->info->spawnhealth - mobj->health)*FRACUNIT/16), false);
 			P_MoveOrigin(seg, mobj->x + P_ReturnThrustX(mobj, angle, dist), mobj->y + P_ReturnThrustY(mobj, angle, dist), bz + FixedMul(fz, FixedDiv(s<<FRACBITS, 9<<FRACBITS)));
+		}
 		angle += ANGLE_MAX/3;
 	}
 }
@@ -4602,7 +4605,7 @@ static void P_Boss4PinchSpikeballs(mobj_t *mobj, angle_t angle, fixed_t dz)
 {
 	INT32 s;
 	mobj_t *base = mobj, *seg;
-	fixed_t workx, worky, dx, dy, bz = mobj->watertop+(8<<FRACBITS);
+	fixed_t workx, worky, dx, dy, bz = mobj->watertop+(24<<FRACBITS);
 	fixed_t rad = (9*132)<<FRACBITS;
 #ifdef CEZ3TILT
 	fixed_t originx, originy;
@@ -4641,6 +4644,7 @@ static void P_Boss4PinchSpikeballs(mobj_t *mobj, angle_t angle, fixed_t dz)
 		{
 			seg->z = bz + (dz*(9-s));
 			P_TryMove(seg, workx + (dx*s), worky + (dy*s), true);
+			P_SetScale(seg, mobj->scale+(4*FRACUNIT/16), false);
 			if (P_MobjWasRemoved(seg))
 				return;
 		}
@@ -4729,22 +4733,27 @@ static void P_Boss4Thinker(mobj_t *mobj)
 	{
 		INT32 oldmovecount = mobj->movecount;
 		if (mobj->movedir == 3) // pinch start
-			movespeed = -(210<<(FRACBITS>>1));
+			movespeed = -(200<<(FRACBITS>>1));
 		else if (mobj->movedir > 3) // pinch
 		{
-			movespeed = 420<<(FRACBITS>>1);
-			movespeed += (420*(mobj->info->damage-mobj->health)<<(FRACBITS>>1));
+			movespeed = 425<<(FRACBITS>>1);
+			movespeed += (75*(mobj->info->spawnhealth-mobj->health)<<(FRACBITS>>1));
 			if (mobj->movedir == 4)
 				movespeed = -movespeed;
 		}
 		else // normal
 		{
-			movespeed = 170<<(FRACBITS>>1);
+			movespeed = 300<<(FRACBITS>>1);
 			movespeed += ((50*(mobj->info->spawnhealth-mobj->health))<<(FRACBITS>>1));
+			if (leveltime < TICRATE) // start up slower to give the player time to react
+				movespeed /= 3;
+			else if (leveltime < TICRATE*3)
+				movespeed /= 2;
+
 			if (mobj->movedir == 2)
 				movespeed = -movespeed;
 			if (mobj->movefactor)
-				movespeed /= 2;
+				movespeed /= 4;
 			else if (mobj->threshold)
 			{
 				// 1 -> 1.5 second timer
@@ -4808,7 +4817,6 @@ static void P_Boss4Thinker(mobj_t *mobj)
 			if (!P_Boss4MoveCage(mobj, mobj->movecount))
 			{
 				mobj->movecount = 0;
-				//mobj->threshold = 3*TICRATE;
 				mobj->extravalue1 = 1;
 				mobj->movedir++; // We don't have a cage, just continue.
 			}
@@ -4914,10 +4922,7 @@ static void P_Boss4Thinker(mobj_t *mobj)
 				mobj->movefactor += 8*FRACUNIT;
 				if (!oldz)
 				{
-					// 5 -> 2.5 second timer
-					mobj->threshold = 5*TICRATE-(TICRATE*(mobj->info->spawnhealth-mobj->health)/2);
-					if (mobj->threshold < 1)
-						mobj->threshold = 1;
+					mobj->threshold = (TICRATE*3)+(mobj->health*3);
 				}
 			}
 			else
@@ -4948,8 +4953,7 @@ static void P_Boss4Thinker(mobj_t *mobj)
 			}
 			if (mobj->spawnpoint)
 				P_LinedefExecute(mobj->spawnpoint->args[5] - (mobj->info->spawnhealth-mobj->health), mobj, NULL);
-			// 1 -> 1.5 second timer
-			mobj->threshold = TICRATE+(TICRATE*(mobj->info->spawnhealth-mobj->health)/10);
+			mobj->threshold = TICRATE/3;
 			if (mobj->threshold < 1)
 				mobj->threshold = 1;
 		}
