@@ -7222,11 +7222,7 @@ void A_Boss2Chase(void *data)
 	}
 	else
 	{
-		// Only speed up if you have the ambush flag.
-		if (actor->flags2 & MF2_AMBUSH)
-			speedvar = actor->health;
-		else
-			speedvar = actor->info->spawnhealth;
+		speedvar = actor->health;
 
 		actor->target->angle += // Don't use FixedAngleC!
 			FixedAngle(FixedDiv(FixedMul(actor->watertop, (actor->info->spawnhealth*(FRACUNIT/4)*3)), speedvar*FRACUNIT));
@@ -7242,8 +7238,8 @@ void A_Boss2Chase(void *data)
 		}
 		P_SetThingPosition(actor);
 
-		// Spray goo once every second
-		if (leveltime % (speedvar*15/10)-1 == 0)
+		// Spray goo in bursts of 3
+		if (leveltime > 1 && (leveltime/3 % speedvar == 0))
 		{
 			const fixed_t ns = FixedMul(3 * FRACUNIT, actor->scale);
 			mobj_t *goop;
@@ -7306,28 +7302,31 @@ void A_Boss2Pogo(void *data)
 	}
 	else if (actor->momz < 0 && actor->reactiontime)
 	{
-		const fixed_t ns = FixedMul(3 * FRACUNIT, actor->scale);
+		fixed_t ns = FixedMul(3<<FRACBITS, actor->scale);
 		mobj_t *goop;
 		fixed_t fz = actor->z+actor->height+FixedMul(24*FRACUNIT, actor->scale);
 		angle_t fa;
 		INT32 i;
 		// spray in all 8 directions!
-		for (i = 0; i < 8; i++)
+		for (i = 0; i < 24; i++)
 		{
 			actor->movedir++;
 			actor->movedir %= NUMDIRS;
 			fa = (actor->movedir*FINEANGLES/8) & FINEMASK;
+			
+			if (actor->reactiontime == 1)
+				ns += actor->scale;
 
 			goop = P_SpawnMobj(actor->x, actor->y, fz, actor->info->painchance);
 			if (P_MobjWasRemoved(goop))
 				continue;
 			goop->momx = FixedMul(FINECOSINE(fa),ns);
 			goop->momy = FixedMul(FINESINE(fa),ns);
-			goop->momz = FixedMul(4*FRACUNIT, actor->scale);
+			goop->momz = FixedMul(ns, actor->scale);
 
 			goop->fuse = 10*TICRATE;
 		}
-		actor->reactiontime = 0; // we already shot goop, so don't do it again!
+		actor->reactiontime -= 1; // only shoot goop twice
 		if (actor->info->attacksound)
 			S_StartAttackSound(actor, actor->info->attacksound);
 		actor->flags2 |= MF2_JUSTATTACKED;
@@ -7350,7 +7349,7 @@ void A_Boss2TakeDamage(void *data)
 		return;
 
 	A_Pain(actor);
-	actor->reactiontime = 1; // turn around
+	actor->reactiontime = 2; // turn around
 	if (locvar1 == 0) // old A_Invincibilerize behavior
 		actor->movecount = TICRATE;
 	else
