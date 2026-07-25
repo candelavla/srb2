@@ -10129,6 +10129,7 @@ static boolean P_FuseThink(mobj_t *mobj)
 		P_SetMobjState(mobj, mobj->info->deathstate);
 		break;
 	case MT_LHRT:
+	case MT_TNTBARREL:
 		P_KillMobj(mobj, NULL, NULL, 0);
 		break;
 	case MT_BLUEFLAG:

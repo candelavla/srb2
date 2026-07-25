@@ -3166,7 +3166,7 @@ void A_Boss4Raise(void *data)
 //		0 - Fly horizontally and vertically
 //		1 - Fly horizontal-only (momz = 0)
 //
-#define SKULLSPEED (20*FRACUNIT)
+#define SKULLSPEED (30*FRACUNIT)
 
 void A_SkullAttack(void *data)
 {
@@ -3229,8 +3229,8 @@ void A_SkullAttack(void *data)
 #define dostuff(q) \
 			testang = actor->angle + ((i+(q))*ANG10);\
 			if (P_CheckMove(actor,\
-				P_ReturnThrustX(actor, testang, dist + 2*actor->radius),\
-				P_ReturnThrustY(actor, testang, dist + 2*actor->radius),\
+				P_ReturnThrustX(actor, testang, dist + 3*actor->radius),\
+				P_ReturnThrustY(actor, testang, dist + 3*actor->radius),\
 				true)) break;
 
 		if (P_RandomChance(FRACUNIT/2)) // port priority 2?
@@ -3272,7 +3272,7 @@ void A_SkullAttack(void *data)
 	if (dist < 1)
 		dist = 1;
 
-	actor->momz = (dest->z + (dest->height>>1) - actor->z) / dist;
+	actor->momz = speed/5;
 
 	if (locvar1 == 1)
 		actor->momz = -actor->momz;
@@ -7238,10 +7238,10 @@ void A_Boss2Chase(void *data)
 		}
 		P_SetThingPosition(actor);
 
-		// Spray goo in bursts of 3
-		if (leveltime > 1 && (leveltime/3 % speedvar == 0))
+		// Spray goo in bursts of 4
+		if (leveltime/4 % speedvar == 0)
 		{
-			const fixed_t ns = FixedMul(3 * FRACUNIT, actor->scale);
+			const fixed_t ns = FixedMul(3*FRACUNIT, actor->scale);
 			mobj_t *goop;
 			fixed_t fz = actor->z+actor->height+FixedMul(24*FRACUNIT, actor->scale);
 			angle_t fa;
@@ -7261,7 +7261,8 @@ void A_Boss2Chase(void *data)
 				goop->momz = FixedMul(4*FRACUNIT, actor->scale);
 				goop->fuse = 10*TICRATE;
 
-				if (actor->info->attacksound)
+				//play the sound once per set but not while the level is loading
+				if ((leveltime > 1) && actor->info->attacksound && ((leveltime % speedvar == 0) || leveltime == 2))
 					S_StartAttackSound(actor, actor->info->attacksound);
 
 				if (P_RandomChance(FRACUNIT/2))
@@ -7269,7 +7270,7 @@ void A_Boss2Chase(void *data)
 					goop->momx *= 2;
 					goop->momy *= 2;
 				}
-				else if (P_RandomChance(129*FRACUNIT/256))
+				else if (P_RandomChance(FRACUNIT/2))
 				{
 					goop->momx *= 3;
 					goop->momy *= 3;
@@ -7308,14 +7309,16 @@ void A_Boss2Pogo(void *data)
 		angle_t fa;
 		INT32 i;
 		// spray in all 8 directions!
-		for (i = 0; i < 24; i++)
+		for (i = 0; i < 16; i++)
 		{
 			actor->movedir++;
 			actor->movedir %= NUMDIRS;
 			fa = (actor->movedir*FINEANGLES/8) & FINEMASK;
 			
-			if (actor->reactiontime == 1)
-				ns += actor->scale;
+			if (i > 8)
+				ns += 2*actor->scale/3;
+			else
+				ns += actor->scale/6;
 
 			goop = P_SpawnMobj(actor->x, actor->y, fz, actor->info->painchance);
 			if (P_MobjWasRemoved(goop))
@@ -7323,10 +7326,21 @@ void A_Boss2Pogo(void *data)
 			goop->momx = FixedMul(FINECOSINE(fa),ns);
 			goop->momy = FixedMul(FINESINE(fa),ns);
 			goop->momz = FixedMul(ns, actor->scale);
+			
+			if (P_RandomChance(FRACUNIT/2))
+			{
+				goop->momx *= 2;
+				goop->momy *= 2;
+			}
+			else if ((i < 9) && P_RandomChance(FRACUNIT/2))
+			{
+				goop->momx *= 3;
+				goop->momy *= 3;
+			}
 
 			goop->fuse = 10*TICRATE;
 		}
-		actor->reactiontime -= 1; // loop twice
+		actor->reactiontime -= 1;
 		if (actor->info->attacksound)
 			S_StartAttackSound(actor, actor->info->attacksound);
 		actor->flags2 |= MF2_JUSTATTACKED;
@@ -11231,7 +11245,7 @@ void A_TrapShot(void *data)
 				vertang = InvAngle(vertang); // flip firing angle
 		missile->momx = FixedMul(FINECOSINE(vertang>>ANGLETOFINESHIFT), FixedMul(FINECOSINE(missile->angle>>ANGLETOFINESHIFT), speed));
 		missile->momy = FixedMul(FINECOSINE(vertang>>ANGLETOFINESHIFT), FixedMul(FINESINE(missile->angle>>ANGLETOFINESHIFT), speed));
-		missile->momz = FixedMul(FINESINE(vertang>>ANGLETOFINESHIFT), speed);
+		missile->momz = FixedMul(FINESINE(vertang>>ANGLETOFINESHIFT), FixedMul(speed, 11*FRACUNIT/8));
 	}
 }
 
@@ -13064,7 +13078,7 @@ void A_Boss5FindWaypoint(void *data)
 	if (LUA_CallAction(A_BOSS5FINDWAYPOINT, actor))
 		return;
 
-	avoidcenter = !actor->tracer || (actor->health == actor->info->damage+1);
+	avoidcenter = !actor->tracer || (actor->health > actor->info->damage);
 
 	if (locvar1 == 2) // look for the boss flypoint
 	{
@@ -13420,8 +13434,11 @@ void A_Boss5Calm(void *data)
 	if (LUA_CallAction(A_BOSS5CALM, actor))
 		return;
 		
-	if (actor->health > 2 && (actor->flags2 & MF2_FRET)) //explosively calm!
-		P_SpawnMobjFromMobj(actor, 0, 0, 0, MT_PROXIMITYTNT);
+	if ((actor->flags2 & MF2_FRET) && actor->health > actor->info->damage) //explosively calm!
+	{
+		mobj_t *tnt = P_SpawnMobjFromMobj(actor, 0, 0, 0, MT_TNTBARREL);
+		tnt->target = actor;
+	}
 
 	actor->flags |= MF_SHOOTABLE;
 	actor->flags2 &= ~MF2_FRET;
@@ -13520,6 +13537,9 @@ void A_Boss5PinchShot(void *data)
 
 	missile->momx = missile->momy = 0;
 	missile->momz = P_MobjFlip(actor)*missile->info->speed/2;
+	missile->fuse = TICRATE;
+	if (missile->type == MT_TNTBARREL)
+		P_SetMobjState(missile, S_TNTBARREL_FLYING);
 }
 
 // Function: A_Boss5MakeItRain

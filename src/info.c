@@ -1268,7 +1268,7 @@ state_t states[NUMSTATES] =
 	{SPR_EGGM,  6,  1, A_Boss1Laser,         MT_LASER, 2|(1<<16), S_EGGMOBILE_PANIC15, 0}, // S_EGGMOBILE_PANIC14
 	{SPR_EGGM,  6,  0, A_Repeat, 45,    S_EGGMOBILE_PANIC13, S_EGGMOBILE_ROFL, 0}, // S_EGGMOBILE_PANIC15
 	{SPR_EGGM, 19,  24, A_Pain,                  0, 0, S_EGGMOBILE_PAIN2, 0},  // S_EGGMOBILE_PAIN
-	{SPR_EGGM, 19,  16, A_SkullAttack,           3, 1, S_EGGMOBILE_STND, 0},   // S_EGGMOBILE_PAIN2
+	{SPR_EGGM, 19,  15, A_SkullAttack,           3, 0, S_EGGMOBILE_STND, 0},   // S_EGGMOBILE_PAIN2
 	{SPR_EGGM, 20,  2, A_Fall,                  17, 0, S_EGGMOBILE_DIE2, 0},   // S_EGGMOBILE_DIE1
 	{SPR_EGGM, 20,  2, A_BossScream,             0, 0, S_EGGMOBILE_DIE3, 0},   // S_EGGMOBILE_DIE2
 	{SPR_EGGM, 20,  0, A_Repeat, 17, S_EGGMOBILE_DIE2, S_EGGMOBILE_DIE4, 0},   // S_EGGMOBILE_DIE3
@@ -1441,7 +1441,7 @@ state_t states[NUMSTATES] =
 	{SPR_PLAY,         0, 0, A_Boss5Calm, 0, 0, S_FANG_CHECKPATH2, 0}, // S_FANG_CHECKPATH1
 	{SPR_PLAY,         0, 0, A_Repeat, 0, S_FANG_PATHINGCONT1, S_FANG_SKID1, 0}, // S_FANG_CHECKPATH2
 
-	{SPR_PLAY,         0, 0, A_Boss5PinchShot, MT_CYBRAKDEMON_NAPALM_BOMB_SMALL, -16, S_FANG_PATHINGCONT2, 0}, // S_FANG_PATHINGCONT1
+	{SPR_PLAY,         0, 0, A_Boss5PinchShot, MT_TNTBARREL, -16, S_FANG_PATHINGCONT2, 0}, // S_FANG_PATHINGCONT1
 	{SPR_PLAY,         0, 0, A_PlayActiveSound, 0, 0, S_FANG_PATHINGCONT3, 0}, // S_FANG_PATHINGCONT2
 	{SPR_PLAY, SPR2_LAND, 2, A_Thrust, 0, 1, S_FANG_PATHING, 0}, // S_FANG_PATHINGCONT3
 
@@ -1484,7 +1484,7 @@ state_t states[NUMSTATES] =
 	{SPR_PLAY, SPR2_MSC3, 16, A_FaceTarget, 1, 5, S_FANG_PINCHLOBSHOT1, 0}, // S_FANG_PINCHLOBSHOT0
 	{SPR_PLAY, SPR2_MSC3,  2, A_FaceTarget, 3, 0, S_FANG_PINCHLOBSHOT2, 0}, // S_FANG_PINCHLOBSHOT1
 	{SPR_PLAY, SPR2_MSC3,  2, A_FaceTarget, 3, 0, S_FANG_PINCHLOBSHOT3, 0}, // S_FANG_PINCHLOBSHOT2
-	{SPR_PLAY, SPR2_MSC3, 30, A_Boss5MakeItRain, MT_FBOMB, -16, S_FANG_PINCHLOBSHOT4, 0}, // S_FANG_PINCHLOBSHOT3
+	{SPR_PLAY, SPR2_MSC3, 30, A_Boss5MakeItRain, MT_FBOMB, 0, S_FANG_PINCHLOBSHOT4, 0}, // S_FANG_PINCHLOBSHOT3
 	{SPR_PLAY, SPR2_STND, 18, A_LinedefExecuteFromArg, 4, 0, S_FANG_PINCHLOBSHOT5, 0}, // S_FANG_PINCHLOBSHOT4
 	{SPR_PLAY,         0,  0, A_Boss5Calm, 0, 0, S_FANG_PATHINGSTART1, 0}, // S_FANG_PINCHLOBSHOT5
 
@@ -12931,7 +12931,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		S_TNTBARREL_EXPL1,         // deathstate
 		S_NULL,         // xdeathstate
 		sfx_s3k4e,      // deathsound
-		0,              // speed
+		25*FRACUNIT,    // speed
 		24*FRACUNIT,    // radius
 		63*FRACUNIT,    // height
 		0,              // display offset

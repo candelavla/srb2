@@ -1078,8 +1078,18 @@ static unsigned PIT_DoCheckThing(mobj_t *thing)
 	if (thing->type == MT_PTERABYTE && tmthing->player)
 		P_DoPterabyteCarry(tmthing->player, thing);
 
-	if (thing->type == MT_TNTBARREL && tmthing->player)
-		P_PlayerBarrelCollide(tmthing, thing);
+	if (thing->type == MT_TNTBARREL)
+	{
+		if (tmthing->player)
+		{
+			P_PlayerBarrelCollide(tmthing, thing);
+		}
+		else if (tmthing->type == MT_FANG && tmthing->state == &states[S_FANG_SKID2])
+		{
+			P_RemoveMobj(thing);
+			return CHECKTHING_NOCOLLIDE;
+		}
+	}
 
 	if (thing->type == MT_VULTURE && tmthing->type == MT_VULTURE)
 	{
