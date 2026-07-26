@@ -11624,7 +11624,7 @@ void A_BrakChase(void *data)
 		return;
 	}
 	
-	actor->movecount -= max(1, ((actor->health/actor->info->spawnhealth)*locvar1)<<1);
+	actor->movecount -= max(1, actor->health/2);
 	
 	// Check if we can attack
 	if (P_CheckMissileRange(actor) && actor->movecount < 0)
