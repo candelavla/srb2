@@ -3272,7 +3272,7 @@ void A_SkullAttack(void *data)
 	if (dist < 1)
 		dist = 1;
 
-	actor->momz = speed/5;
+	actor->momz = speed/7;
 
 	if (locvar1 == 1)
 		actor->momz = -actor->momz;
@@ -8407,8 +8407,11 @@ void A_Shockwave(void *data)
 
 	if (LUA_CallAction(A_SHOCKWAVE, actor))
 		return;
+	
+	if (!locvar1) // use the default shockwave mobj if none supplied
+		locvar1 = MT_SHOCKWAVE;
 
-	if (locvar2 == 0)
+	if (!locvar2)
 		locvar2 = 24; // a sensible default, just in case
 
 	interval = FixedAngle((360 << FRACBITS) / locvar2);
@@ -11544,10 +11547,6 @@ void A_VileFire(void *data)
 //
 // Description: Chase after your target, but speed and attack are tied to health.
 //
-// Every time this is called, generate a random number from a 1/4 to 3/4 of mobj's spawn health.
-// If health is above that value, use missilestate to attack.
-// If health is at or below that value, use meleestate to attack (default to missile state if not available).
-//
 // Likewise, state will linearly speed up as health goes down.
 // Upper bound will be the frame's normal length.
 // Lower bound defaults to 1 tic (technically 0, but we round up), unless a lower bound is specified in var1.
@@ -11559,23 +11558,20 @@ void A_BrakChase(void *data)
 {
 	mobj_t *actor = data;
 	INT32 delta;
-	INT32 lowerbound;
 	INT32 newtics;
 	INT32 locvar1 = var1;
 	INT32 locvar2 = var2;
 
 	if (LUA_CallAction(A_BRAKCHASE, actor))
 		return;
+		
+	if (locvar1 < 0)
+		locvar1 = 0;
 
 	// Set new tics NOW, in case the state changes while we're doing this and we try applying this to the painstate or something silly
 	if (actor->tics > 1 && locvar1 < actor->tics) // Not much point, otherwise
 	{
-		if (locvar1 < 0)
-			lowerbound = 0;
-		else
-			lowerbound = locvar1;
-
-		newtics = (((actor->tics - lowerbound) * actor->health) / actor->info->spawnhealth) + lowerbound;
+		newtics = (((actor->tics - locvar1) * actor->health) / actor->info->spawnhealth) + locvar1;
 		if (newtics < 1)
 			newtics = 1;
 
@@ -11627,13 +11623,14 @@ void A_BrakChase(void *data)
 		P_NewChaseDir(actor);
 		return;
 	}
-
+	
+	actor->movecount -= max(1, ((actor->health/actor->info->spawnhealth)*locvar1)<<1);
+	
 	// Check if we can attack
-	if (P_CheckMissileRange(actor) && !actor->movecount)
+	if (P_CheckMissileRange(actor) && actor->movecount < 0)
 	{
 		// Check if we should use "melee" attack first. (Yes, this still runs outside of melee range. Quiet, you.)
-		if (actor->info->meleestate
-			&& actor->health <= P_RandomRange(actor->info->spawnhealth/4, (actor->info->spawnhealth * 3)/4)) // Guaranteed true if <= 1/4 health, guaranteed false if > 3/4 health
+		if (actor->info->meleestate && (actor->health != actor->info->spawnhealth) && ((actor->health < 4) || (P_RandomChance(FRACUNIT/(actor->health/2))))) // increase chance as health lowers
 		{
 			if (actor->info->attacksound)
 				S_StartAttackSound(actor, actor->info->attacksound);
@@ -11655,9 +11652,10 @@ void A_BrakChase(void *data)
 	if (multiplayer && !actor->threshold && (actor->target->health <= 0 || !P_CheckSight(actor, actor->target))
 		&& P_LookForPlayers(actor, true, false, 0))
 		return; // got a new target
+		
 
 	// chase towards player
-	if (--actor->movecount < 0 || !P_Move(actor, actor->info->speed))
+	if (actor->movecount < 0 || !P_Move(actor, actor->info->speed))
 	{
 		if (P_MobjWasRemoved(actor))
 			return;
@@ -11712,14 +11710,19 @@ void A_BrakFireShot(void *data)
 	else
 		z = actor->z + FixedMul(144*FRACUNIT, actor->scale);
 
-	P_SpawnXYZMissile(actor, actor->target, locvar1, x, y, z);
+	mobj_t *launch = P_SpawnXYZMissile(actor, actor->target, locvar1, x, y, z);
+	if (P_MobjWasRemoved(launch))
+		return;
 
-	if (!(actor->flags & MF_BOSS))
+	if (launch->type == MT_CYBRAKDEMON_MISSILE)
 	{
-		if (ultimatemode)
-			actor->reactiontime = actor->info->reactiontime*TICRATE;
-		else
-			actor->reactiontime = actor->info->reactiontime*TICRATE*2;
+		launch->spritexscale = actor->spritexscale*2;
+		launch->spriteyscale = actor->spriteyscale*2;
+	}
+	else if (launch->type == MT_BLACKEGGMAN_GOOPFIRE)
+	{
+		launch->scale = actor->scale*2;
+		launch->fuse = 5*TICRATE;
 	}
 }
 

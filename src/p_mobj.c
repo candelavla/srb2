@@ -4287,27 +4287,6 @@ static void P_Boss3Thinker(mobj_t *mobj)
 
 	if (mobj->health <= 0)
 		return;
-	/*
-	{
-		mobj->movecount = 0;
-		mobj->reactiontime = 0;
-
-		if (mobj->state < &states[mobj->info->xdeathstate])
-			return;
-
-		if (mobj->threshold == -1)
-		{
-			mobj->momz = mobj->info->speed;
-			return;
-		}
-		else
-		{
-			mobj->flags |= MF_NOGRAVITY|MF_NOCLIP;
-			mobj->flags |= MF_NOCLIPHEIGHT;
-			mobj->threshold = -1;
-			return;
-		}
-	}*/
 
 	if (mobj->reactiontime) // At the bottom of the water
 	{
@@ -4591,7 +4570,7 @@ static void P_Boss4MoveSpikeballs(mobj_t *mobj, angle_t angle, fixed_t fz)
 	{
 		for (seg = base, dist = 172*FRACUNIT, s = 9; seg; seg = seg->hnext, dist += 128*FRACUNIT, --s)
 		{
-			P_SetScale(seg, mobj->scale+((mobj->info->spawnhealth - mobj->health)*FRACUNIT/16), false);
+			P_SetScale(seg, mobj->scale+(min((mobj->info->spawnhealth - mobj->health), 5)*FRACUNIT/16), false);
 			P_MoveOrigin(seg, mobj->x + P_ReturnThrustX(mobj, angle, dist), mobj->y + P_ReturnThrustY(mobj, angle, dist), bz + FixedMul(fz, FixedDiv(s<<FRACBITS, 9<<FRACBITS)));
 		}
 		angle += ANGLE_MAX/3;
@@ -4644,7 +4623,7 @@ static void P_Boss4PinchSpikeballs(mobj_t *mobj, angle_t angle, fixed_t dz)
 		{
 			seg->z = bz + (dz*(9-s));
 			P_TryMove(seg, workx + (dx*s), worky + (dy*s), true);
-			P_SetScale(seg, mobj->scale+(4*FRACUNIT/16), false);
+			P_SetScale(seg, mobj->scale+(min((mobj->info->spawnhealth - mobj->health), 5)*FRACUNIT/16), false);
 			if (P_MobjWasRemoved(seg))
 				return;
 		}
@@ -5405,8 +5384,11 @@ static void P_Boss7Thinker(mobj_t *mobj)
 // Metal Sonic battle boss
 static void P_Boss9Thinker(mobj_t *mobj)
 {
-	if ((statenum_t)(mobj->state-states) == mobj->info->spawnstate)
+	if ((mobj->flags2 & MF2_FRET) && (statenum_t)(mobj->state-states) == mobj->info->spawnstate)
+	{
 		mobj->flags2 &= ~MF2_FRET;
+		mobj->fuse = 0; // immediately counterattack
+	}
 
 	if (!mobj->tracer)
 	{

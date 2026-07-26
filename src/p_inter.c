@@ -1581,18 +1581,29 @@ void P_TouchSpecialThing(mobj_t *special, mobj_t *toucher, boolean heightcheck)
 				if (toucher->momz != 0)
 					special->momz = toucher->momz;
 
-				player->powers[pw_carry] = CR_BRAKGOOP;
 				P_SetTarget(&toucher->tracer, special);
 
 				P_ResetPlayer(player);
 
-				if (special->target && special->target->state == &states[S_BLACKEGG_SHOOT1])
+				if (special->target)
 				{
-					if (special->target->health <= 2 && P_RandomChance(FRACUNIT/2))
-						P_SetMobjState(special->target, special->target->info->missilestate);
-					else
+					if (special->target->type == MT_CYBRAKDEMON && player->powers[pw_carry] != CR_BRAKGOOP && !special->extravalue1)
+					{
+						special->target->target = toucher;
+						A_FaceTarget(special->target->target);
 						P_SetMobjState(special->target, special->target->info->raisestate);
+						special->target->flags2 |= MF2_JUSTATTACKED;
+						special->extravalue1 = 1; // each glue mobj may only grab 1 player
+					}	
+					else if (special->target->state == &states[S_BLACKEGG_SHOOT1])
+					{
+						if (special->target->health <= 2 && P_RandomChance(FRACUNIT/2))
+							P_SetMobjState(special->target, special->target->info->missilestate);
+						else
+							P_SetMobjState(special->target, special->target->info->raisestate);
+					}
 				}
+				player->powers[pw_carry] = CR_BRAKGOOP;
 			}
 			return;
 		case MT_EGGSHIELD:
