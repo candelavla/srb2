@@ -2428,6 +2428,13 @@ boolean P_PlayerHitFloor(player_t *player, boolean dorollstuff)
 
 	if ((clipmomz = !(P_CheckDeathPitCollide(player->mo))) && player->mo->health && !player->spectator)
 	{
+		UINT8 shouldForce = LUA_HookPlayerHitFloor(player);
+
+		if (shouldForce == 1)
+			return true;
+		else if (shouldForce == 2)
+			return false;
+
 		if (dorollstuff)
 		{
 			if ((player->charability2 == CA2_SPINDASH) && (player->panim != PA_ABILITY) && (player->panim != PA_ETC) && !(player->charability == CA_GLIDEANDCLIMB && (player->pflags & PF_THOKKED) && player->panim == PA_FALL)

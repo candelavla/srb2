@@ -85,6 +85,7 @@ automatically.
 	X (KeyDown),\
 	X (KeyUp),\
 	X (ShieldButtonSpecial),\
+	X (PlayerHitFloor), /* P_PlayerHitFloor */ \
 	X (TextInput),\
 
 #define STRING_HOOK_LIST(X) \
@@ -183,3 +184,4 @@ int  LUA_HookMusicChange(const char *oldname, struct MusicChange *);
 int  LUA_HookSoundPlay(sfxenum_t sfx_id, void *origin, const int origintype);
 fixed_t LUA_HookPlayerHeight(player_t *player);
 int  LUA_HookPlayerCanEnterSpinGaps(player_t *player);
+int LUA_HookPlayerHitFloor(player_t* player);

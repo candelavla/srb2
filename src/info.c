@@ -7031,7 +7031,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		100,            // mass
 		0,              // damage
 		sfx_None,       // activesound
-		MF_SLIDEME|MF_SPECIAL, // flags
+		MF_SLIDEME|MF_SPECIAL|MF_APPLYSLOPE, // flags
 		S_BLUESPHEREBONUS // raisestate
 	},
 
@@ -7484,7 +7484,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		100,            // mass
 		0,              // damage
 		sfx_None,       // activesound
-		MF_SLIDEME|MF_SPECIAL, // flags
+		MF_SLIDEME|MF_SPECIAL|MF_APPLYSLOPE, // flags
 		S_NULL          // raisestate
 	},
 
@@ -9995,7 +9995,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		100,            // mass
 		1,              // damage
 		sfx_None,       // activesound
-		MF_SOLID|MF_PUSHABLE|MF_SLIDEME, // flags
+		MF_SOLID|MF_PUSHABLE|MF_SLIDEME|MF_APPLYSLOPE, // flags
 		S_NULL          // raisestate
 	},
 
@@ -12425,7 +12425,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		100,            // mass
 		1,              // damage
 		sfx_s3k64,      // activesound
-		MF_SPECIAL|MF_BOUNCE,      // flags
+		MF_SPECIAL|MF_BOUNCE|MF_APPLYSLOPE, // flags
 		S_NULL          // raisestate
 	},
 
@@ -12452,7 +12452,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		100,            // mass
 		1,              // damage
 		sfx_s3k64,      // activesound
-		MF_SPECIAL|MF_BOUNCE,      // flags
+		MF_SPECIAL|MF_BOUNCE|MF_APPLYSLOPE, // flags
 		S_NULL          // raisestate
 	},
 
@@ -18614,7 +18614,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		pw_bouncering,  // mass
 		0,              // damage
 		sfx_None,       // activesound
-		MF_SLIDEME|MF_SPECIAL|MF_NOGRAVITY|MF_NOCLIPHEIGHT, // flags
+		MF_SLIDEME|MF_SPECIAL|MF_NOGRAVITY|MF_NOCLIPHEIGHT|MF_APPLYSLOPE, // flags
 		S_NULL          // raisestate
 	},
 
@@ -18641,7 +18641,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		pw_railring,    // mass
 		0,              // damage
 		sfx_None,       // activesound
-		MF_SLIDEME|MF_SPECIAL|MF_NOGRAVITY|MF_NOCLIPHEIGHT, // flags
+		MF_SLIDEME|MF_SPECIAL|MF_NOGRAVITY|MF_NOCLIPHEIGHT|MF_APPLYSLOPE, // flags
 		S_NULL          // raisestate
 	},
 
@@ -18668,7 +18668,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		pw_infinityring,// mass
 		0,              // damage
 		sfx_None,       // activesound
-		MF_SLIDEME|MF_SPECIAL|MF_NOGRAVITY|MF_NOCLIPHEIGHT, // flags
+		MF_SLIDEME|MF_SPECIAL|MF_NOGRAVITY|MF_NOCLIPHEIGHT|MF_APPLYSLOPE, // flags
 		S_NULL          // raisestate
 	},
 
@@ -18695,7 +18695,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		pw_automaticring, // mass
 		0,              // damage
 		sfx_None,       // activesound
-		MF_SLIDEME|MF_SPECIAL|MF_NOGRAVITY|MF_NOCLIPHEIGHT, // flags
+		MF_SLIDEME|MF_SPECIAL|MF_NOGRAVITY|MF_NOCLIPHEIGHT|MF_APPLYSLOPE, // flags
 		S_NULL          // raisestate
 	},
 
@@ -18722,7 +18722,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		pw_explosionring, // mass
 		0,              // damage
 		sfx_None,       // activesound
-		MF_SLIDEME|MF_SPECIAL|MF_NOGRAVITY|MF_NOCLIPHEIGHT, // flags
+		MF_SLIDEME|MF_SPECIAL|MF_NOGRAVITY|MF_NOCLIPHEIGHT|MF_APPLYSLOPE, // flags
 		S_NULL          // raisestate
 	},
 
@@ -18749,7 +18749,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		pw_scatterring, // mass
 		0,              // damage
 		sfx_None,       // activesound
-		MF_SLIDEME|MF_SPECIAL|MF_NOGRAVITY|MF_NOCLIPHEIGHT, // flags
+		MF_SLIDEME|MF_SPECIAL|MF_NOGRAVITY|MF_NOCLIPHEIGHT|MF_APPLYSLOPE, // flags
 		S_NULL          // raisestate
 	},
 
@@ -18776,7 +18776,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		pw_grenadering, // mass
 		0,              // damage
 		sfx_None,       // activesound
-		MF_SLIDEME|MF_SPECIAL|MF_NOGRAVITY|MF_NOCLIPHEIGHT, // flags
+		MF_SLIDEME|MF_SPECIAL|MF_NOGRAVITY|MF_NOCLIPHEIGHT|MF_APPLYSLOPE, // flags
 		S_NULL          // raisestate
 	},
 
@@ -18804,7 +18804,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		pw_bouncering,  // mass
 		2*TICRATE,      // damage
 		sfx_None,       // activesound
-		MF_SLIDEME|MF_SPECIAL|MF_NOGRAVITY|MF_NOCLIPHEIGHT, // flags
+		MF_SLIDEME|MF_SPECIAL|MF_NOGRAVITY|MF_NOCLIPHEIGHT|MF_APPLYSLOPE, // flags
 		S_NULL          // raisestate
 	},
 
@@ -18831,7 +18831,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		pw_railring,    // mass
 		2*TICRATE,      // damage
 		sfx_None,       // activesound
-		MF_SLIDEME|MF_SPECIAL|MF_NOGRAVITY|MF_NOCLIPHEIGHT, // flags
+		MF_SLIDEME|MF_SPECIAL|MF_NOGRAVITY|MF_NOCLIPHEIGHT|MF_APPLYSLOPE, // flags
 		S_NULL          // raisestate
 	},
 
@@ -18858,7 +18858,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		pw_automaticring, // mass
 		2*TICRATE,      // damage
 		sfx_None,       // activesound
-		MF_SLIDEME|MF_SPECIAL|MF_NOGRAVITY|MF_NOCLIPHEIGHT, // flags
+		MF_SLIDEME|MF_SPECIAL|MF_NOGRAVITY|MF_NOCLIPHEIGHT|MF_APPLYSLOPE, // flags
 		S_NULL          // raisestate
 	},
 
@@ -18885,7 +18885,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		pw_explosionring, // mass
 		2*TICRATE,      // damage
 		sfx_None,       // activesound
-		MF_SLIDEME|MF_SPECIAL|MF_NOGRAVITY|MF_NOCLIPHEIGHT, // flags
+		MF_SLIDEME|MF_SPECIAL|MF_NOGRAVITY|MF_NOCLIPHEIGHT|MF_APPLYSLOPE, // flags
 		S_NULL          // raisestate
 	},
 
@@ -18912,7 +18912,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		pw_scatterring, // mass
 		2*TICRATE,      // damage
 		sfx_None,       // activesound
-		MF_SLIDEME|MF_SPECIAL|MF_NOGRAVITY|MF_NOCLIPHEIGHT, // flags
+		MF_SLIDEME|MF_SPECIAL|MF_NOGRAVITY|MF_NOCLIPHEIGHT|MF_APPLYSLOPE, // flags
 		S_NULL          // raisestate
 	},
 
@@ -18939,7 +18939,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		pw_grenadering, // mass
 		2*TICRATE,      // damage
 		sfx_None,       // activesound
-		MF_SLIDEME|MF_SPECIAL|MF_NOGRAVITY|MF_NOCLIPHEIGHT, // flags
+		MF_SLIDEME|MF_SPECIAL|MF_NOGRAVITY|MF_NOCLIPHEIGHT|MF_APPLYSLOPE, // flags
 		S_NULL          // raisestate
 	},
 
@@ -19155,7 +19155,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		100,            // mass
 		0,              // damage
 		sfx_None,       // activesound
-		MF_SLIDEME|MF_SPECIAL, // flags
+		MF_SLIDEME|MF_SPECIAL|MF_APPLYSLOPE, // flags
 		S_NULL          // raisestate
 	},
 
@@ -19991,7 +19991,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		100,            // mass
 		0,              // damage
 		sfx_None,       // activesound
-		MF_SLIDEME|MF_SPECIAL, // flags
+		MF_SLIDEME|MF_SPECIAL|MF_APPLYSLOPE, // flags
 		S_NIGHTSCHIPBONUS // raisestate
 	},
 
@@ -21181,7 +21181,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		0,              // mass
 		0,              // damage
 		sfx_rocks1,     // activesound
-		MF_PAIN|MF_BOUNCE,  // flags
+		MF_PAIN|MF_BOUNCE|MF_APPLYSLOPE,  // flags
 		S_NULL          // raisestate
 	},
 
