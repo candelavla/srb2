@@ -10294,8 +10294,8 @@ void P_MobjThinker(mobj_t *mobj)
 	{
 		if (!P_MobjDeadThink(mobj))
 			return;
-			
-		if (P_WeaponOrPanel(mobj->type == 2)) // Fading tile
+
+		if (P_WeaponOrPanel(mobj->type) == 2) // Fading tile
 		{
 			// TODO: Maybe use mobj->alpha instead of messing with frame flags
 			INT32 value = mobj->info->damage/10;
