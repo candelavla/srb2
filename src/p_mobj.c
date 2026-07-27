@@ -10249,16 +10249,16 @@ void P_MobjThinker(mobj_t *mobj)
 		}
 	}
 
-	// Special thinker for scenery objects
-	if (mobj->flags & MF_SCENERY)
-	{
-		P_MobjSceneryThink(mobj);
-		return;
-	}
-
-	// Check for a Lua thinker first
 	if (!mobj->player)
 	{
+		// Special thinker for scenery objects
+		if (mobj->flags & MF_SCENERY)
+		{
+			P_MobjSceneryThink(mobj);
+			return;
+		}
+
+		// Check for a Lua thinker first
 		if (LUA_HookMobj(mobj, MOBJ_HOOK(MobjThinker)) || P_MobjWasRemoved(mobj))
 			return;
 	}
