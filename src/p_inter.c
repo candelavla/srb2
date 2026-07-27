@@ -1575,6 +1575,9 @@ void P_TouchSpecialThing(mobj_t *special, mobj_t *toucher, boolean heightcheck)
 		case MT_BLACKEGGMAN_GOOPFIRE:
 			if (!player->powers[pw_flashing] && !(player->powers[pw_ignorelatch] & (1<<15)))
 			{
+				if (special->extravalue1 || player->powers[pw_carry] == CR_BRAKGOOP) // each glue mobj may only grab 1 player
+					return;
+
 				toucher->momx = 0;
 				toucher->momy = 0;
 
@@ -1585,15 +1588,14 @@ void P_TouchSpecialThing(mobj_t *special, mobj_t *toucher, boolean heightcheck)
 
 				P_ResetPlayer(player);
 
-				if (special->target)
+				if (special->target && !P_MobjWasRemoved(special->target) && !player->bot)
 				{
-					if (special->target->type == MT_CYBRAKDEMON && player->powers[pw_carry] != CR_BRAKGOOP && !special->extravalue1)
+					if (special->target->type == MT_CYBRAKDEMON)
 					{
 						special->target->target = toucher;
 						A_FaceTarget(special->target->target);
 						P_SetMobjState(special->target, special->target->info->raisestate);
 						special->target->flags2 |= MF2_JUSTATTACKED;
-						special->extravalue1 = 1; // each glue mobj may only grab 1 player
 					}	
 					else if (special->target->state == &states[S_BLACKEGG_SHOOT1])
 					{
@@ -1603,6 +1605,8 @@ void P_TouchSpecialThing(mobj_t *special, mobj_t *toucher, boolean heightcheck)
 							P_SetMobjState(special->target, special->target->info->raisestate);
 					}
 				}
+				special->extravalue1 = 1;
+				S_StartSoundFromMobj(special, sfx_s3k4a);
 				player->powers[pw_carry] = CR_BRAKGOOP;
 			}
 			return;

@@ -6545,7 +6545,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		1,                  // damage
 		sfx_bewar1,         // activesound
 		MF_SPECIAL|MF_BOSS|MF_SHOOTABLE, // flags
-		S_CYBRAKDEMON_MISSILE_ATTACK4    // raisestate
+		S_CYBRAKDEMON_MISSILE_ATTACK5    // raisestate
 	},
 
 	{           // MT_CYBRAKDEMON_ELECTRIC_BARRIER
