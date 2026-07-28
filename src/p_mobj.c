@@ -4720,21 +4720,19 @@ static void P_Boss4Thinker(mobj_t *mobj)
 	{
 		INT32 oldmovecount = mobj->movecount;
 		if (mobj->movedir == 3) // pinch start
-			movespeed = -(200<<(FRACBITS>>1));
+			movespeed = -(250<<(FRACBITS>>1));
 		else if (mobj->movedir > 3) // pinch
 		{
-			movespeed = 425<<(FRACBITS>>1);
-			movespeed += (75*(mobj->info->spawnhealth-mobj->health)<<(FRACBITS>>1));
+			movespeed = 400<<(FRACBITS>>1);
+			movespeed += (72*(mobj->info->spawnhealth-mobj->health)<<(FRACBITS>>1));
 			if (mobj->movedir == 4)
 				movespeed = -movespeed;
 		}
 		else // normal
 		{
-			movespeed = 300<<(FRACBITS>>1);
-			movespeed += ((50*(mobj->info->spawnhealth-mobj->health))<<(FRACBITS>>1));
-			if (leveltime < TICRATE) // start up slower to give the player time to react
-				movespeed /= 3;
-			else if (leveltime < TICRATE*3)
+			movespeed = 250<<(FRACBITS>>1);
+			movespeed += ((45*(mobj->info->spawnhealth-mobj->health))<<(FRACBITS>>1));
+			if (leveltime < 3*TICRATE) // start up slower to give the player time to react
 				movespeed /= 2;
 
 			if (mobj->movedir == 2)
