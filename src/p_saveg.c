@@ -4769,7 +4769,7 @@ static inline void P_ArchiveMisc(save_t *save_p, INT16 mapnum)
 	P_WriteStringN(save_p, timeattackfolder, sizeof(timeattackfolder));
 }
 
-static inline void P_UnArchiveSPGame(save_t *save_p, INT16 mapoverride)
+static void P_UnArchiveSPGame(save_t *save_p, INT16 mapoverride)
 {
 	INT32 i;
 	char testname[sizeof(timeattackfolder)];

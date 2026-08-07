@@ -1153,7 +1153,7 @@ static void R_UpdateTranslation(remaptable_t *tr, skincolornum_t skincolor, INT3
 
 	colorcache_t *cache = tr->skincolor_remaps[cache_index][skincolor - 1];
 	if (cache)
-		R_ApplyTranslationRemap(tr, cache->colors, skincolor, cache_index);
+		R_ApplyTranslationRemap(tr, cache->colors, skincolor, skinnum);
 }
 
 void R_UpdateTranslationRemaps(skincolornum_t skincolor, INT32 skinnum, INT32 cache_index)

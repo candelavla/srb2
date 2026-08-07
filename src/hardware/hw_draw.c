@@ -1175,14 +1175,12 @@ void HWR_DrawFixedFill(fixed_t x, fixed_t y, fixed_t w, fixed_t h, INT32 color)
 {
 	FOutVector v[4];
 	FSurfaceInfo Surf;
-	FBITFIELD flags;
 	float fx = FIXED_TO_FLOAT(x);
 	float fy = FIXED_TO_FLOAT(y);
 	float fw = FIXED_TO_FLOAT(w);
 	float fh = FIXED_TO_FLOAT(h);
 	RGBA_t *palette = HWR_GetTexturePalette();
 	UINT8 alphalevel = ((color & V_ALPHAMASK) >> V_ALPHASHIFT);
-	UINT8 blendmode = ((color & V_BLENDMASK) >> V_BLENDSHIFT);
 
 	UINT8 perplayershuffle = 0;
 
@@ -1342,8 +1340,6 @@ void HWR_DrawFixedFill(fixed_t x, fixed_t y, fixed_t w, fixed_t h, INT32 color)
 	v[2].t = v[3].t = 1.0f;
 
 	Surf.PolyColor = palette[color&0xFF];
-
-	flags = HWR_GetBlendModeFlag(blendmode+1)|PF_NoDepthTest|PF_NoTexture|PF_Modulated;
 
 	if (alphalevel)
 	{
