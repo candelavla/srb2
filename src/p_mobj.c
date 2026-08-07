@@ -3975,7 +3975,6 @@ void P_RainThinker(precipmobj_t *mobj)
 	}
 
 	mobj->z = mobj->floorz;
-	R_ResetPrecipitationMobjInterpolationState(mobj);
 	P_SetPrecipMobjState(mobj, S_SPLASH1);
 }
 
