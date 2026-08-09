@@ -10297,17 +10297,7 @@ void P_MobjThinker(mobj_t *mobj)
 
 		if (P_WeaponOrPanel(mobj->type) == 2) // Fading tile
 		{
-			// TODO: Maybe use mobj->alpha instead of messing with frame flags
-			INT32 value = mobj->info->damage/10;
-			value = mobj->fuse/value;
-			value = 10-value;
-			value--;
-
-			if (value <= 0)
-				value = 1;
-
-			mobj->frame &= ~FF_TRANSMASK;
-			mobj->frame |= value << FF_TRANSSHIFT;
+			mobj->alpha = mobj->fuse<<10;
 		}	
 	}
 	else

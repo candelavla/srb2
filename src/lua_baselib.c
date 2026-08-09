@@ -876,7 +876,7 @@ static int lib_pWeaponOrPanel(lua_State *L)
 	mobjtype_t type = luaL_checkinteger(L, 1);
 	//HUDSAFE
 	NOSPAWNNULL
-	lua_pushboolean(L, P_WeaponOrPanel(type));
+	lua_pushboolean(L, P_WeaponOrPanel(type)); // TODO 2.3: change to pushinteger as C function now returns an integer
 	return 1;
 }
 
