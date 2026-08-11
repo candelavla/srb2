@@ -700,7 +700,7 @@ SINT8 P_MobjFlip(mobj_t *mobj)
 //
 // Returns 1 if weapon ring, 2 if panel; otherwise returns 0
 //
-inline boolean P_WeaponOrPanel(mobjtype_t type)
+UINT8 P_WeaponOrPanel(mobjtype_t type)
 {
 	switch (type)
 	{
@@ -710,6 +710,8 @@ inline boolean P_WeaponOrPanel(mobjtype_t type)
 		case MT_EXPLODEPICKUP:
 		case MT_SCATTERPICKUP:
 		case MT_GRENADEPICKUP:
+			return 2;
+			break;
 		case MT_BOUNCERING:
 		case MT_AUTOMATICRING:
 		case MT_INFINITYRING:
@@ -717,13 +719,13 @@ inline boolean P_WeaponOrPanel(mobjtype_t type)
 		case MT_EXPLOSIONRING:
 		case MT_SCATTERRING:
 		case MT_GRENADERING:
-			return true;
+			return 1;
 			break;
 		default:
 			break;
 			
 	}
-	return false;
+	return 0;
 }
 
 //
@@ -10297,20 +10299,10 @@ void P_MobjThinker(mobj_t *mobj)
 		if (!P_MobjDeadThink(mobj))
 			return;
 
-		// check for a weapon panel
-		switch (mobj->type)
+		if (P_WeaponOrPanel(mobj->type) == 2) // Fading tile
 		{
-			case MT_BOUNCEPICKUP:
-			case MT_RAILPICKUP:
-			case MT_AUTOPICKUP:
-			case MT_EXPLODEPICKUP:
-			case MT_SCATTERPICKUP:
-			case MT_GRENADEPICKUP:
-				mobj->alpha = min(FRACUNIT, mobj->fuse<<10);
-				break;
-			default:
-				break;	
-		}
+			mobj->alpha = mobj->fuse<<10;
+		}	
 	}
 	else
 	{
