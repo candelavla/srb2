@@ -700,7 +700,7 @@ SINT8 P_MobjFlip(mobj_t *mobj)
 //
 // Returns 1 if weapon ring, 2 if panel; otherwise returns 0
 //
-UINT8 P_WeaponOrPanel(mobjtype_t type)
+inline boolean P_WeaponOrPanel(mobjtype_t type)
 {
 	switch (type)
 	{
@@ -710,8 +710,6 @@ UINT8 P_WeaponOrPanel(mobjtype_t type)
 		case MT_EXPLODEPICKUP:
 		case MT_SCATTERPICKUP:
 		case MT_GRENADEPICKUP:
-			return 2;
-			break;
 		case MT_BOUNCERING:
 		case MT_AUTOMATICRING:
 		case MT_INFINITYRING:
@@ -719,13 +717,13 @@ UINT8 P_WeaponOrPanel(mobjtype_t type)
 		case MT_EXPLOSIONRING:
 		case MT_SCATTERRING:
 		case MT_GRENADERING:
-			return 1;
+			return true;
 			break;
 		default:
 			break;
 			
 	}
-	return 0;
+	return false;
 }
 
 //
@@ -10299,20 +10297,20 @@ void P_MobjThinker(mobj_t *mobj)
 		if (!P_MobjDeadThink(mobj))
 			return;
 
-		if (P_WeaponOrPanel(mobj->type) == 2) // Fading tile
+		// check for a weapon panel
+		switch (mobj->type)
 		{
-			// TODO: Maybe use mobj->alpha instead of messing with frame flags
-			INT32 value = mobj->info->damage/10;
-			value = mobj->fuse/value;
-			value = 10-value;
-			value--;
-
-			if (value <= 0)
-				value = 1;
-
-			mobj->frame &= ~FF_TRANSMASK;
-			mobj->frame |= value << FF_TRANSSHIFT;
-		}	
+			case MT_BOUNCEPICKUP:
+			case MT_RAILPICKUP:
+			case MT_AUTOPICKUP:
+			case MT_EXPLODEPICKUP:
+			case MT_SCATTERPICKUP:
+			case MT_GRENADEPICKUP:
+				mobj->alpha = min(FRACUNIT, mobj->fuse<<10);
+				break;
+			default:
+				break;	
+		}
 	}
 	else
 	{
