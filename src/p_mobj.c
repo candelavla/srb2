@@ -700,7 +700,7 @@ SINT8 P_MobjFlip(mobj_t *mobj)
 //
 // Returns 1 if weapon ring, 2 if panel; otherwise returns 0
 //
-UINT8 P_WeaponOrPanel(mobjtype_t type)
+inline UINT8 P_WeaponOrPanel(mobjtype_t type)
 {
 	switch (type)
 	{
@@ -10301,7 +10301,7 @@ void P_MobjThinker(mobj_t *mobj)
 
 		if (P_WeaponOrPanel(mobj->type) == 2) // Fading tile
 		{
-			mobj->alpha = mobj->fuse<<10;
+			mobj->alpha = min(FRACUNIT, mobj->fuse<<10);
 		}	
 	}
 	else
