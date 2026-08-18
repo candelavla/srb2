@@ -10299,27 +10299,10 @@ void P_MobjThinker(mobj_t *mobj)
 		if (!P_MobjDeadThink(mobj))
 			return;
 
-<<<<<<< HEAD
 		if (P_WeaponOrPanel(mobj->type) == 2) // Fading tile
 		{
 			mobj->alpha = min(FRACUNIT, mobj->fuse<<10);
-		}	
-=======
-		// check for a weapon panel
-		switch (mobj->type)
-		{
-			case MT_BOUNCEPICKUP:
-			case MT_RAILPICKUP:
-			case MT_AUTOPICKUP:
-			case MT_EXPLODEPICKUP:
-			case MT_SCATTERPICKUP:
-			case MT_GRENADEPICKUP:
-				mobj->alpha = min(FRACUNIT, mobj->fuse<<10);
-				break;
-			default:
-				break;	
 		}
->>>>>>> stjr/next
 	}
 	else
 	{
