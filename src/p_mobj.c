@@ -10299,10 +10299,27 @@ void P_MobjThinker(mobj_t *mobj)
 		if (!P_MobjDeadThink(mobj))
 			return;
 
+<<<<<<< HEAD
 		if (P_WeaponOrPanel(mobj->type) == 2) // Fading tile
 		{
 			mobj->alpha = min(FRACUNIT, mobj->fuse<<10);
 		}	
+=======
+		// check for a weapon panel
+		switch (mobj->type)
+		{
+			case MT_BOUNCEPICKUP:
+			case MT_RAILPICKUP:
+			case MT_AUTOPICKUP:
+			case MT_EXPLODEPICKUP:
+			case MT_SCATTERPICKUP:
+			case MT_GRENADEPICKUP:
+				mobj->alpha = min(FRACUNIT, mobj->fuse<<10);
+				break;
+			default:
+				break;	
+		}
+>>>>>>> stjr/next
 	}
 	else
 	{
@@ -12047,7 +12064,6 @@ static boolean P_SpawnNonMobjMapThing(mapthing_t *mthing)
 		if (numdmstarts < MAX_DM_STARTS)
 		{
 			deathmatchstarts[numdmstarts] = mthing;
-			mthing->type = 0;
 			numdmstarts++;
 		}
 		return true;
@@ -12057,7 +12073,6 @@ static boolean P_SpawnNonMobjMapThing(mapthing_t *mthing)
 		if (numredctfstarts < MAXPLAYERS)
 		{
 			redctfstarts[numredctfstarts] = mthing;
-			mthing->type = 0;
 			numredctfstarts++;
 		}
 		return true;
@@ -12067,7 +12082,6 @@ static boolean P_SpawnNonMobjMapThing(mapthing_t *mthing)
 		if (numbluectfstarts < MAXPLAYERS)
 		{
 			bluectfstarts[numbluectfstarts] = mthing;
-			mthing->type = 0;
 			numbluectfstarts++;
 		}
 		return true;
