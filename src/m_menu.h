@@ -216,6 +216,9 @@ void M_SortServerList(void);
 // Draws a box with a texture inside as background for messages
 void M_DrawTextBox(INT32 x, INT32 y, INT32 width, INT32 boxlines);
 
+// Remaps the gamepad to ENTER and ESC for menus, with confirm and cancel able to be swapped by the cv_menubuttons setting
+INT32 M_RemapGamepadButton(event_t *ev);
+
 // the function to show a message box typing with the string inside
 // string must be static (not in the stack)
 // routine is a function taking a INT32 in parameter

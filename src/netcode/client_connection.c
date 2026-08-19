@@ -60,7 +60,7 @@ static void DrawConnectionStatusBox(void)
 	if (cl_mode == CL_CONFIRMCONNECT || IsDownloadingFile())
 		return;
 
-	V_DrawCenteredString(BASEVIDWIDTH/2, BASEVIDHEIGHT-16-16, V_YELLOWMAP, "Press ESC to abort");
+	V_DrawCenteredString(BASEVIDWIDTH/2, BASEVIDHEIGHT-16-16, V_YELLOWMAP, "Press ESC/Cancel Button to abort");
 }
 
 static void DrawFileProgress(fileneeded_t *file, int y)
@@ -189,7 +189,7 @@ static void CL_DrawConnectionStatus(void)
 			INT32 totalfileslength;
 			INT32 loadcompletednum = 0;
 
-			V_DrawCenteredString(BASEVIDWIDTH/2, BASEVIDHEIGHT-16-16, V_YELLOWMAP, "Press ESC to abort");
+			V_DrawCenteredString(BASEVIDWIDTH/2, BASEVIDHEIGHT-16-16, V_YELLOWMAP, "Press ESC/Cancel Button to abort");
 
 			// ima just count files here
 			if (fileneeded)
@@ -214,7 +214,7 @@ static void CL_DrawConnectionStatus(void)
 			INT32 checkcompletednum = 0;
 			INT32 i;
 
-			V_DrawCenteredString(BASEVIDWIDTH/2, BASEVIDHEIGHT-16-16, V_YELLOWMAP, "Press ESC to abort");
+			V_DrawCenteredString(BASEVIDWIDTH/2, BASEVIDHEIGHT-16-16, V_YELLOWMAP, "Press ESC/Cancel Button to abort");
 
 			//ima just count files here
 			if (fileneeded)
@@ -302,8 +302,8 @@ static void CL_DrawConnectionStatus(void)
 
 			// Buttons
 			V_DrawFill(8, BASEVIDHEIGHT - 14, BASEVIDWIDTH - 16, 12, 159);
-			V_DrawThinString(16, BASEVIDHEIGHT - 12, V_ALLOWLOWERCASE, va("[%sESC%s] = Abort", "\x82", "\x80"));
-			V_DrawRightAlignedThinString(BASEVIDWIDTH - 12, BASEVIDHEIGHT - 12, V_ALLOWLOWERCASE, va("[%sENTER%s] = Join", "\x82", "\x80"));
+			V_DrawThinString(16, BASEVIDHEIGHT - 12, V_ALLOWLOWERCASE, va("[%sESC/Cancel Button%s] = Abort", "\x82", "\x80"));
+			V_DrawRightAlignedThinString(BASEVIDWIDTH - 12, BASEVIDHEIGHT - 12, V_ALLOWLOWERCASE, va("[%sENTER/Confirm Button%s] = Join", "\x82", "\x80"));
 		}
 		else if (filedownload.current != -1)
 		{
@@ -736,7 +736,7 @@ static void BeginDownload(boolean direct)
 			M_StartMessage(M_GetText(
 				"The direct downloader encountered an error.\n"
 				"See the logfile for more info.\n\n"
-				"Press ESC\n"
+				"Press ESC/Cancel Button\n"
 			), NULL, MM_NOTHING);
 		}
 	}
@@ -744,18 +744,25 @@ static void BeginDownload(boolean direct)
 
 static void M_ConfirmConnect(event_t *ev)
 {
-	if (ev->type == ev_keydown)
+	INT32 ch = -1;
+	if (ev->type == ev_keydown || ev->type == ev_text)
 	{
-		if (ev->key == ' ' || ev->key == 'y' || ev->key == KEY_ENTER || ev->key == GAMEPAD_BUTTON_B)
-		{
-			BeginDownload(UseDirectDownloader());
-			M_ClearMenus(true);
-		}
-		else if (ev->key == 'n' || ev->key == KEY_ESCAPE || ev->key == GAMEPAD_BUTTON_X)
-		{
-			cl_mode = CL_ABORTED;
-			M_ClearMenus(true);
-		}
+		ch = ev->key;
+	}
+	else if (ev->type == ev_gamepad_down)
+	{
+		ch = M_RemapGamepadButton(ev);
+	}
+
+	if (ch == 'y' || ch == KEY_ENTER)
+	{
+		BeginDownload(UseDirectDownloader());
+		M_ClearMenus(true);
+	}
+	else if (ch == 'n' || ch == KEY_ESCAPE)
+	{
+		cl_mode = CL_ABORTED;
+		M_ClearMenus(true);
 	}
 }
 
@@ -799,13 +806,13 @@ static void ShowDownloadConsentMessage(void)
 			"\n"
 			"You may download server addons,\nand wait for a slot.\n"
 			"\n"
-			"Press ENTER to continue\nor ESC to cancel.\n"
+			"Press ENTER/Confirm Button to continue\nor ESC/Cancel Button to abort.\n"
 		), downloadsize), M_ConfirmConnect, MM_EVENTHANDLER);
 	else
 		M_StartMessage(va(M_GetText(
 			"Download of %s of additional\ncontent is required to join.\n"
 			"\n"
-			"Press ENTER to continue\nor ESC to cancel.\n"
+			"Press ENTER/Confirm Button to continue\nor ESC/Cancel Button to abort.\n"
 		), downloadsize), M_ConfirmConnect, MM_EVENTHANDLER);
 
 	cl_mode = CL_CONFIRMCONNECT;
@@ -880,7 +887,7 @@ static boolean CL_FinishedFileList(void)
 			"You have too many WAD files loaded\n"
 			"to add ones the server is using.\n"
 			"Please restart SRB2 before connecting.\n\n"
-			"Press ESC\n"
+			"Press ESC/Cancel Button\n"
 		), NULL, MM_NOTHING);
 		return false;
 	}
@@ -895,7 +902,7 @@ static boolean CL_FinishedFileList(void)
 			"SRB2 will automatically add\n"
 			"everything you need when you join.\n"
 			"\n"
-			"Press ESC\n"
+			"Press ESC/Cancel Button\n"
 		), NULL, MM_NOTHING);
 		return false;
 	}
@@ -908,7 +915,7 @@ static boolean CL_FinishedFileList(void)
 				"\n"
 				"You may load server addons (if any), and wait for a slot.\n"
 				"\n"
-				"Press ENTER to continue\nor ESC to cancel.\n\n"
+				"Press ENTER/Confirm Button to continue\nor ESC/Cancel Button to abort.\n\n"
 			), M_ConfirmConnect, MM_EVENTHANDLER);
 			cl_mode = CL_CONFIRMCONNECT;
 			curfadevalue = 0;
@@ -935,7 +942,7 @@ static boolean CL_FinishedFileList(void)
 				"See the console or log file\n"
 				"for additional details.\n"
 				"\n"
-				"Press ESC\n"
+				"Press ESC/Cancel Button\n"
 			), NULL, MM_NOTHING);
 			return false;
 		}
@@ -957,7 +964,7 @@ static boolean CL_FinishedFileList(void)
 
 static const char * InvalidServerReason (serverinfo_pak *info)
 {
-#define EOT "\nPress ESC\n"
+#define EOT "\nPress ESC/Cancel Button\n"
 
 	// Magic number for new packet format
 	if (info->_255 != 255)
@@ -1231,7 +1238,7 @@ static boolean CL_ServerConnectionTicker(const char *tmpsave, tic_t *oldtic, tic
 					"5 minute wait time exceeded.\n"
 					"You may retry connection.\n"
 					"\n"
-					"Press ESC\n"
+					"Press ESC/Cancel Button\n"
 				), NULL, MM_NOTHING);
 				return false;
 			}
@@ -1280,34 +1287,43 @@ static boolean CL_ServerConnectionTicker(const char *tmpsave, tic_t *oldtic, tic
 	if (*oldtic != I_GetTime())
 	{
 		I_OsPolling();
-
-		if (cl_mode == CL_CONFIRMCONNECT)
-			D_ProcessEvents(); //needed for menu system to receive inputs
-		else
+		
+		event_t *ev = &events[eventtail];
+		INT32 ch = -1;
+		
+		if (ev->type == ev_keydown || ev->type == ev_text)
 		{
-			// my hand has been forced and I am dearly sorry for this awful hack :vomit:
-			for (; eventtail != eventhead; eventtail = (eventtail+1) & (MAXEVENTS-1))
-			{
-				if (!Snake_JoyGrabber(snake, &events[eventtail]))
-					G_MapEventsToControls(&events[eventtail]);
-			}
+			ch = ev->key;
 		}
+		else if (ev->type == ev_gamepad_down)
+		{
+			ch = M_RemapGamepadButton(ev);
+		}
+		
+		D_ProcessEvents(); // needed to make the view server and confirm connect menus respond to input
 
 		if (cl_mode == CL_VIEWSERVER)
 		{
-			if (gamekeydown[KEY_ENTER] || gamepads[0].buttons[GAMEPAD_BUTTON_A])
+			if (ch == 'y' || ch == KEY_ENTER)
+			{
 				cl_mode = CL_CHECKFILES;
-			else if (gamekeydown[KEY_ESCAPE] || gamepads[0].buttons[GAMEPAD_BUTTON_B])
+				M_ClearMenus(true);
+			}
+			else if (ch == 'n' || ch == KEY_ESCAPE)
+			{
 				cl_mode = CL_ABORTED;
+				M_ClearMenus(true);
+			}
 		}
 
-		if (gamekeydown[KEY_ESCAPE] || gamepads[0].buttons[GAMEPAD_BUTTON_B] || cl_mode == CL_ABORTED)
+		if (ch == KEY_ESCAPE || cl_mode == CL_ABORTED)
 		{
 			CONS_Printf(M_GetText("Network game synchronization aborted.\n"));
-			M_StartMessage(M_GetText("Network game synchronization aborted.\n\nPress ESC\n"), NULL, MM_NOTHING);
+			M_StartMessage(M_GetText("Network game synchronization aborted.\n\nPress ESC/Cancel Button\n"), NULL, MM_NOTHING);
 
 			AbortConnection();
 
+			M_ClearMenus(true);
 			memset(gamekeydown, 0, NUMKEYS);
 			return false;
 		}

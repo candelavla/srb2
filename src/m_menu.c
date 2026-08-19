@@ -3166,7 +3166,7 @@ static void Command_Manual_f(void)
 	itemOn = 0;
 }
 
-static INT32 RemapGamepadButton(event_t *ev)
+INT32 M_RemapGamepadButton(event_t *ev)
 {
 
 	if (cv_menubuttons.value)
@@ -3182,6 +3182,7 @@ static INT32 RemapGamepadButton(event_t *ev)
 			case GAMEPAD_BUTTON_DPAD_LEFT: return KEY_LEFTARROW;
 			case GAMEPAD_BUTTON_DPAD_RIGHT: return KEY_RIGHTARROW;
 			case GAMEPAD_BUTTON_BACK: return KEY_BACKSPACE;
+			case GAMEPAD_BUTTON_START: return KEY_ENTER;
 		}
 	}
 	else
@@ -3197,6 +3198,7 @@ static INT32 RemapGamepadButton(event_t *ev)
 			case GAMEPAD_BUTTON_DPAD_LEFT: return KEY_LEFTARROW;
 			case GAMEPAD_BUTTON_DPAD_RIGHT: return KEY_RIGHTARROW;
 			case GAMEPAD_BUTTON_BACK: return KEY_BACKSPACE;
+			case GAMEPAD_BUTTON_START: return KEY_ENTER;
 		}
 	}
 	return KEY_GAMEPAD + ev->key;
@@ -3256,7 +3258,7 @@ boolean M_Responder(event_t *ev)
 		else if (ev->type == ev_gamepad_down)
 		{
 			keydown++;
-			ch = RemapGamepadButton(ev);
+			ch = M_RemapGamepadButton(ev);
 		}
 		else if (ev->type == ev_gamepad_axis && ev->which == 0 && joywait < I_GetTime())
 		{
