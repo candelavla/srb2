@@ -4547,7 +4547,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		DMG_SPIKE,      // mass
 		0,              // damage
 		sfx_s3kaa,      // activesound
-		MF_ENEMY|MF_SPECIAL|MF_SHOOTABLE|MF_BOUNCE|MF_APPLYSLOPE, // flags
+		MF_ENEMY|MF_SPECIAL|MF_SHOOTABLE|MF_BOUNCE, // flags
 		S_NULL          // raisestate
 	},
 
@@ -4871,7 +4871,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		100,            // mass
 		0,              // damage
 		sfx_s3kc5s,      // activesound
-		MF_ENEMY|MF_SPECIAL|MF_SHOOTABLE|MF_SLIDEME|MF_APPLYSLOPE, // flags
+		MF_ENEMY|MF_SPECIAL|MF_SHOOTABLE|MF_SLIDEME, // flags
 		S_NULL          // raisestate
 	},
 
@@ -5114,7 +5114,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		15*FRACUNIT,    // mass
 		0,              // damage
 		sfx_None,       // activesound
-		MF_ENEMY|MF_SPECIAL|MF_SHOOTABLE|MF_APPLYSLOPE, // flags
+		MF_ENEMY|MF_SPECIAL|MF_SHOOTABLE, // flags
 		S_SSHELL_SPRING1// raisestate
 	},
 
@@ -5141,7 +5141,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		20*FRACUNIT,    // mass
 		0,              // damage
 		sfx_None,       // activesound
-		MF_ENEMY|MF_SPECIAL|MF_SHOOTABLE|MF_APPLYSLOPE, // flags
+		MF_ENEMY|MF_SPECIAL|MF_SHOOTABLE, // flags
 		S_YSHELL_SPRING1// raisestate
 	},
 
@@ -20470,7 +20470,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		S_BUMBLEBORE_DIE, // deathstate
 		S_NULL,         // xdeathstate
 		sfx_pop,        // deathsound
-		4*FRACUNIT,     // speed
+		3*FRACUNIT,     // speed
 		16*FRACUNIT,    // radius
 		32*FRACUNIT,    // height
 		0,              // display offset
@@ -20497,7 +20497,7 @@ mobjinfo_t mobjinfo[NUMMOBJTYPES] =
 		S_XPLD_FLICKY,  // deathstate
 		S_NULL,         // xdeathstate
 		sfx_pop,        // deathsound
-		6*FRACUNIT,     // speed
+		5*FRACUNIT,     // speed
 		20*FRACUNIT,    // radius
 		24*FRACUNIT,    // height
 		0,              // display offset
