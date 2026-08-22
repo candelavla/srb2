@@ -425,7 +425,7 @@ static int lib_mMapNumber(lua_State *L)
 static int lib_pRandomFixed(lua_State *L)
 {
 	NOHUD
-	LUA_Deprecated(L, "P_RandomFixed", "random.fixed")
+	//LUA_Deprecated(L, "P_RandomFixed", "random.fixed")
 	lua_pushfixed(L, P_RandomFixed());
 	return 1;
 }
@@ -433,7 +433,7 @@ static int lib_pRandomFixed(lua_State *L)
 static int lib_pRandomByte(lua_State *L)
 {
 	NOHUD
-	LUA_Deprecated(L, "P_RandomByte", "random.byte")
+	//LUA_Deprecated(L, "P_RandomByte", "random.byte")
 	lua_pushinteger(L, P_RandomByte());
 	return 1;
 }
@@ -443,7 +443,7 @@ static int lib_pRandomKey(lua_State *L)
 	INT32 a = (INT32)luaL_checkinteger(L, 1);
 
 	NOHUD
-	LUA_Deprecated(L, "P_RandomKey", "random.key")
+	//LUA_Deprecated(L, "P_RandomKey", "random.key")
 	if (a > 65536)
 		LUA_UsageWarning(L, "P_RandomKey: range > 65536 is undefined behavior");
 	lua_pushinteger(L, P_RandomKey(a));
@@ -456,7 +456,7 @@ static int lib_pRandomRange(lua_State *L)
 	INT32 b = (INT32)luaL_checkinteger(L, 2);
 
 	NOHUD
-	LUA_Deprecated(L, "P_RandomRange", "random.range")
+	//LUA_Deprecated(L, "P_RandomRange", "random.range")
 	if (b < a) {
 		INT32 c = a;
 		a = b;
@@ -472,7 +472,7 @@ static int lib_pRandomRange(lua_State *L)
 static int lib_pSignedRandom(lua_State *L)
 {
 	NOHUD
-	LUA_Deprecated(L, "P_SignedRandom", "random.signed")
+	//LUA_Deprecated(L, "P_SignedRandom", "random.signed")
 	lua_pushinteger(L, P_SignedRandom());
 	return 1;
 }
@@ -481,7 +481,7 @@ static int lib_pRandomChance(lua_State *L)
 {
 	fixed_t p = luaL_checkfixed(L, 1);
 	NOHUD
-	LUA_Deprecated(L, "P_RandomChance", "random.chance")
+	//LUA_Deprecated(L, "P_RandomChance", "random.chance")
 	lua_pushboolean(L, P_RandomChance(p));
 	return 1;
 }
@@ -2695,7 +2695,7 @@ static int lib_pThingOnSpecial3DFloor(lua_State *L)
 	INLEVEL
 	if (!mo)
 		return LUA_ErrInvalid(L, "mobj_t");
-	LUA_Deprecated(L, "P_ThingOnSpecial3DFloor", "P_MobjTouchingSectorSpecial\" or \"P_MobjTouchingSectorSpecialFlag");
+	//LUA_Deprecated(L, "P_ThingOnSpecial3DFloor", "P_MobjTouchingSectorSpecial\" or \"P_MobjTouchingSectorSpecialFlag");
 	LUA_PushUserdata(L, P_ThingOnSpecial3DFloor(mo), META_SECTOR);
 	return 1;
 }
@@ -4439,22 +4439,22 @@ static int GetNextMapNameOrNumber(lua_State *L, int idx)
 		lua_Integer val = luaL_checkinteger(L, idx);
 		if (val == 1100)
 		{
-			LUA_Deprecated(L, "1100", "SCENE_TITLE");
+			//LUA_Deprecated(L, "1100", "SCENE_TITLE");
 			return NEXTMAP_TITLE;
 		}
 		else if (val == 1101)
 		{
-			LUA_Deprecated(L, "1101", "SCENE_EVALUATION");
+			//LUA_Deprecated(L, "1101", "SCENE_EVALUATION");
 			return NEXTMAP_EVALUATION;
 		}
 		else if (val == 1102)
 		{
-			LUA_Deprecated(L, "1102", "SCENE_CREDITS");
+			//LUA_Deprecated(L, "1102", "SCENE_CREDITS");
 			return NEXTMAP_CREDITS;
 		}
 		else if (val == 1103)
 		{
-			LUA_Deprecated(L, "1103", "SCENE_ENDING");
+			//LUA_Deprecated(L, "1103", "SCENE_ENDING");
 			return NEXTMAP_ENDING;
 		}
 		return val;
@@ -4683,7 +4683,7 @@ static int lib_gSetCustomExitVars(lua_State *L)
 	int n = lua_gettop(L); // Num arguments
 	NOHUD
 	INLEVEL
-	LUA_Deprecated(L, "G_SetCustomExitVars", "G_SetNextLevel")
+	//LUA_Deprecated(L, "G_SetCustomExitVars", "G_SetNextLevel")
 
 	// LUA EXTENSION: Custom exit like support
 	// Supported:

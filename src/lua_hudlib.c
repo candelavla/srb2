@@ -1337,14 +1337,14 @@ static int libd_renderer(lua_State *L)
 
 static int libd_RandomFixed(lua_State* L)
 {
-	LUA_Deprecated(L, "v.RandomFixed", "random.localFixed")
+	//LUA_Deprecated(L, "v.RandomFixed", "random.localFixed")
 	lua_pushfixed(L, M_RandomFixed());
 	return 1;
 }
 
 static int libd_RandomByte(lua_State* L)
 {
-	LUA_Deprecated(L, "v.RandomByte", "random.localByte")
+	//LUA_Deprecated(L, "v.RandomByte", "random.localByte")
 	lua_pushinteger(L, M_RandomByte());
 	return 1;
 }
@@ -1353,7 +1353,7 @@ static int libd_RandomKey(lua_State* L)
 {
 	INT32 a = (INT32)luaL_checkinteger(L, 1);
 
-	LUA_Deprecated(L, "v.RandomKey", "random.localKey")
+	//LUA_Deprecated(L, "v.RandomKey", "random.localKey")
 	lua_pushinteger(L, M_RandomKey(a));
 	return 1;
 }
@@ -1363,7 +1363,7 @@ static int libd_RandomRange(lua_State* L)
 	INT32 a = (INT32)luaL_checkinteger(L, 1);
 	INT32 b = (INT32)luaL_checkinteger(L, 2);
 
-	LUA_Deprecated(L, "v.RandomRange", "random.localRange")
+	//LUA_Deprecated(L, "v.RandomRange", "random.localRange")
 	lua_pushinteger(L, M_RandomRange(a, b));
 	return 1;
 }
@@ -1371,7 +1371,7 @@ static int libd_RandomRange(lua_State* L)
 // Macros.
 static int libd_SignedRandom(lua_State* L)
 {
-	LUA_Deprecated(L, "v.SignedRandom", "random.localSigned")
+	//LUA_Deprecated(L, "v.SignedRandom", "random.localSigned")
 	lua_pushinteger(L, M_SignedRandom());
 	return 1;
 }
