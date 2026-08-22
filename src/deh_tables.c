@@ -4857,6 +4857,8 @@ const char *const POWERS_LIST[] = {
 	"IGNORELATCH",
 
 	"STRONG",
+	
+	"CAMLOCK",
 
 	"SPRINGLOCK"
 };

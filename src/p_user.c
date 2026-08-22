@@ -4794,8 +4794,9 @@ static void P_DoSpinAbility(player_t *player, ticcmd_t *cmd)
 		{
 			case CA2_SPINDASH: // Spinning and Spindashing
 				 // Start revving
-				if ((cmd->buttons & BT_SPIN) && (player->speed < FixedMul(5<<FRACBITS, player->mo->scale) || P_IsPlayerInState(player, S_PLAY_GLIDE_LANDING))
+				if ((cmd->buttons & BT_SPIN) && (player->speed < FixedMul(5<<FRACBITS, player->mo->scale) || P_IsPlayerInState(player, S_PLAY_GLIDE_LANDING) || player->skidtime)
 					&& !player->mo->momz && onground && !(player->pflags & (PF_SPINDOWN|PF_SPINNING)))
+
 				{
 					player->mo->momx >>= 1;
 					player->mo->momy >>= 1;
@@ -4860,6 +4861,7 @@ static void P_DoSpinAbility(player_t *player, ticcmd_t *cmd)
 						{
 							P_SetMobjState(player->mo, S_PLAY_ROLL);
 							P_InstaThrust(player->mo, player->mo->angle, (player->speed = FixedMul(player->dashspeed, player->mo->scale))); // catapult forward ho!!
+							player->powers[pw_camlock] = 8;
 						}
 						else
 						{
@@ -5271,6 +5273,7 @@ static void P_DoShieldAbility(player_t *player, boolean spinshieldhack)
 				case SH_FLAMEAURA:
 					player->pflags |= PF_THOKKED|PF_SHIELDABILITY;
 					P_Thrust(player->mo, player->mo->angle, FixedMul(55*FRACUNIT - FixedSqrt(FixedDiv(player->speed, player->mo->scale)), player->mo->scale));
+					player->powers[pw_camlock] = 8;
 					player->drawangle = player->mo->angle;
 					player->pflags &= ~(PF_NOJUMPDAMAGE|PF_SPINNING);
 					P_SetMobjState(player->mo, S_PLAY_ROLL);
@@ -9873,10 +9876,10 @@ static void CV_CamRotate2_OnChange(void)
 		CV_SetValue(&cv_cam2_rotate, cv_cam2_rotate.value % 360);
 }
 
-static CV_PossibleValue_t CV_CamSpeed[] = {{0, "MIN"}, {1*FRACUNIT, "MAX"}, {0, NULL}};
+static CV_PossibleValue_t CV_CamSpeed[] = {{0, "MIN"}, {FRACUNIT/3, "MAX"}, {0, NULL}};
 static CV_PossibleValue_t rotation_cons_t[] = {{1, "MIN"}, {25, "MAX"}, {0, NULL}};
 static CV_PossibleValue_t CV_CamRotate[] = {{-720, "MIN"}, {720, "MAX"}, {0, NULL}};
-static CV_PossibleValue_t multiplier_cons_t[] = {{0, "MIN"}, {3*FRACUNIT, "MAX"}, {0, NULL}};
+static CV_PossibleValue_t multiplier_cons_t[] = {{0, "MIN"}, {2<<FRACBITS, "MAX"}, {0, NULL}};
 static CV_PossibleValue_t campos_cons_t[] = { {INT32_MIN, "MIN"}, {INT32_MAX, "MAX"}, {0, NULL} };
 
 consvar_t cv_cam_dist = CVAR_INIT ("cam_curdist", "240", CV_FLOAT|CV_ALLOWLUA, campos_cons_t, NULL);
@@ -10146,15 +10149,6 @@ boolean P_MoveChaseCamera(player_t *player, camera_t *thiscam, boolean resetcall
 	if (!(twodlevel || (mo->flags2 & MF2_TWOD)) && !(player->powers[pw_carry] == CR_NIGHTSMODE))
 		camheight = FixedMul(camheight, player->camerascale);
 
-#ifdef REDSANALOG
-	if (P_ControlStyle(player) == CS_LMAOGALOG && (player->cmd.buttons & (BT_CAMLEFT|BT_CAMRIGHT)) == (BT_CAMLEFT|BT_CAMRIGHT)) {
-		camstill = true;
-
-		if (camspeed < 4*FRACUNIT/5)
-			camspeed = 4*FRACUNIT/5;
-	}
-#endif // REDSANALOG
-
 	if (mo->eflags & MFE_VERTICALFLIP)
 		camheight += thiscam->height;
 
@@ -10268,11 +10262,16 @@ boolean P_MoveChaseCamera(player_t *player, camera_t *thiscam, boolean resetcall
 		{
 			camheight = mo->scale << 7;
 			camspeed = FRACUNIT/12;
+			player->powers[pw_camlock] = 0;
 		}
-		else if (P_ControlStyle(player) == CS_LMAOGALOG) // x1.2 dist for analog
+		else if (player->powers[pw_camlock])
 		{
-			dist = FixedMul(dist, 6*FRACUNIT/5);
-			camheight = FixedMul(camheight, 6*FRACUNIT/5);
+			if (player->powers[pw_camlock] > 3)
+				camspeed = 0;
+			else // move at half speed for 3 tics when starting up
+				camspeed >>= 1;
+
+			player->powers[pw_camlock] --;
 		}
 
 		if (player->climbing || player->exiting || player->playerstate == PST_DEAD || (player->powers[pw_carry] == CR_ROPEHANG || player->powers[pw_carry] == CR_GENERIC || player->powers[pw_carry] == CR_MACESPIN))

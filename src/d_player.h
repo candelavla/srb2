@@ -333,6 +333,8 @@ typedef enum
 	pw_ignorelatch, // Don't grab onto CR_GENERIC, add 32768 (powers[pw_ignorelatch] & 1<<15) to avoid ALL not-NiGHTS CR_ types
 
 	pw_strong, // Additional properties for powerful attacks
+	
+	pw_camlock, // Stop the camera from following temporarily
 
 	pw_springlock, // nocontrol sucks so here's nocontrol but better
 
