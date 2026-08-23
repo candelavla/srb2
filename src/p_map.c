@@ -391,9 +391,11 @@ boolean P_DoSpring(mobj_t *spring, mobj_t *object)
 		if (horizspeed)
 		{
 			object->angle = object->player->drawangle = spring->angle;
-
-			if (!demoplayback || P_ControlStyle(object->player) == CS_LMAOGALOG)
+			if (!demoplayback)
+			{
 				P_SetPlayerAngle(object->player, spring->angle);
+			}
+			object->player->powers[pw_camlock] = 5;
 		}
 
 		if (object->player->pflags & PF_GLIDING)
