@@ -1200,7 +1200,7 @@ static menuitem_t OP_CameraOptionsMenu[] =
 	{IT_HEADER,            NULL, "General Toggles", NULL, 0},
 	{IT_STRING  | IT_CVAR, NULL, "Third-person Camera"  , &cv_chasecam , 6},
 	{IT_STRING  | IT_CVAR, NULL, "Flip Camera with Gravity"  , &cv_flipcam , 11},
-	{IT_STRING  | IT_CVAR, NULL, "Orbital Looking"  , &cv_cam_orbit , 16},
+	{IT_STRING  | IT_CVAR, NULL, "Dash Catchup Delay"  , &cv_cam_delay , 16},
 	{IT_STRING  | IT_CVAR, NULL, "Downhill Slope Adjustment", &cv_cam_adjust, 21},
 
 	{IT_HEADER,                                NULL, "Camera Positioning", NULL, 30},
@@ -1262,9 +1262,9 @@ static menuitem_t OP_Camera2ExtendedOptionsMenu[] =
 {
 	{IT_HEADER,            NULL, "General Toggles", NULL, 0},
 	{IT_STRING  | IT_CVAR, NULL, "Third-person Camera"  , &cv_chasecam2 , 6},
-	{IT_STRING  | IT_CVAR, NULL, "Flip Camera with Gravity"  , &cv_flipcam2 , 11},
-	{IT_STRING  | IT_CVAR, NULL, "Orbital Looking"  , &cv_cam2_orbit , 16},
-	{IT_STRING  | IT_CVAR, NULL, "Downhill Slope Adjustment", &cv_cam2_adjust, 21},
+	{IT_STRING  | IT_CVAR, NULL, "Flip View in Reverse Gravity"  , &cv_flipcam2 , 11},
+	{IT_STRING  | IT_CVAR, NULL, "Dash Catchup Delay"  , &cv_cam2_delay , 16},
+	{IT_STRING  | IT_CVAR, NULL, "Slope Angle Adjustment", &cv_cam2_adjust, 21},
 
 	{IT_HEADER,                                NULL, "Camera Positioning", NULL, 30},
 	{IT_STRING  | IT_CVAR | IT_CV_INTEGERSTEP, NULL, "Camera Distance", &cv_cam_savedist[1][1], 36},
