@@ -5700,9 +5700,17 @@ static void P_Boss9Thinker(mobj_t *mobj)
 						S_StartSoundFromMobj(mobj, mobj->info->seesound);
 					P_SetMobjState(mobj, mobj->info->missilestate);
 					if (mobj->extravalue1 == 3)
-						mobj->reactiontime = TICRATE/16;
+					{
+						mobj->reactiontime = TICRATE/10;
+						if (mobj->threshold < 4)
+						{
+							mobj->extravalue1 = 2;
+						}
+					}
 					else
+					{
 						mobj->reactiontime = TICRATE/8;
+					}
 
 					A_FaceTarget(mobj);
 					missile = P_SpawnMissile(mobj, mobj->target, mobj->info->speed);
@@ -5923,26 +5931,26 @@ static void P_Boss9Thinker(mobj_t *mobj)
 					// Attack 2: Energy shot!
 					switch (mobj->health)
 					{
-						case 8: // shoot once
+						case 8: // shoot twice
 						default:
 							mobj->extravalue1 = 0;
-							mobj->threshold = 2;
+							mobj->threshold = 4;
 							break;
-						case 7: // spread shot (vertical)
+						case 7: // double spread shot (vertical)
 							mobj->extravalue1 = 4;
-							mobj->threshold = 2;
+							mobj->threshold = 4;
 							break;
-						case 6: // three shots
+						case 6: // four BIG SHOTs
 							mobj->extravalue1 = 1;
-							mobj->threshold = 3*2;
+							mobj->threshold = 8;
 							break;
-						case 5: // spread shot (horizontal)
+						case 5: // double spread shot (horizontal)
 							mobj->extravalue1 = 2;
-							mobj->threshold = 2;
+							mobj->threshold = 4;
 							break;
-						case 4: // machine gun
+						case 4: // vertical six shooter
 							mobj->extravalue1 = 3;
-							mobj->threshold = 5*2;
+							mobj->threshold = 12;
 							break;
 					}
 				}
