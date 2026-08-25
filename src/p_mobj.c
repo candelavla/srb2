@@ -5936,19 +5936,19 @@ static void P_Boss9Thinker(mobj_t *mobj)
 							mobj->extravalue1 = 0;
 							mobj->threshold = 4;
 							break;
-						case 7: // double spread shot (vertical)
+						case 7: // triple vertical spread shot
 							mobj->extravalue1 = 4;
-							mobj->threshold = 4;
+							mobj->threshold = 6;
 							break;
 						case 6: // four BIG SHOTs
 							mobj->extravalue1 = 1;
 							mobj->threshold = 8;
 							break;
-						case 5: // double spread shot (horizontal)
+						case 5: // double horizontal spread shot
 							mobj->extravalue1 = 2;
 							mobj->threshold = 4;
 							break;
-						case 4: // vertical six shooter
+						case 4: // 5 vertical with horizontal finisher rapid fire spread
 							mobj->extravalue1 = 3;
 							mobj->threshold = 12;
 							break;
