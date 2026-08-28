@@ -29,9 +29,10 @@ set(SRB2_ASSETS_GAME
 	"srb2.pk3"
 	"characters.pk3"
 	"zones.pk3"
-	"patch.pk3"
+	"reveries.pk3"
 	"music.pk3"
 	"models.dat"
+	"patch.pk3"
 )
 list(TRANSFORM SRB2_ASSETS_GAME PREPEND "/")
 list(TRANSFORM SRB2_ASSETS_GAME PREPEND "${SRB2_ASSET_DIRECTORY_ABSOLUTE}")

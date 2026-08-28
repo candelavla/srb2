@@ -1219,6 +1219,7 @@ static const char *credits[] = {
 	"Doom Legacy Project",
 	"FreeDoom Project", // Used some of the mancubus and rocket launcher sprites for Brak
 	"Kart Krew",
+	"\"Aburtos\"", // SEGAudio.sf2 soundfont included with reveries flatpak
 	"Alex \"MistaED\" Fuller",
 	"Howard Drossin", // Virtual Sonic - Sonic & Knuckles Theme
 	"Pascal \"CodeImp\" vd Heiden", // Doom Builder developer
