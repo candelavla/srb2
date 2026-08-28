@@ -395,7 +395,7 @@ boolean P_DoSpring(mobj_t *spring, mobj_t *object)
 			{
 				P_SetPlayerAngle(object->player, spring->angle);
 			}
-			object->player->powers[pw_camlock] = 5;
+			object->player->powers[pw_camlock] = 6;
 		}
 
 		if (object->player->pflags & PF_GLIDING)

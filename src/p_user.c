@@ -4861,7 +4861,7 @@ static void P_DoSpinAbility(player_t *player, ticcmd_t *cmd)
 						{
 							P_SetMobjState(player->mo, S_PLAY_ROLL);
 							P_InstaThrust(player->mo, player->mo->angle, (player->speed = FixedMul(player->dashspeed, player->mo->scale))); // catapult forward ho!!
-							player->powers[pw_camlock] = 8;
+							player->powers[pw_camlock] = 9;
 						}
 						else
 						{
@@ -5273,7 +5273,7 @@ static void P_DoShieldAbility(player_t *player, boolean spinshieldhack)
 				case SH_FLAMEAURA:
 					player->pflags |= PF_THOKKED|PF_SHIELDABILITY;
 					P_Thrust(player->mo, player->mo->angle, FixedMul(55*FRACUNIT - FixedSqrt(FixedDiv(player->speed, player->mo->scale)), player->mo->scale));
-					player->powers[pw_camlock] = 8;
+					player->powers[pw_camlock] = 9;
 					player->drawangle = player->mo->angle;
 					player->pflags &= ~(PF_NOJUMPDAMAGE|PF_SPINNING);
 					P_SetMobjState(player->mo, S_PLAY_ROLL);
@@ -8760,8 +8760,8 @@ void P_MovePlayer(player_t *player)
 	}
 
 	if ((player->powers[pw_shield] & SH_NOSTACK) == SH_ELEMENTAL
-	&& (leveltime & 1) && onground && (player->speed >= FixedMul(23<<FRACBITS, player->mo->scale)) && (!(player->mo->eflags & MFE_JUSTHITFLOOR))
-	&& ((player->pflags & PF_SPINNING) || player->speed >= FixedMul(player->runspeed, player->mo->scale))) // must move at above 23fracs and also either above runspeed or be spinning
+	&& onground && (leveltime & 1) && (player->speed >= FixedMul(23<<FRACBITS, player->mo->scale)) && (!(player->mo->eflags & MFE_JUSTHITFLOOR))
+	&& ((player->pflags & PF_SPINNING) || player->speed >= FixedMul(player->runspeed, player->mo->scale))) // must move at above 23fracs and also be either above runspeed or spinning
 		P_ElementalFire(player, false);
 
 	if ((cmd->buttons & (BT_SPIN|BT_SHIELD)) == (BT_SPIN|BT_SHIELD) && !(player->pflags & (PF_SPINDOWN|PF_SHIELDDOWN)))
@@ -10272,7 +10272,7 @@ boolean P_MoveChaseCamera(player_t *player, camera_t *thiscam, boolean resetcall
 		{
 			if (camdelay) // always tic the power down, but only do anything if cvar is enabled
 			{
-				if (player->powers[pw_camlock] > 3)
+				if (player->powers[pw_camlock] > 4)
 					camspeed = 0;
 				else // move at half speed for 3 tics when starting up
 					camspeed >>= 1;
