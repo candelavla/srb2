@@ -8760,8 +8760,8 @@ void P_MovePlayer(player_t *player)
 	}
 
 	if ((player->powers[pw_shield] & SH_NOSTACK) == SH_ELEMENTAL
-	&& (player->pflags & PF_SPINNING) && player->speed >= FixedMul(23<<FRACBITS, player->mo->scale) && onground && (leveltime & 1)
-	&& !(player->mo->eflags & (MFE_UNDERWATER|MFE_TOUCHWATER)))
+	&& (leveltime & 1) && onground && (player->speed >= FixedMul(23<<FRACBITS, player->mo->scale)) && (!(player->mo->eflags & MFE_JUSTHITFLOOR))
+	&& ((player->pflags & PF_SPINNING) || player->speed >= FixedMul(player->runspeed, player->mo->scale))) // must move at above 23fracs and also either above runspeed or be spinning
 		P_ElementalFire(player, false);
 
 	if ((cmd->buttons & (BT_SPIN|BT_SHIELD)) == (BT_SPIN|BT_SHIELD) && !(player->pflags & (PF_SPINDOWN|PF_SHIELDDOWN)))
