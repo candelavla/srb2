@@ -5291,7 +5291,6 @@ static void HWR_SetupView(player_t *player, INT32 viewnumber, boolean skybox)
 		stplyr = player;
 		ST_doPaletteStuff();
 		stplyr = saved_player;
-		(void)viewnumber;
 	}
 
 	// note: sets viewangle, viewx, viewy, viewz
