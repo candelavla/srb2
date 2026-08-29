@@ -10534,6 +10534,7 @@ boolean P_MoveChaseCamera(player_t *player, camera_t *thiscam, boolean resetcall
 			// too close
 			if (ArePointsClose2D(thiscam->x, thiscam->y, mo->x, mo->y, 48*mo->scale))
 			{
+				player->powers[pw_camlock] = 0;
 				P_ResetCamera(player, thiscam);
 				return true;
 			}
