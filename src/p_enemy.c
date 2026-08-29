@@ -11567,6 +11567,9 @@ void A_BrakChase(void *data)
 		
 	if (locvar1 < 0)
 		locvar1 = 0;
+		
+	if (!actor->health) // prevent divby0 just in case a mod calls this on a dead object for some crazy reason
+		return;
 
 	// Set new tics NOW, in case the state changes while we're doing this and we try applying this to the painstate or something silly
 	if (actor->tics > 1 && locvar1 < actor->tics) // Not much point, otherwise
@@ -11580,10 +11583,12 @@ void A_BrakChase(void *data)
 
 	if (actor->reactiontime)
 	{
-		actor->reactiontime--;
-		if (actor->reactiontime == 0 && actor->type == MT_CYBRAKDEMON)
-			S_StartSoundFromEverywhere(sfx_bewar1 + P_RandomKey(4));
+		actor->reactiontime --;
+		
+		if (actor->reactiontime == 0)
+			actor->extravalue1 = 0;
 	}
+	
 
 	// modify target threshold
 	if (actor->threshold)
@@ -11626,25 +11631,38 @@ void A_BrakChase(void *data)
 	
 	actor->movecount -= max(1, actor->health/2);
 	
+	if (P_RandomChance(FRACUNIT/4)) // chance to degrade faster makes attack timing more unpredictable
+		actor->movecount --;
+	
 	// Check if we can attack
 	if (P_CheckMissileRange(actor) && actor->movecount < 0)
 	{
-		// Check if we should use "melee" attack first. (Yes, this still runs outside of melee range. Quiet, you.)
-		if (actor->info->meleestate && (actor->health != actor->info->spawnhealth) && ((actor->health < 4) || (P_RandomChance(FRACUNIT/(actor->health/2))))) // increase chance as health lowers
+		if (!actor->extravalue1) // evil laugh signals an incoming attack
 		{
-			if (actor->info->attacksound)
-				S_StartAttackSound(actor, actor->info->attacksound);
-
-			P_SetMobjState(actor, actor->info->meleestate);
-			actor->flags2 |= MF2_JUSTATTACKED;
-			return;
+			S_StartSoundFromEverywhere(sfx_bewar1 + P_RandomKey(4));
+			actor->extravalue1 = 1;
 		}
-		// Else, check for missile attack.
-		else if (actor->info->missilestate)
+		else
 		{
-			P_SetMobjState(actor, actor->info->missilestate);
-			actor->flags2 |= MF2_JUSTATTACKED;
-			return;
+			// Roll for chance to use the bomb or lockon attack (guaranteed during pinch, never occurs at full health)
+			if (actor->info->meleestate && (actor->health != actor->info->spawnhealth) && ((actor->health < 4) || (P_RandomChance(FRACUNIT/(actor->health/2))))) // increase chance as health lowers
+			{
+				if (actor->info->attacksound)
+					S_StartAttackSound(actor, actor->info->attacksound);
+
+				P_SetMobjState(actor, actor->info->meleestate);
+				actor->flags2 |= MF2_JUSTATTACKED;
+				actor->extravalue1 = 0;
+				return;
+			}
+			// Otherwise, use rockets or glue gun
+			else if (actor->info->missilestate)
+			{
+				P_SetMobjState(actor, actor->info->missilestate);
+				actor->flags2 |= MF2_JUSTATTACKED;
+				actor->extravalue1 = 0;
+				return;
+			}
 		}
 	}
 
@@ -11667,12 +11685,6 @@ void A_BrakChase(void *data)
 	// Optionally play a sound effect
 	if (locvar2 > 0 && locvar2 < NUMSFX)
 		S_StartSoundFromMobj(actor, (sfxenum_t)locvar2);
-
-	// make active sound
-	if (actor->type != MT_CYBRAKDEMON && actor->info->activesound && P_RandomChance(3*FRACUNIT/256))
-	{
-		S_StartSoundFromMobj(actor, actor->info->activesound);
-	}
 }
 
 // Function: A_BrakFireShot
