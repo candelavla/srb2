@@ -315,6 +315,7 @@ static void R_RasterizeFloorSplat(floorsplat_t *pSplat, vector2_t *verts, visspr
 	fixed_t step;
 
 	int spanfunctype;
+	
 
 #define RASTERPARAMS(vnum1, vnum2, tv1, tv2, tc, dir) \
     x1 = verts[vnum1].x; \
@@ -335,13 +336,13 @@ static void R_RasterizeFloorSplat(floorsplat_t *pSplat, vector2_t *verts, visspr
         } \
         ry1 = 0; \
     } \
-    if (ry1 >= vid.height) { \
+    if (ry1 >= viewheight) { \
         if (step) { \
             x1 <<= FRACBITS; \
-            x1 -= (vid.height-1-ry1)*step; \
+            x1 -= (viewheight-1-ry1)*step; \
             x1 >>= FRACBITS; \
         } \
-        ry1 = vid.height - 1; \
+        ry1 = viewheight - 1; \
     } \
     if (y2 < 0) { \
         if (step) { \
@@ -351,13 +352,13 @@ static void R_RasterizeFloorSplat(floorsplat_t *pSplat, vector2_t *verts, visspr
         } \
         y2 = 0; \
     } \
-    if (y2 >= vid.height) { \
+    if (y2 >= viewheight) { \
         if (step) { \
             x2 <<= FRACBITS; \
-            x2 += (vid.height-1-y2)*step; \
+            x2 += (viewheight-1-y2)*step; \
             x2 >>= FRACBITS; \
         } \
-        y2 = vid.height - 1; \
+        y2 = viewheight - 1; \
     } \
     rasterize_segment_tex(x1, ry1, x2, y2, tv1, tv2, tc, dir); \
     if (ry1 < miny) \
@@ -480,8 +481,8 @@ static void R_RasterizeFloorSplat(floorsplat_t *pSplat, vector2_t *verts, visspr
 	// do segment d -> left side of texture
 	RASTERPARAMS(0,3,pSplat->width-1,0,0,1);
 
-	if (maxy >= vid.height)
-		maxy = vid.height-1;
+	if (maxy >= viewheight)
+		maxy = viewheight-1;
 
 	for (y = miny; y <= maxy; y++)
 	{
@@ -575,7 +576,7 @@ static void prepare_rastertab(void)
 {
 	INT32 i;
 	prastertab = rastertab;
-	for (i = 0; i < vid.height; i++)
+	for (i = 0; i < viewheight; i++)
 	{
 		rastertab[i].minx = INT32_MAX;
 		rastertab[i].maxx = INT32_MIN;
