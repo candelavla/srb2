@@ -519,13 +519,29 @@ void P_TouchSpecialThing(mobj_t *special, mobj_t *toucher, boolean heightcheck)
 				toucher->momy = -toucher->momy;
 				if (player->charability == CA_FLY && player->panim == PA_ABILITY)
 					toucher->momz = -toucher->momz/2;
-				else if (player->pflags & PF_GLIDING && !P_IsObjectOnGround(toucher))
+				else if ((player->pflags & PF_GLIDING) && !P_IsObjectOnGround(toucher))
 				{
 					player->pflags &= ~(PF_GLIDING|PF_JUMPED|PF_NOJUMPDAMAGE);
 					P_SetMobjState(toucher, S_PLAY_FALL);
 					toucher->momz += P_MobjFlip(toucher) * (player->speed >> 3);
-					toucher->momx = 7*toucher->momx>>3;
-					toucher->momy = 7*toucher->momy>>3;
+					toucher->momx = 7*toucher->momx/8;
+					toucher->momy = 7*toucher->momy/8;
+				}
+				else if (player->charability == CA_GLIDEANDCLIMB && (player->powers[pw_strong] & STR_PUNCH) && (player->panim == PA_RUN || player->panim == PA_DASH))
+				{
+					toucher->momx /= 2;
+					toucher->momy /= 2;
+					if (P_IsObjectOnGround(toucher))
+					{
+						P_SetMobjState(toucher, S_PLAY_GLIDE_LANDING);
+						toucher->tics <<= 1;
+						player->powers[pw_justsprung] = toucher->tics;
+					}
+					else
+					{
+						P_SetMobjState(toucher, S_PLAY_FALL);
+						player->pflags |= PF_THOKKED;
+					}
 				}
 				else if ((player->powers[pw_strong] & STR_DASH) && player->panim == PA_DASH)
 					P_DoPlayerPain(player, special, special);
@@ -1562,8 +1578,8 @@ void P_TouchSpecialThing(mobj_t *special, mobj_t *toucher, boolean heightcheck)
 					player->pflags &= ~(PF_GLIDING|PF_JUMPED|PF_NOJUMPDAMAGE);
 					P_SetMobjState(toucher, S_PLAY_FALL);
 					toucher->momz += P_MobjFlip(toucher) * (player->speed >> 3);
-					toucher->momx = 7*toucher->momx>>3;
-					toucher->momy = 7*toucher->momy>>3;
+					toucher->momx = 7*toucher->momx/8;
+					toucher->momy = 7*toucher->momy/8;
 				}
 				player->homing = 0;
 
@@ -1619,7 +1635,7 @@ void P_TouchSpecialThing(mobj_t *special, mobj_t *toucher, boolean heightcheck)
 					touchspeed = special->scale;
 
 				// Blocked by the shield?
-				if (!(angle > ANGLE_90 && angle < ANGLE_270) && (!(((player->charflags & SF_CANBUSTWALLS) || (player->powers[pw_strong] & STR_BUST)) && P_PlayerCanDamage(player, player->mo))))
+				if (!(angle > ANGLE_90 && angle < ANGLE_270) && (!(((player->charflags & SF_CANBUSTWALLS) || (player->powers[pw_strong] & STR_WALL)) && P_PlayerCanDamage(player, player->mo))))
 				{
 					toucher->momx = P_ReturnThrustX(special, special->angle, touchspeed);
 					toucher->momy = P_ReturnThrustY(special, special->angle, touchspeed);
@@ -1629,8 +1645,8 @@ void P_TouchSpecialThing(mobj_t *special, mobj_t *toucher, boolean heightcheck)
 						player->pflags &= ~(PF_GLIDING|PF_JUMPED|PF_NOJUMPDAMAGE);
 						P_SetMobjState(toucher, S_PLAY_FALL);
 						toucher->momz += P_MobjFlip(toucher) * (player->speed >> 3);
-						toucher->momx = 7*toucher->momx>>3;
-						toucher->momy = 7*toucher->momy>>3;
+						toucher->momx = 7*toucher->momx/8;
+						toucher->momy = 7*toucher->momy/8;
 					}
 					player->homing = 0;
 
