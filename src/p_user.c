@@ -9876,7 +9876,7 @@ static void CV_CamRotate2_OnChange(void)
 		CV_SetValue(&cv_cam2_rotate, cv_cam2_rotate.value % 360);
 }
 
-static CV_PossibleValue_t CV_CamSpeed[] = {{0, "MIN"}, {FRACUNIT/3, "MAX"}, {0, NULL}};
+static CV_PossibleValue_t CV_CamSpeed[] = {{0, "MIN"}, {FRACUNIT, "MAX"}, {0, NULL}};
 static CV_PossibleValue_t rotation_cons_t[] = {{1, "MIN"}, {25, "MAX"}, {0, NULL}};
 static CV_PossibleValue_t CV_CamRotate[] = {{-720, "MIN"}, {720, "MAX"}, {0, NULL}};
 static CV_PossibleValue_t multiplier_cons_t[] = {{0, "MIN"}, {2<<FRACBITS, "MAX"}, {0, NULL}};
@@ -9892,8 +9892,8 @@ consvar_t cv_cam_turnmultiplier = CVAR_INIT ("cam_turnmultiplier", "1.00", CV_FL
 consvar_t cv_cam_orbit = CVAR_INIT ("cam_orbit", "Off", CV_SAVE|CV_ALLOWLUA, CV_OnOff, NULL);
 consvar_t cv_cam_adjust = CVAR_INIT ("cam_adjust", "On", CV_SAVE|CV_ALLOWLUA, CV_OnOff, NULL);
 consvar_t cv_cam_delay = CVAR_INIT ("cam_delay", "True", CV_SAVE|CV_ALLOWLUA, CV_TrueFalse, NULL);
-consvar_t cv_cam2_dist = CVAR_INIT ("cam2_curdist", "160", CV_FLOAT|CV_ALLOWLUA, campos_cons_t, NULL);
-consvar_t cv_cam2_height = CVAR_INIT ("cam2_curheight", "25", CV_FLOAT|CV_ALLOWLUA, campos_cons_t, NULL);
+consvar_t cv_cam2_dist = CVAR_INIT ("cam2_curdist", "240", CV_FLOAT|CV_ALLOWLUA, campos_cons_t, NULL);
+consvar_t cv_cam2_height = CVAR_INIT ("cam2_curheight", "50", CV_FLOAT|CV_ALLOWLUA, campos_cons_t, NULL);
 consvar_t cv_cam2_still = CVAR_INIT ("cam2_still", "Off", CV_ALLOWLUA, CV_OnOff, NULL);
 consvar_t cv_cam2_speed = CVAR_INIT ("cam2_speed", "0.3", CV_FLOAT|CV_SAVE|CV_ALLOWLUA, CV_CamSpeed, NULL);
 consvar_t cv_cam2_rotate = CVAR_INIT ("cam2_rotate", "0", CV_CALL|CV_NOINIT|CV_ALLOWLUA, CV_CamRotate, CV_CamRotate2_OnChange);
@@ -10094,11 +10094,6 @@ boolean P_MoveChaseCamera(player_t *player, camera_t *thiscam, boolean resetcall
 
 	thiscam->radius = FixedMul(20*FRACUNIT, mo->scale);
 	thiscam->height = FixedMul(16*FRACUNIT, mo->scale);
-
-	// Don't run while respawning from a starpost
-	// Inu 4/8/13 Why not?!
-//	if (leveltime > 0 && timeinmap <= 0)
-//		return true;
 
 	if (player->powers[pw_carry] == CR_NIGHTSMODE)
 	{
@@ -10529,10 +10524,10 @@ boolean P_MoveChaseCamera(player_t *player, camera_t *thiscam, boolean resetcall
 			}
 	}
 	
-		if (leveltime > 5 && !resetcalled && !cameranoclip)
+		if (!resetcalled && !cameranoclip)
 		{
 			// too close
-			if (ArePointsClose2D(thiscam->x, thiscam->y, mo->x, mo->y, 48*mo->scale))
+			if ((ArePointsClose2D(thiscam->x, thiscam->y, mo->x, mo->y, 48*mo->scale)) && (player->speed >= 23*mo->scale))
 			{
 				player->powers[pw_camlock] = 0;
 				P_ResetCamera(player, thiscam);
@@ -10545,21 +10540,6 @@ boolean P_MoveChaseCamera(player_t *player, camera_t *thiscam, boolean resetcall
 				P_ResetCamera(player, thiscam);
 				return true;
 			}
-		}
-
-		// camera fit?
-		if (myceilingz != myfloorz
-			&& myceilingz - thiscam->height < z)
-		{
-/*			// no fit
-			if (!resetcalled && !cameranoclip)
-			{
-				P_ResetCamera(player, thiscam);
-				return true;
-			}
-*/
-			z = myceilingz - thiscam->height-FixedMul(11*FRACUNIT, mo->scale);
-			// is the camera fit is there own sector
 		}
 
 		// Make the camera a tad smarter with 3d floors
@@ -10643,7 +10623,7 @@ boolean P_MoveChaseCamera(player_t *player, camera_t *thiscam, boolean resetcall
 		thiscam->momy += FixedMul(shifty, camspeed);
 	}
 
-	// compute aming to look the viewed point (what does this mean???)
+	// calculate distance
 	dist = GetDistance2D(viewpointx, viewpointy, thiscam->x, thiscam->y);
 
 	if (mo->eflags & MFE_VERTICALFLIP)

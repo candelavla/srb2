@@ -1477,13 +1477,6 @@ void G_BuildTiccmd(ticcmd_t *cmd, INT32 realtics, UINT8 ssplayer)
 		tspeed = speed;
 
 	// let movement keys cancel each other out
-	if (controlstyle == CS_LMAOGALOG) // Analog
-	{
-		if (turnright)
-			cmd->angleturn = (INT16)(cmd->angleturn - angleturn[tspeed]);
-		if (turnleft)
-			cmd->angleturn = (INT16)(cmd->angleturn + angleturn[tspeed]);
-	}
 	if (twodlevel
 		|| (player->mo && (player->mo->flags2 & MF2_TWOD))
 		|| (!demoplayback && (player->pflags & PF_SLIDING)))
@@ -1505,13 +1498,6 @@ void G_BuildTiccmd(ticcmd_t *cmd, INT32 realtics, UINT8 ssplayer)
 			// JOYAXISRANGE is supposed to be 32767 (divide by 32768)
 			side += ((lookjoystickvector.xaxis * sidemove[1]) >> 15);
 		}
-	}
-	else if (controlstyle == CS_LMAOGALOG) // Analog
-	{
-		if (turnright)
-			cmd->buttons |= BT_CAMRIGHT;
-		if (turnleft)
-			cmd->buttons |= BT_CAMLEFT;
 	}
 	else
 	{
@@ -1890,94 +1876,79 @@ void G_BuildTiccmd(ticcmd_t *cmd, INT32 realtics, UINT8 ssplayer)
 
 	*myangle += (cmd->angleturn<<16);
 
-	if (controlstyle == CS_LMAOGALOG) {
-		angle_t angle;
-
-		if (player->awayviewtics)
-			angle = player->awayviewmobj->angle;
-		else
-			angle = thiscam->angle;
-
-		cmd->angleturn = (INT16)((angle - (ticcmd_oldangleturn[forplayer] << 16)) >> 16);
-	}
-	else
+	if (controlstyle == CS_SIMPLE && !forcestrafe && thiscam->chase && !turnheld[forplayer] && !ticcmd_centerviewdown[forplayer] && player->powers[pw_carry] != CR_MINECART)
 	{
 		// Adjust camera angle by player input
-		if (controlstyle == CS_SIMPLE && !forcestrafe && thiscam->chase && !turnheld[forplayer] && !ticcmd_centerviewdown[forplayer] && !player->climbing && player->powers[pw_carry] != CR_MINECART)
+		fixed_t camadjustfactor = cv_cam_turntoinput[forplayer].value;
+
+		if (camadjustfactor)
 		{
-			fixed_t camadjustfactor = cv_cam_turntoinput[forplayer].value;
+			fixed_t sine = FINESINE((R_PointToAngle2(0, 0, player->rmomx, player->rmomy) - *myangle)>>ANGLETOFINESHIFT);
+			fixed_t factor;
+			INT16 camadjust;
 
-			if (camadjustfactor)
-			{
-				fixed_t sine = FINESINE((R_PointToAngle2(0, 0, player->rmomx, player->rmomy) - localangle)>>ANGLETOFINESHIFT);
-				fixed_t factor;
-				INT16 camadjust;
+			if ((sine > 0) == (cmd->sidemove > 0))
+				sine = 0; // Prevent jerking right when braking from going left, or vice versa
 
-				if ((sine > 0) == (cmd->sidemove > 0))
-					sine = 0; // Prevent jerking right when braking from going left, or vice versa
+			factor = min(40, FixedMul(player->speed, abs(sine))*2 / FRACUNIT);
 
-				factor = min(40, FixedMul(player->speed, abs(sine))*2 / FRACUNIT);
+			camadjust = (cmd->sidemove * factor * camadjustfactor) >> 16;
 
-				camadjust = (cmd->sidemove * factor * camadjustfactor) >> 16;
-
-				*myangle -= camadjust << 16;
-				cmd->angleturn = (INT16)(cmd->angleturn - camadjust);
-			}
-
-			if (ticcmd_centerviewdown[forplayer] && (cv_cam_lockedinput[forplayer].value || (player->pflags & PF_STARTDASH)))
-				cmd->sidemove = 0;
+			*myangle -= camadjust << 16;
+			cmd->angleturn = (INT16)(cmd->angleturn - camadjust);
+			camadjustfactor = 0;
 		}
+
+		if (ticcmd_centerviewdown[forplayer] && (cv_cam_lockedinput[forplayer].value || (player->pflags & PF_STARTDASH)))
+			cmd->sidemove = 0;
 
 		// Adjust camera angle to face player direction, depending on circumstances
 		// Nothing happens if cam left/right are held, so you can hold both to lock the camera in one direction
-		if (controlstyle == CS_SIMPLE && !forcestrafe && thiscam->chase && !turnheld[forplayer] && !ticcmd_centerviewdown[forplayer] && player->powers[pw_carry] != CR_MINECART)
+
+		boolean alt = false; // Reduce intensity on diagonals and prevent backwards movement from turning the camera
+
+		if (player->pflags & PF_STARTDASH)
+			camadjustfactor = cv_cam_turntospindash[forplayer].value/4;
+		else
+			alt = true;
+
+		camadjustfactor = FixedMul(camadjustfactor, max(FRACUNIT - player->speed, min(player->speed/18, FRACUNIT)));
+
+		camadjustfactor = FixedMul(camadjustfactor, tta_factor[forplayer]);
+
+		if (tta_factor[forplayer] < FRACUNIT && (cmd->forwardmove || cmd->sidemove || tta_factor[forplayer] >= FRACUNIT/3))
+			tta_factor[forplayer] += FRACUNIT>>5;
+		else if (tta_factor[forplayer] && tta_factor[forplayer] < FRACUNIT/3)
+			tta_factor[forplayer] -= FRACUNIT>>5;
+
+		if (camadjustfactor)
 		{
-			fixed_t camadjustfactor = 0;
-			boolean alt = false; // Reduce intensity on diagonals and prevent backwards movement from turning the camera
+			angle_t controlangle;
+			INT32 anglediff;
+			INT16 camadjust;
 
-			if (player->pflags & PF_STARTDASH)
-				camadjustfactor = cv_cam_turntospindash[forplayer].value/4;
+			if ((cmd->forwardmove || cmd->sidemove) && !(player->pflags & PF_SPINNING))
+				controlangle = *myangle + R_PointToAngle2(0, 0, cmd->forwardmove << FRACBITS, -cmd->sidemove << FRACBITS);
 			else
-				alt = true;
+				controlangle = player->drawangle + drawangleoffset;
 
-			camadjustfactor = FixedMul(camadjustfactor, max(FRACUNIT - player->speed, min(player->speed/18, FRACUNIT)));
+			anglediff = controlangle - *myangle;
 
-			camadjustfactor = FixedMul(camadjustfactor, tta_factor[forplayer]);
-
-			if (tta_factor[forplayer] < FRACUNIT && (cmd->forwardmove || cmd->sidemove || tta_factor[forplayer] >= FRACUNIT/3))
-				tta_factor[forplayer] += FRACUNIT>>5;
-			else if (tta_factor[forplayer] && tta_factor[forplayer] < FRACUNIT/3)
-				tta_factor[forplayer] -= FRACUNIT>>5;
-
-			if (camadjustfactor)
+			if (alt)
 			{
-				angle_t controlangle;
-				INT32 anglediff;
-				INT16 camadjust;
+				fixed_t sine = FINESINE((angle_t) (anglediff)>>ANGLETOFINESHIFT);
+				sine = abs(sine);
 
-				if ((cmd->forwardmove || cmd->sidemove) && !(player->pflags & PF_SPINNING))
-					controlangle = *myangle + R_PointToAngle2(0, 0, cmd->forwardmove << FRACBITS, -cmd->sidemove << FRACBITS);
-				else
-					controlangle = player->drawangle + drawangleoffset;
+				if (abs(anglediff) > ANGLE_90)
+					sine = max(0, sine*3 - 2*FRACUNIT); // At about 135 degrees, this will stop turning
 
-				anglediff = controlangle - *myangle;
-
-				if (alt)
-				{
-					fixed_t sine = FINESINE((angle_t) (anglediff)>>ANGLETOFINESHIFT);
-					sine = abs(sine);
-
-					if (abs(anglediff) > ANGLE_90)
-						sine = max(0, sine*3 - 2*FRACUNIT); // At about 135 degrees, this will stop turning
-
-					anglediff = FixedMul(anglediff, sine);
-				}
-
-				camadjust = FixedMul(anglediff, camadjustfactor) >> 16;
-
-				*myangle += camadjust << 16;
-				cmd->angleturn = (INT16)(cmd->angleturn + camadjust);
+				anglediff = FixedMul(anglediff, sine);
 			}
+
+			camadjust = FixedMul(anglediff, camadjustfactor) >> 16;
+
+			*myangle += camadjust << 16;
+			cmd->angleturn = (INT16)(cmd->angleturn + camadjust);
 		}
 	}
 
