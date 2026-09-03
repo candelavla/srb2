@@ -1096,27 +1096,35 @@ void P_DoPlayerPain(player_t *player, mobj_t *source, mobj_t *inflictor)
 void P_ResetPlayer(player_t *player)
 {
 	player->pflags &= ~(PF_SPINNING|PF_STARTDASH|PF_STARTJUMP|PF_JUMPED|PF_NOJUMPDAMAGE|PF_GLIDING|PF_THOKKED|PF_CANCARRY|PF_SHIELDABILITY|PF_BOUNCING);
-
-	if (player->powers[pw_carry] == CR_ROLLOUT)
+	
+	switch (player->powers[pw_carry])
 	{
-		if (player->mo->tracer && !P_MobjWasRemoved(player->mo->tracer))
-		{
-			player->mo->tracer->flags |= MF_PUSHABLE;
+		case CR_NONE:
+		case CR_NIGHTSMODE:
+		case CR_NIGHTSFALL:
+		case CR_BRAKGOOP:
+		case CR_MINECART:
+			break;
+		case CR_ROLLOUT:
+			if (player->mo->tracer && !P_MobjWasRemoved(player->mo->tracer))
+			{
+				player->mo->tracer->flags |= MF_PUSHABLE;
 
-			// goose the mom a little bit to trigger gravity to process for a tic
-			if (player->mo->tracer->eflags & MFE_VERTICALFLIP)
-				player->mo->tracer->momz -= 1;
-			else
-				player->mo->tracer->momz += 1;
+				// goose the momz a little bit to trigger gravity to process for a tic
+				if (player->mo->tracer->eflags & MFE_VERTICALFLIP)
+					player->mo->tracer->momz -= 1;
+				else
+					player->mo->tracer->momz += 1;
 
-			P_SetTarget(&player->mo->tracer->tracer, NULL);
-		}
-		P_SetTarget(&player->mo->tracer, NULL);
-		player->powers[pw_carry] = CR_NONE;
+				P_SetTarget(&player->mo->tracer->tracer, NULL);
+			}
+			P_SetTarget(&player->mo->tracer, NULL);
+			player->powers[pw_carry] = CR_NONE;
+			break;
+		default:
+			player->powers[pw_carry] = CR_NONE;
+			break;
 	}
-
-	if (!(player->powers[pw_carry] == CR_NIGHTSMODE || player->powers[pw_carry] == CR_NIGHTSFALL || player->powers[pw_carry] == CR_BRAKGOOP || player->powers[pw_carry] == CR_MINECART))
-		player->powers[pw_carry] = CR_NONE;
 
 	player->secondjump = 0;
 	player->rsprung = 0;
@@ -4513,9 +4521,9 @@ void P_DoJump(player_t *player, boolean soundandstate, boolean allowflip)
 		return;
 
 	if (player->mo->eflags & MFE_VERTICALFLIP)
-		prevmomz = max(0, -(player->mo->momz*16/19));
+		prevmomz = max(0, -(16*player->mo->momz/19));
 	else
-		prevmomz = max(0, player->mo->momz*16/19);
+		prevmomz = max(0, 16*player->mo->momz/19);
 
 	if (player->climbing)
 	{
@@ -4618,7 +4626,7 @@ void P_DoJump(player_t *player, boolean soundandstate, boolean allowflip)
 			}
 		}
 		else if (maptol & TOL_NIGHTS)
-			player->mo->momz = baseline<<1;
+			player->mo->momz = 7*(baseline>>2);
 		else if (player->powers[pw_super] && !(player->charflags & SF_NOSUPERJUMPBOOST))
 		{
 			player->mo->momz = 13*baseline/10;
@@ -4627,9 +4635,9 @@ void P_DoJump(player_t *player, boolean soundandstate, boolean allowflip)
 			if (player->charability == CA_JUMPBOOST)
 			{
 				if (player->charflags & SF_MULTIABILITY)
-					player->mo->momz += FixedMul(FRACUNIT/4, dist6);
+					player->mo->momz += FixedMul(FRACUNIT>>2, dist6);
 				else
-					player->mo->momz += FixedMul(FRACUNIT/8, dist6);
+					player->mo->momz += FixedMul(FRACUNIT>>3, dist6);
 			}
 		}
 		else
@@ -4639,14 +4647,14 @@ void P_DoJump(player_t *player, boolean soundandstate, boolean allowflip)
 		if (player->mo->eflags & MFE_UNDERWATER)
 			player->mo->momz = FixedMul(player->mo->momz, FixedDiv(117*FRACUNIT, 200*FRACUNIT));
 
-		// prevent holding spin to build infinite score chains (this isn't needed in vanilla because the spin control is so bad)
+		// reset score chain
 		if (player->powers[pw_invulnerability] <= 1)
 			P_ResetScore(player);
 
 		player->pflags |= PF_STARTJUMP;
 	}
 
-	factor = player->jumpfactor*8/5;
+	factor = 8*player->jumpfactor/5;
 
 	P_SetObjectMomZ(player->mo, max(FixedMul(factor, player->mo->momz), prevmomz), false); // Custom height
 
@@ -12529,7 +12537,7 @@ void P_PlayerThink(player_t *player)
 
 #define dashmode player->dashmode
 	// Dash mode - thanks be to VelocitOni
-	if ((player->charflags & SF_DASHMODE) && !player->gotflag && (player->powers[pw_carry] != CR_ROLLOUT) && !player->exiting && !(maptol & TOL_NIGHTS) && !P_PlayerInPain(player) && (player->playerstate == PST_LIVE))
+	if ((player->charflags & SF_DASHMODE) && !player->gotflag && (!player->powers[pw_carry] || (player->powers[pw_carry] != CR_ROLLOUT && player->powers[pw_carry] != CR_NIGHTSMODE && player->powers[pw_carry] != CR_MINECART)) && !player->exiting && !P_PlayerInPain(player))
 	{
 		tic_t prevdashmode = dashmode;
 		boolean above = (player->speed >= FixedMul(skins[player->skin]->normalspeed>>1, player->mo->scale)) || (player->pflags & PF_STARTDASH);
