@@ -107,6 +107,8 @@ static drawseg_xrange_item_t *drawsegs_xrange;
 static size_t drawsegs_xrange_size = 0;
 static INT32 drawsegs_xrange_count = 0;
 
+static boolean everloaded = false;
+
 // ==========================================================================
 //
 // Sprite loading routines: support sprites in pwad, dehacked sprite renaming,
@@ -3022,6 +3024,15 @@ static void R_CreateDrawNodes(maskcount_t* mask, drawnode_t* head, boolean temps
 				entry->ffloor = ds->thicksides[i];
 			}
 		}
+		// temporary hack to make the midtexture bug less obnoxious
+		if (!everloaded && !titlemapinaction && (ds->curline->linedef->flags & ML_MIDPEG))
+		{
+			if (!timeinmap)
+				continue;
+			else
+				everloaded = true;
+		}
+
 		// Check for a polyobject plane, but only if this is a front line
 		if (ds->curline->polyseg && ds->curline->polyseg->visplane && !ds->curline->side) {
 			plane = ds->curline->polyseg->visplane;
