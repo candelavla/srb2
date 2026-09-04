@@ -7947,13 +7947,15 @@ static void P_PlayerDropWeapon(player_t *player)
 void P_BlackOw(player_t *player)
 {
 	INT32 i;
+	fixed_t nukedist = 3000<<FRACBITS;
+
 	S_StartSoundFromMobj(player->mo, sfx_bkpoof); // Sound the BANG!
 
 	for (i = 0; i < MAXPLAYERS; i++)
-		if (players[i].ingame && P_AreMobjsClose2D(player->mo, players[i].mo, 3000<<FRACBITS))
+		if (players[i].ingame && P_AreMobjsClose2D(player->mo, players[i].mo, nukedist))
 			P_FlashPal(&players[i], PAL_NUKE, 10);
 
-	P_NukeEnemies(player->mo, player->mo, 3000<<FRACBITS); // Search for all nearby enemies and nuke their pants off!
+	P_NukeEnemies(player->mo, player->mo, nukedist); // Search for all nearby enemies and nuke their pants off!
 	player->powers[pw_shield] = player->powers[pw_shield] & SH_NOSTACK;
 	P_SpawnShieldOrb(player);
 }
@@ -10271,19 +10273,7 @@ boolean P_MoveChaseCamera(player_t *player, camera_t *thiscam, boolean resetcall
 			camspeed = FRACUNIT/12;
 			player->powers[pw_camlock] = 0;
 		}
-		else if (player->powers[pw_camlock])
-		{
-			if (camdelay) // always tic the power down, but only do anything if cvar is enabled
-			{
-				if (player->powers[pw_camlock] > 4)
-					camspeed = 0;
-				else // move at half speed for 4 tics when starting up
-					camspeed >>= 1;
-			}
-			player->powers[pw_camlock] --;
-		}
-
-		if (player->climbing || player->exiting || player->playerstate == PST_DEAD || (player->powers[pw_carry] == CR_ROPEHANG || player->powers[pw_carry] == CR_GENERIC || player->powers[pw_carry] == CR_MACESPIN))
+		else if (player->climbing || player->exiting || player->playerstate == PST_DEAD || (player->powers[pw_carry] == CR_ROPEHANG || player->powers[pw_carry] == CR_GENERIC || player->powers[pw_carry] == CR_MACESPIN))
 		{
 			dist <<= 1;
 			player->powers[pw_camlock] = 0;
@@ -10297,6 +10287,18 @@ boolean P_MoveChaseCamera(player_t *player, camera_t *thiscam, boolean resetcall
 
 	if (!sign && !(twodlevel || (mo->flags2 & MF2_TWOD)) && !(player->powers[pw_carry] == CR_NIGHTSMODE))
 		dist = FixedMul(dist, player->camerascale);
+		
+	if (player->powers[pw_camlock])
+	{
+		if (camdelay) // always tic the power down, but only do anything if cvar is enabled
+		{
+			if (player->powers[pw_camlock] > 4)
+				camspeed = 0;
+			else // move at half speed for 4 tics when starting up
+				camspeed >>= 1;
+		}
+		player->powers[pw_camlock] --;
+	}
 
 	if (!(twodlevel || (mo->flags2 & MF2_TWOD)) && !(player->powers[pw_carry] == CR_NIGHTSMODE)) // This block here is like 90% Lach's work, thanks bud
 	{
@@ -10535,11 +10537,22 @@ boolean P_MoveChaseCamera(player_t *player, camera_t *thiscam, boolean resetcall
 		if (!resetcalled && !cameranoclip)
 		{
 			// too close
-			if ((ArePointsClose2D(thiscam->x, thiscam->y, mo->x, mo->y, 48*mo->scale)) && (player->speed >= 23*mo->scale))
+			if (ArePointsClose2D(thiscam->x, thiscam->y, mo->x, mo->y, 48*mo->scale))
 			{
-				player->powers[pw_camlock] = 0;
-				P_ResetCamera(player, thiscam);
-				return true;
+				if (!splitscreen && !netgame && !(mo->flags2 & MF2_SHADOW))
+				{
+					mo->flags2 |= MF2_SHADOW;
+				}
+				if (player->speed >= 23*mo->scale)
+				{
+					player->powers[pw_camlock] = 0;
+					P_ResetCamera(player, thiscam);
+					return true;
+				}
+			}
+			else if (mo->flags2 & MF2_SHADOW)
+			{
+				mo->flags2 &= ~MF2_SHADOW;
 			}
 			
 			// crushed camera

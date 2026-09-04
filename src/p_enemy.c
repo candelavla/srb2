@@ -562,7 +562,7 @@ static boolean P_LookForShield(mobj_t *actor)
 			goto ringattract;
 		}
 
-		return false;
+		continue;
 
 ringattract:
 		P_SetTarget(&actor->tracer, player->mo);
