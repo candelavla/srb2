@@ -188,7 +188,7 @@ static char returnWadPath[256];
 #include "../g_game.h"
 #include "../filesrch.h"
 
-#include "../i_joy.h"
+#include "../i_gamepad.h"
 
 #include "../m_argv.h"
 
@@ -243,7 +243,7 @@ static boolean is_quitting = false;
 static long get_entry(const char* name, const char* buf)
 {
 	long val;
-	char* hit = strstr(buf, name);
+	const char* hit = strstr(buf, name);
 	if (hit == NULL) {
 		return -1;
 	}
@@ -526,37 +526,6 @@ void I_Error(const char *error, ...)
 	// ---
 
 	I_QuitStatus(-1);
-}
-
-void I_Tactile(FFType Type, const JoyFF_t *Effect)
-{
-	(void)Type;
-	(void)Effect;
-}
-
-void I_Tactile2(FFType Type, const JoyFF_t *Effect)
-{
-	(void)Type;
-	(void)Effect;
-}
-
-void I_JoyScale(void){}
-
-void I_JoyScale2(void){}
-
-void I_InitJoystick(void){}
-
-void I_InitJoystick2(void){}
-
-INT32 I_NumJoys(void)
-{
-	return 0;
-}
-
-const char *I_GetJoyName(INT32 joyindex)
-{
-	(void)joyindex;
-	return NULL;
 }
 
 #ifndef NOMUMBLE
@@ -1447,10 +1416,6 @@ const char *I_LocateWad(void)
 	}
 	return waddir;
 }
-
-void I_GetJoystickEvents(void){}
-
-void I_GetJoystick2Events(void){}
 
 void I_GetMouseEvents(void){}
 
