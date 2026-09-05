@@ -6021,7 +6021,9 @@ static void P_2dMovement(player_t *player)
 		acceleration = 650;
 
 		if (player->mo->friction > ORIG_FRICTION) // friction scaled acceleration
-			acceleration += 50;
+			acceleration += 125;
+		else if (player->mo->friction < ORIG_FRICTION)
+			acceleration -= 125;
 	}
 	else
 	{
