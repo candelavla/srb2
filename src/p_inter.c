@@ -2817,10 +2817,14 @@ void P_KillMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, UINT8 damaget
 				mobj_t *chain = target->tracer->target, *chainnext;
 				while (chain)
 				{
+					if (chain->type != MT_CRUSHCHAIN) // mods can cause this to delete the player object otherwise
+						goto notachain;
+
 					chainnext = chain->target;
 					P_RemoveMobj(chain);
 					chain = chainnext;
 				}
+notachain:
 				S_StopSound(target->tracer);
 				P_KillMobj(target->tracer, inflictor, source, damagetype);
 			}
