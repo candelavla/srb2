@@ -1638,23 +1638,24 @@ void G_BuildTiccmd(ticcmd_t *cmd, INT32 realtics, UINT8 ssplayer)
 		return;
 	}
 
-	static boolean last_centerviewdown[2], centerviewhold[2]; // detect taps for toggle behavior
-	boolean down = PLAYERINPUTDOWN(ssplayer, GC_CENTERVIEW);
-
-	// why was this ever restricted to simple/automatic ???
-	// - nikoberry
-	if (cv_cam_centertoggle[forplayer].value == 0)
-		centerviewdown = down;
-	else
+	// Centerview can be a toggle in simple mode!
 	{
-		if (down && !last_centerviewdown[forplayer])
-			centerviewhold[forplayer] = !centerviewhold[forplayer];
-		last_centerviewdown[forplayer] = down;
+		static boolean last_centerviewdown[2], centerviewhold[2]; // detect taps for toggle behavior
+		boolean down = PLAYERINPUTDOWN(ssplayer, GC_CENTERVIEW);
 
-		if (cv_cam_centertoggle[forplayer].value == 2 && !down && !ticcmd_ztargetfocus[forplayer])
-			centerviewhold[forplayer] = false;
+		if (!(controlstyle == CS_SIMPLE && cv_cam_centertoggle[forplayer].value))
+			centerviewdown = down;
+		else
+		{
+			if (down && !last_centerviewdown[forplayer])
+				centerviewhold[forplayer] = !centerviewhold[forplayer];
+			last_centerviewdown[forplayer] = down;
 
-		centerviewdown = centerviewhold[forplayer];
+			if (cv_cam_centertoggle[forplayer].value == 2 && !down && !ticcmd_ztargetfocus[forplayer])
+				centerviewhold[forplayer] = false;
+
+			centerviewdown = centerviewhold[forplayer];
+		}
 	}
 
 	if (centerviewdown)
@@ -1774,33 +1775,31 @@ void G_BuildTiccmd(ticcmd_t *cmd, INT32 realtics, UINT8 ssplayer)
 		cmd->buttons |= BT_JUMP;
 
 	// player aiming shit, ahhhh...
-
-	INT32 player_invert = invertmouse ? -1 : 1;
-	INT32 screen_invert =
-		(player->mo && (player->mo->eflags & MFE_VERTICALFLIP)
-		 && (!thiscam->chase || player->pflags & PF_FLIPCAM)) //because chasecam's not inverted
-		 ? -1 : 1; // set to -1 or 1 to multiply
-	INT32 configlookaxis = ssplayer == 1 ? cv_lookaxis.value : cv_lookaxis2.value;
-
-	// mouse look stuff (mouse look is not the same as mouse aim)
-	if (mouseaiming)
 	{
-		keyboard_look[forplayer] = false;
+		INT32 player_invert = invertmouse ? -1 : 1;
+		INT32 screen_invert =
+			(player->mo && (player->mo->eflags & MFE_VERTICALFLIP)
+			 && (!thiscam->chase || player->pflags & PF_FLIPCAM)) //because chasecam's not inverted
+			 ? -1 : 1; // set to -1 or 1 to multiply
+		 INT32 configlookaxis = ssplayer == 1 ? cv_lookaxis.value : cv_lookaxis2.value;
 
-		// looking up/down
-		*myaiming += (mldy<<19)*player_invert*screen_invert;
-	}
+		// mouse look stuff (mouse look is not the same as mouse aim)
+		if (mouseaiming)
+		{
+			keyboard_look[forplayer] = false;
 
-	if (analogjoystickmove && joyaiming[forplayer] && lookjoystickvector.yaxis != 0 && configlookaxis != 0)
-		*myaiming += (lookjoystickvector.yaxis<<16) * screen_invert;
+			// looking up/down
+			*myaiming += (mldy<<19)*player_invert*screen_invert;
+		}
 
-	// spring back if not using keyboard neither mouselookin'
-	if (!keyboard_look[forplayer] && configlookaxis == 0 && !joyaiming[forplayer] && !mouseaiming)
-		*myaiming = 0;
+		if (analogjoystickmove && joyaiming[forplayer] && lookjoystickvector.yaxis != 0 && configlookaxis != 0)
+			*myaiming += (lookjoystickvector.yaxis<<16) * screen_invert;
 
-	if (!(player->powers[pw_carry] == CR_NIGHTSMODE))
-	{
-		if (!ticcmd_centerviewdown[forplayer]) // for parity with mlook
+		// spring back if not using keyboard neither mouselookin'
+		if (!keyboard_look[forplayer] && configlookaxis == 0 && !joyaiming[forplayer] && !mouseaiming)
+			*myaiming = 0;
+
+		if (!(player->powers[pw_carry] == CR_NIGHTSMODE))
 		{
 			if (PLAYERINPUTDOWN(ssplayer, GC_LOOKUP) || (gamepadjoystickmove && lookjoystickvector.yaxis < 0))
 			{
@@ -1812,8 +1811,9 @@ void G_BuildTiccmd(ticcmd_t *cmd, INT32 realtics, UINT8 ssplayer)
 				*myaiming -= KB_LOOKSPEED * screen_invert;
 				keyboard_look[forplayer] = true;
 			}
-		} else
-			*myaiming = 0;
+			else if (ticcmd_centerviewdown[forplayer])
+				*myaiming = 0;
+		}
 
 		// accept no mlook for network games
 		if (!cv_allowmlook.value)
