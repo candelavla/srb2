@@ -11138,8 +11138,6 @@ static void P_MinecartThink(player_t *player)
 		if (!(player->pflags & PF_GODMODE))
 			P_KillMobj(player->mo, NULL, NULL, 0);
 
-		//Clear player's carry flag.
-		player->powers[pw_carry] = CR_NONE;
 		return;
 	}
 
@@ -11178,7 +11176,7 @@ static void P_MinecartThink(player_t *player)
 	if (!P_TryMove(minecart, minecart->x + FINECOSINE(fa), minecart->y + FINESINE(fa), true))
 	{
 		if (!P_MobjWasRemoved(minecart))
-			P_KillMobj(minecart, NULL, NULL, DMG_INSTAKILL);
+			P_KillMobj(minecart, NULL, NULL, 0);
 		return;
 	}
 
@@ -11215,7 +11213,7 @@ static void P_MinecartThink(player_t *player)
 
 			if (!axis)
 			{
-				P_KillMobj(minecart, NULL, NULL, DMG_INSTAKILL);
+				P_KillMobj(minecart, NULL, NULL, 0);
 				return;
 			}
 
@@ -11374,12 +11372,7 @@ static void P_MinecartThink(player_t *player)
 			
 			if (abs(minecart->momx) < minecart->scale/2 && abs(minecart->momy) < minecart->scale/2) // hit a wall
 			{
-				P_KillMobj(minecart, NULL, NULL, DMG_DEATHPIT);
-				return;
-			}
-			if (abs(minecart->momx) < minecart->scale/2 && abs(minecart->momy) < minecart->scale/2) // hit a wall
-			{
-				P_KillMobj(minecart, NULL, NULL, DMG_INSTAKILL);
+				P_KillMobj(minecart, NULL, NULL, 0);
 				return;
 			}
 		}
