@@ -12212,9 +12212,8 @@ void P_PlayerThink(player_t *player)
 					if (player->mo->tracer->player)
 					{
 						player->drawangle = player->mo->tracer->player->drawangle;
-						break;
 					}
-					/* FALLTHRU */
+					break;
 				case CR_MINECART:
 				case CR_GENERIC:
 				case CR_PTERABYTE:
@@ -12231,11 +12230,8 @@ void P_PlayerThink(player_t *player)
 					player->drawangle += ANG20;
 					break;
 				case CR_FAN:
-					if (player->pflags & PF_ANALOGMODE) // Don't impact drawangle in any special way when on a fan
-						player->drawangle = player->mo->angle;
+					// Don't impact drawangle in any special way when on a fan
 					break;
-				/* -- in case we wanted to have the camera freely movable during zoom tubes
-				case CR_ZOOMTUBE:*/
 				case CR_ROPEHANG:
 					if (player->mo->momx || player->mo->momy)
 					{
@@ -12916,14 +12912,6 @@ void P_PlayerAfterThink(player_t *player)
 					player->mo->momx = tails->momx;
 					player->mo->momy = tails->momy;
 					player->mo->momz = tails->momz;
-				}
-
-				if (G_CoopGametype() && tails->player && tails->player->bot != BOT_2PAI)
-				{
-					player->mo->angle = tails->angle;
-
-					if (!demoplayback || P_ControlStyle(player) == CS_LMAOGALOG)
-						P_SetPlayerAngle(player, player->mo->angle);
 				}
 
 				if (P_AreMobjsFar2D(player->mo, tails, tails->radius))
