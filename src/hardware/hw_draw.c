@@ -495,8 +495,8 @@ void HWR_DrawCroppedPatch(patch_t *gpatch, fixed_t x, fixed_t y, fixed_t pscale,
 	}
 
 	// positions of the cx, cy, are between 0 and vid.width/vid.height now, we need them to be between -1 and 1
-	cx = -1 + (cx / (vid.width/2));
-	cy = 1 - (cy / (vid.height/2));
+	cx = -1.0f + (cx / (vid.width / 2.0f));
+	cy = 1.0f - (cy / (vid.height / 2.0f));
 
 	// fwidth and fheight are similar
 	fwidth /= vid.width / 2;
@@ -1206,10 +1206,7 @@ void HWR_DrawFixedFill(fixed_t x, fixed_t y, fixed_t w, fixed_t h, INT32 color)
 {
 	FOutVector v[4];
 	FSurfaceInfo Surf;
-	float fx = FIXED_TO_FLOAT(x);
-	float fy = FIXED_TO_FLOAT(y);
-	float fw = FIXED_TO_FLOAT(w);
-	float fh = FIXED_TO_FLOAT(h);
+	float fx, fy, fw, fh;
 	RGBA_t *palette = HWR_GetTexturePalette();
 	UINT8 alphalevel = ((color & V_ALPHAMASK) >> V_ALPHASHIFT);
 
@@ -1222,15 +1219,15 @@ void HWR_DrawFixedFill(fixed_t x, fixed_t y, fixed_t w, fixed_t h, INT32 color)
 
 	if (splitscreen && (color & V_PERPLAYER))
 	{
-		float adjusty = ((color & V_NOSCALESTART) ? vid.height : BASEVIDHEIGHT)/2.0f;
-		fh /= 2;
-		fy /= 2;
+		fixed_t adjusty = ((color & V_NOSCALESTART) ? vid.height : BASEVIDHEIGHT)<<(FRACBITS-1);
+		h >>= 1;
+		y >>= 1;
 #ifdef QUADS
 		if (splitscreen > 1) // 3 or 4 players
 		{
-			float adjustx = ((color & V_NOSCALESTART) ? vid.height : BASEVIDHEIGHT)/2.0f;
-			fw /= 2;
-			fx /= 2;
+			fixed_t adjustx = ((color & V_NOSCALESTART) ? vid.height : BASEVIDHEIGHT)<<(FRACBITS-1);
+			w >>= 1;
+			x >>= 1;
 			if (stplyr == &players[displayplayer])
 			{
 				if (!(color & (V_SNAPTOTOP|V_SNAPTOBOTTOM)))
@@ -1245,7 +1242,7 @@ void HWR_DrawFixedFill(fixed_t x, fixed_t y, fixed_t w, fixed_t h, INT32 color)
 					perplayershuffle |= 1;
 				if (!(color & (V_SNAPTOLEFT|V_SNAPTORIGHT)))
 					perplayershuffle |= 8;
-				fx += adjustx;
+				x += adjustx;
 				color &= ~V_SNAPTOBOTTOM|V_SNAPTOLEFT;
 			}
 			else if (stplyr == &players[thirddisplayplayer])
@@ -1254,7 +1251,7 @@ void HWR_DrawFixedFill(fixed_t x, fixed_t y, fixed_t w, fixed_t h, INT32 color)
 					perplayershuffle |= 2;
 				if (!(color & (V_SNAPTOLEFT|V_SNAPTORIGHT)))
 					perplayershuffle |= 4;
-				fy += adjusty;
+				y += adjusty;
 				color &= ~V_SNAPTOTOP|V_SNAPTORIGHT;
 			}
 			else //if (stplyr == &players[fourthdisplayplayer])
@@ -1263,8 +1260,8 @@ void HWR_DrawFixedFill(fixed_t x, fixed_t y, fixed_t w, fixed_t h, INT32 color)
 					perplayershuffle |= 2;
 				if (!(color & (V_SNAPTOLEFT|V_SNAPTORIGHT)))
 					perplayershuffle |= 8;
-				fx += adjustx;
-				fy += adjusty;
+				x += adjustx;
+				y += adjusty;
 				color &= ~V_SNAPTOTOP|V_SNAPTOLEFT;
 			}
 		}
@@ -1282,11 +1279,16 @@ void HWR_DrawFixedFill(fixed_t x, fixed_t y, fixed_t w, fixed_t h, INT32 color)
 			{
 				if (!(color & (V_SNAPTOTOP|V_SNAPTOBOTTOM)))
 					perplayershuffle |= 2;
-				fy += adjusty;
+				y += adjusty;
 				color &= ~V_SNAPTOTOP;
 			}
 		}
 	}
+
+	fx = FixedToFloat(x);
+	fy = FixedToFloat(y);
+	fw = FixedToFloat(w);
+	fh = FixedToFloat(h);
 
 	if (!(color & V_NOSCALESTART))
 	{

@@ -1050,7 +1050,7 @@ static void HWR_RenderMidtexture(INT32 gl_midtexture, float cliplow, float cliph
 	}
 
 	// The cut-off values of a linedef can always be constant, since every line has an absoulute front and or back sector
-	if (gl_curline->polyseg)
+	if (gl_curline->polyseg && ((gl_linedef->flags & ML_CLIPMIDTEX) || (gl_sidedef->flags & SIDEFLAG_CLIP_MIDTEX)) == 0)
 	{
 		lowcut = polybottom;
 		highcut = polytop;
@@ -5910,6 +5910,8 @@ void HWR_DoPostProcessor(player_t *player)
 			Surf.PolyColor.s.red = Surf.PolyColor.s.green = Surf.PolyColor.s.blue = 0xff;
 
 		Surf.PolyColor.s.alpha = 0xc0; // match software mode
+
+		V_CubeApply(&Surf.PolyColor.s.red, &Surf.PolyColor.s.green, &Surf.PolyColor.s.blue);
 
 		GL_DrawPolygon(&Surf, v, 4, PF_Modulated|PF_Additive|PF_NoTexture|PF_NoDepthTest);
 	}

@@ -106,11 +106,11 @@ boolean P_CanPickupItem(player_t *player, boolean weapon)
 	if (!player->mo || player->mo->health <= 0)
 		return false;
 
-	if (player->bot && player->bot != BOT_MPAI)
+	if ((player->bot == BOT_2PAI || player->bot == BOT_2PHUMAN) && player->botleader)
 	{
 		if (weapon)
 			return false;
-		return P_CanPickupItem(&players[consoleplayer], true); // weapon is true to prevent infinite recursion if p1 is bot - doesn't occur in vanilla, but may be relevant for mods
+		return P_CanPickupItem(player->botleader, true); // weapon is true to prevent infinite recursion if p1 is bot - doesn't occur in vanilla, but may be relevant for mods
 	}
 
 	if (P_PlayerInPain(player))
@@ -189,8 +189,8 @@ void P_DoNightsScore(player_t *player)
 		return; // Don't do any fancy shit for failures.
 
 	dummymo = P_SpawnMobj(player->mo->x, player->mo->y, player->mo->z+player->mo->height/2, MT_NIGHTSCORE);
-	if (player->bot && player->bot != BOT_MPAI)
-		player = &players[consoleplayer];
+	if ((player->bot == BOT_2PAI || player->bot == BOT_2PHUMAN) && player->botleader)
+		player = player->botleader;
 
 	if (G_IsSpecialStage(gamemap)) // Global link count? Maybe not a good idea...
 	{
@@ -1441,8 +1441,8 @@ void P_TouchSpecialThing(mobj_t *special, mobj_t *toucher, boolean heightcheck)
 					if (players[i].ingame && players[i].powers[pw_carry] == CR_NIGHTSMODE)
 						players[i].drillmeter += TICRATE/2;
 			}
-			else if (player->bot && player->bot != BOT_MPAI)
-				players[consoleplayer].drillmeter += TICRATE/2;
+			else if ((player->bot == BOT_2PAI || player->bot == BOT_2PHUMAN) && player->botleader)
+				player->botleader->drillmeter += TICRATE/2;
 			else
 				player->drillmeter += TICRATE/2;
 
@@ -2817,14 +2817,14 @@ void P_KillMobj(mobj_t *target, mobj_t *inflictor, mobj_t *source, UINT8 damaget
 				mobj_t *chain = target->tracer->target, *chainnext;
 				while (chain)
 				{
-					if (chain->type != MT_CRUSHCHAIN) // mods can cause this to delete the player object otherwise
-						goto notachain;
+					if (P_MobjWasRemoved(chain) || chain->type != MT_CRUSHCHAIN)
+						goto afterchain;
 
 					chainnext = chain->target;
 					P_RemoveMobj(chain);
 					chain = chainnext;
 				}
-notachain:
+afterchain:
 				S_StopSound(target->tracer);
 				P_KillMobj(target->tracer, inflictor, source, damagetype);
 			}
@@ -2928,7 +2928,8 @@ notachain:
 			A_Scream(target);
 			target->momx = target->momy = target->momz = 0;
 			if (target->target && target->target->health)
-				P_KillMobj(target->target, target, source, 0);
+				P_DamageMobj(target->target, target, source, 1,
+					damagetype == DMG_DEATHPIT ? DMG_DEATHPIT : DMG_INSTAKILL);
 			break;
 
 		case MT_PLAYER:

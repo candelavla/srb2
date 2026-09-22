@@ -1279,8 +1279,8 @@ void P_GivePlayerSpheres(player_t *player, INT32 num_spheres)
 	if (!player)
 		return;
 
-	if (player->bot)
-		player = &players[consoleplayer];
+	if ((player->bot == BOT_2PAI || player->bot == BOT_2PHUMAN) && player->botleader)
+		player = player->botleader;
 
 	if (!player->mo)
 		return;
@@ -1306,8 +1306,8 @@ void P_GivePlayerLives(player_t *player, INT32 numlives)
 	if (!player)
 		return;
 
-	if (player->bot)
-		player = &players[consoleplayer];
+	if ((player->bot == BOT_2PAI || player->bot == BOT_2PHUMAN) && player->botleader)
+		player = player->botleader;
 
 	if (gamestate == GS_LEVEL)
 	{
@@ -2197,7 +2197,7 @@ void P_SpawnThokMobj(player_t *player)
 	if (player->spectator)
 		return;
 
-	if (!type)
+	if (type < 1 ||  type >= NUMMOBJTYPES)
 		return;
 
 	if (type == MT_GHOST)
@@ -2261,7 +2261,7 @@ void P_SpawnSpinMobj(player_t *player, mobjtype_t type)
 	if (player->spectator)
 		return;
 
-	if (!type)
+	if (type < 1 ||  type >= NUMMOBJTYPES)
 		return;
 
 	if (type == MT_GHOST)
@@ -10025,7 +10025,7 @@ boolean P_MoveChaseCamera(player_t *player, camera_t *thiscam, boolean resetcall
 
 	mo = player->mo;
 
-	if (player->playerstate == PST_REBORN)
+	if (LUA_HookCameraThinker(player, thiscam) || player->playerstate == PST_REBORN)
 	{
 		P_CalcChasePostImg(player, thiscam);
 		return true;
@@ -10535,12 +10535,15 @@ boolean P_MoveChaseCamera(player_t *player, camera_t *thiscam, boolean resetcall
 					plink = (polymaplink_t *)(plink->link.next);
 				}
 			}
-	}
-	
+		}	
 		if (!resetcalled && !cameranoclip)
 		{
+			fixed_t vx = thiscam->x, vy = thiscam->y;
+			if (player->awayviewtics && player->awayviewmobj != NULL && !P_MobjWasRemoved(player->awayviewmobj))
+				vx = player->awayviewmobj->x, vy = player->awayviewmobj->y;
+
 			// too close
-			if (ArePointsClose2D(thiscam->x, thiscam->y, mo->x, mo->y, 48*mo->scale))
+			if (ArePointsClose2D(vx, vy, mo->x, mo->y, 48*mo->scale))
 			{
 				if (!splitscreen && !netgame && !(mo->flags2 & MF2_SHADOW))
 				{
@@ -10608,7 +10611,7 @@ boolean P_MoveChaseCamera(player_t *player, camera_t *thiscam, boolean resetcall
 
 	// point viewed by the camera
 	// this point is just 64 unit forward the player
-	dist = FixedMul(64 << FRACBITS, mo->scale);
+	dist = FixedMul(64<<FRACBITS, mo->scale);
 	if (sign)
 	{
 		viewpointx = sign->x + FixedMul(FINECOSINE((angle>>ANGLETOFINESHIFT) & FINEMASK), dist);
@@ -11135,6 +11138,8 @@ static void P_MinecartThink(player_t *player)
 		if (!(player->pflags & PF_GODMODE))
 			P_KillMobj(player->mo, NULL, NULL, 0);
 
+		//Clear player's carry flag.
+		player->powers[pw_carry] = CR_NONE;
 		return;
 	}
 
@@ -11173,7 +11178,7 @@ static void P_MinecartThink(player_t *player)
 	if (!P_TryMove(minecart, minecart->x + FINECOSINE(fa), minecart->y + FINESINE(fa), true))
 	{
 		if (!P_MobjWasRemoved(minecart))
-			P_KillMobj(minecart, NULL, NULL, 0);
+			P_KillMobj(minecart, NULL, NULL, DMG_INSTAKILL);
 		return;
 	}
 
@@ -11210,7 +11215,7 @@ static void P_MinecartThink(player_t *player)
 
 			if (!axis)
 			{
-				P_KillMobj(minecart, NULL, NULL, 0);
+				P_KillMobj(minecart, NULL, NULL, DMG_INSTAKILL);
 				return;
 			}
 
@@ -11369,7 +11374,12 @@ static void P_MinecartThink(player_t *player)
 			
 			if (abs(minecart->momx) < minecart->scale/2 && abs(minecart->momy) < minecart->scale/2) // hit a wall
 			{
-				P_KillMobj(minecart, NULL, NULL, 0);
+				P_KillMobj(minecart, NULL, NULL, DMG_DEATHPIT);
+				return;
+			}
+			if (abs(minecart->momx) < minecart->scale/2 && abs(minecart->momy) < minecart->scale/2) // hit a wall
+			{
+				P_KillMobj(minecart, NULL, NULL, DMG_INSTAKILL);
 				return;
 			}
 		}
