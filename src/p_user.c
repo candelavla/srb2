@@ -12209,7 +12209,7 @@ void P_PlayerThink(player_t *player)
 				player->drawangle += (player->powers[pw_justsprung] & ~(1<<15))*(ANG2+ANG1);
 #endif
 		}
-		else if (player->powers[pw_carry] && player->powers[pw_carry] != CR_FAN && player->mo->tracer) // carry
+		else if (player->powers[pw_carry] && player->mo->tracer) // carry
 		{
 			switch (player->powers[pw_carry])
 			{
@@ -12234,6 +12234,10 @@ void P_PlayerThink(player_t *player)
 					break;
 				case CR_DUSTDEVIL:
 					player->drawangle += ANG20;
+					break;
+				case CR_FAN:
+					if (player->pflags & PF_ANALOGMODE) // Don't impact drawangle in any special way when on a fan
+						player->drawangle = player->mo->angle;
 					break;
 				/* -- in case we wanted to have the camera freely movable during zoom tubes
 				case CR_ZOOMTUBE:*/
