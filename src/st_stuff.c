@@ -1171,7 +1171,7 @@ static void ST_drawInput(void)
 		col = flags|16;\
 		V_DrawFill(x+16+(xoffs), y+9+(yoffs), 10, 1, flags|29);\
 	}\
-	V_DrawFill(x+16+(xoffs), y+(yoffs)-offs, 10, 10, col);\
+	V_DrawFill(x+16+(xoffs), y+(yoffs)-offs, 10, 10, V_PERPLAYER|col);\
 	V_DrawCharacter(x+16+1+(xoffs), y+1+(yoffs)-offs, flags|symb, false)
 
 	drawbutt( 4,-3, BT_JUMP,   'J' );
