@@ -12230,15 +12230,17 @@ void P_PlayerThink(player_t *player)
 					player->drawangle += ANG20;
 					break;
 				case CR_FAN:
-					// Don't impact drawangle in any special way when on a fan
+					if (player->pflags & PF_ANALOGMODE) // Impact drawangle in a special way when on a fan
+					{
+							player->drawangle = player->mo->angle;
+					}
 					break;
 				case CR_ROPEHANG:
 					if (player->mo->momx || player->mo->momy)
 					{
 						player->drawangle = R_PointToAngle2(0, 0, player->mo->momx, player->mo->momy);
-						break;
 					}
-					/* FALLTHRU */
+					break;
 				default:
 					player->drawangle = player->mo->angle;
 					break;
