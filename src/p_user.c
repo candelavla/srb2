@@ -6332,7 +6332,7 @@ static void P_3dMovement(player_t *player)
 		else if (angdiff <= -180 * FRACUNIT)
 			angdiff += 360 * FRACUNIT;
 
-		if (abs(angdiff) > FRACUNIT/2 && abs(angdiff) < FRACUNIT*135)
+		if (abs(angdiff) > FRACUNIT>>1 && abs(angdiff) < FRACUNIT*144)
 		{
 			fixed_t newang = ang1;
 			fixed_t turnspd = FixedMul(2<<FRACBITS, player->mo->movefactor);
@@ -6343,10 +6343,10 @@ static void P_3dMovement(player_t *player)
 			}
 			else if (!spin && onground && player->mo->friction <= ORIG_FRICTION)
 			{
-				turnspd += FRACUNIT/3;
+				turnspd += FRACUNIT>>1;
 				if (totalcontrol < 50)
 				{
-					turnspd += (50-totalcontrol)*(FRACUNIT/22);
+					turnspd += (50-totalcontrol)*(FRACUNIT>>4);
 				}
 			}
 
@@ -8433,7 +8433,6 @@ void P_MovePlayer(player_t *player)
 	}
 
 	// If springing while travelling DOWNWARD, or airwalking without jerboa time, change to fall state
-	// TODO: 2.3: Change this to PA_DASH. It checks the state to avoid causing issue with characters that use PA_DASH as a hack to avoid resetting animation on the ground.
 	if ((player->panim == PA_SPRING && P_MobjFlip(player->mo)*player->mo->momz < 0)
 	|| ((player->panim == PA_WALK || player->panim == PA_RUN || player->mo->state-states == S_PLAY_DASH) && !player->secondjump && !player->jerboatime && !player->powers[pw_carry]))
 		P_SetMobjState(player->mo, (P_MobjFlip(player->mo)*player->mo->momz < 8*player->mo->scale) ? S_PLAY_FALL : S_PLAY_SPRING);
@@ -11506,7 +11505,7 @@ void P_DoTailsOverlay(player_t *player, mobj_t *tails)
 	{
 		if (!smilesonground || P_IsPlayerInState(player, S_PLAY_SKID))
 			chosenstate = S_TAILSOVERLAY_PLUS30DEGREES;
-		else if (player->speed >= FixedMul(18<<FRACBITS, player->mo->scale))
+		else if (player->speed >= FixedMul(23<<FRACBITS, player->mo->scale))
 			chosenstate = S_TAILSOVERLAY_0DEGREES;
 		else
 			chosenstate = S_TAILSOVERLAY_MINUS30DEGREES;

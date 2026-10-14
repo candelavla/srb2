@@ -1157,41 +1157,25 @@ static INT16 GetJoystickAxisValue(INT32 axisval)
 {
 	boolean flp = false;
 
-	if (axisval < 0) // odd -axes
+	if (!axisval || axisval > JOYAXISSET*2)
+	{
+		return 0;
+	}
+	else if (axisval < 0) // odd -axes
 	{
 		axisval = -axisval;
 		flp = true;
 	}
-	else if (axisval == 0)
-		return 0;
-
-	if (axisval > JOYAXISSET*2)
-		return 0;
 
 	gamepad_axis_e gp_axis;
 
-#ifdef OLD_GAMEPAD_AXES
-	gp_axis = ConvertXboxControllerAxes(axisval);
-#else
-	gp_axis = axisval - 1;
-#endif
-
-	if (gp_axis >= NUM_GAMEPAD_AXES)
-		return 0;
-
-	if (axisval % 2)
-		axisval /= 2;
-	else
-	{
-		axisval--;
-		axisval /= 2;
-	}
+	gp_axis = axisval-1;
 
 	INT16 retaxis = G_GetGamepadAxisValue(0, gp_axis);
 
 	// flip it around
 	if (flp)
-		retaxis = -retaxis;
+		retaxis = -retaxis-1;
 
 	return retaxis;
 }
