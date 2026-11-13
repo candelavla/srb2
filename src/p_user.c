@@ -94,6 +94,7 @@ jingle_t jingleinfo[NUMJINGLES] = {
 #define MAXBOB (0x10 << FRACBITS)
 
 static boolean onground;
+static boolean spin;
 
 //
 // P_Thrust
@@ -6009,14 +6010,28 @@ static void P_2dMovement(player_t *player)
 			movepushangle = player->mo->angle;
 	}
 
+	player->aiming = cmd->aiming<<FRACBITS;
+	
 	onground = P_IsObjectOnGround(player->mo);
 
-	player->aiming = cmd->aiming<<FRACBITS;
-
-	// set player speeds
+	// determine acceleration value
 	if (player->pflags & PF_SLIDING)
-		acceleration = 800;
-	else if (onground)
+	{
+		if (P_GetPlayerControlDirection(player) == 2)
+			acceleration = 0;
+		else
+			acceleration = 725;
+		
+		goto setaccel; // don't further modify accel on a slide
+	}
+
+	if (player->powers[pw_justsprung] && P_GetPlayerControlDirection(player) == 2)
+	{
+		acceleration = 80;
+		goto setaccel; // brakes locked up from a spring, skip the rest of this
+	}
+
+	if (onground)
 	{
 		acceleration = 650;
 
@@ -6027,11 +6042,14 @@ static void P_2dMovement(player_t *player)
 	}
 	else
 	{
-		acceleration = 650;
+		if (P_GetPlayerControlDirection(player) == 2)
+			acceleration = 375;
+		else
+			acceleration = 650;
 	}
 
 	if (stricmp(player->mo->skin, "luigi") == 0)
-		acceleration -= (onground) ? 150 : 50;
+		acceleration -= (onground) ? 120 : 70;
 
 	if (player->mo->eflags & (MFE_UNDERWATER|MFE_GOOWATER))
 	{
@@ -6044,7 +6062,7 @@ static void P_2dMovement(player_t *player)
 		if (player->powers[pw_sneakers])
 		{
 			normalspd <<= 1;
-			acceleration += 320;
+			acceleration += 310;
 		}
 		else
 		{
@@ -6057,9 +6075,8 @@ static void P_2dMovement(player_t *player)
 		normalspd = FixedMul(normalspd, 5*FRACUNIT/3);
 		acceleration += 240;
 	}
-
-	if (player->powers[pw_justsprung] && P_GetPlayerControlDirection(player) == 2)
-		acceleration = 62;
+		
+setaccel:
 
 	topspeed = normalspd; //set normal top speed
 
@@ -6104,7 +6121,6 @@ static void P_2dMovement(player_t *player)
 	player->mo->friction = ORIG_FRICTION;
 }
 
-//#define OLD_MOVEMENT_CODE 1
 static void P_3dMovement(player_t *player)
 {
 	ticcmd_t *cmd;
@@ -6112,8 +6128,6 @@ static void P_3dMovement(player_t *player)
 	INT32 topspeed, acceleration;
 	fixed_t movepushforward = 0, movepushside = 0;
 	fixed_t normalspd = FixedMul(player->normalspeed, player->mo->scale);
-	controlstyle_e controlstyle;
-	boolean spin = ((onground = P_IsObjectOnGround(player->mo)) && (player->pflags & PF_SPINNING) && (player->rmomx || player->rmomy) && !(player->pflags & PF_STARTDASH));
 	fixed_t oldMagnitude, newMagnitude;
 	vector3_t totalthrust;
 
@@ -6124,8 +6138,6 @@ static void P_3dMovement(player_t *player)
 
 	// Get the old momentum; this will be needed at the end of the function! -SH
 	oldMagnitude = GetDistance2D(player->mo->momx, player->mo->momy, player->cmomx, player->cmomy);
-
-	controlstyle = P_ControlStyle(player);
 
 	cmd = &player->cmd;
 
@@ -6166,10 +6178,27 @@ static void P_3dMovement(player_t *player)
 
 	player->aiming = cmd->aiming<<FRACBITS;
 
-	// set player speeds
+	onground = P_IsObjectOnGround(player->mo);
+	spin = (player->pflags & PF_SPINNING);
+
+	// determine acceleration value
 	if (player->pflags & PF_SLIDING)
-		acceleration = 900;
-	else if (onground)
+	{
+		if (P_GetPlayerControlDirection(player) == 2)
+			acceleration = 0;
+		else
+			acceleration = 725;
+		
+		goto setaccel; // don't further modify accel on a slide
+	}
+
+	if (player->powers[pw_justsprung] && P_GetPlayerControlDirection(player) == 2)
+	{
+		acceleration = 80;
+		goto setaccel; // brakes locked up from a spring, skip the rest of this
+	}
+
+	if (onground)
 	{
 		acceleration = 1400;
 
@@ -6178,11 +6207,17 @@ static void P_3dMovement(player_t *player)
 	}
 	else
 	{
-		acceleration = 650;
+		if (P_GetPlayerControlDirection(player) == 2)
+			acceleration = 375;
+		else
+			acceleration = 650;
+			
+		if (spin) // this is effectively halved, so double it in advance
+			acceleration <<= 1;
 	}
 
 	if (stricmp(player->mo->skin, "luigi") == 0)
-		acceleration -= (onground) ? 150 : 50;
+		acceleration -= (onground) ? 120 : 70;
 
 	if (player->mo->eflags & (MFE_UNDERWATER|MFE_GOOWATER))
 	{
@@ -6195,7 +6230,7 @@ static void P_3dMovement(player_t *player)
 		if (player->powers[pw_sneakers])
 		{
 			normalspd <<= 1;
-			acceleration += 320;
+			acceleration += 310;
 		}
 		else
 		{
@@ -6208,16 +6243,15 @@ static void P_3dMovement(player_t *player)
 		normalspd = FixedMul(normalspd, 5*FRACUNIT/3);
 		acceleration += 240;
 	}
-
-	if (player->powers[pw_justsprung] && P_GetPlayerControlDirection(player) == 2)
-		acceleration = 62;
+		
+setaccel:
 
 	topspeed = normalspd; //set normal top speed
 
 	if (player->fly1)
 		topspeed = FixedMul(topspeed, 11*FRACUNIT/16);
 
-	if (spin) // Prevent gaining speed whilst rolling!
+	if (spin && onground) // Prevent gaining speed whilst rolling!
 		topspeed = oldMagnitude;
 
 	// Forward movement
@@ -6231,8 +6265,7 @@ static void P_3dMovement(player_t *player)
 				P_SetObjectMomZ(player->mo, FixedDiv(cmd->forwardmove*FRACUNIT, player->powers[pw_super] ? 6*FRACUNIT : 8*FRACUNIT), false); // -2 while super
 		}
 	}
-	else if (!(controlstyle == CS_LMAOGALOG)
-		&& (cmd->forwardmove != 0 || (player->pflags & PF_STARTDASH)) && !(player->pflags & PF_GLIDING || player->exiting
+	else if ((cmd->forwardmove != 0 || (player->pflags & PF_STARTDASH)) && !(player->pflags & PF_GLIDING || player->exiting
 		|| (P_PlayerInPain(player) && !onground)))
 	{
 		movepushforward = cmd->forwardmove * acceleration;
@@ -6255,33 +6288,6 @@ static void P_3dMovement(player_t *player)
 			P_InstaThrust(player->mo, player->mo->angle-ANGLE_90, FixedDiv(cmd->sidemove*player->mo->scale, player->powers[pw_super] ? 5*FRACUNIT : 7*FRACUNIT)); // -2 while super
 		else
 			P_InstaThrust(player->mo, player->mo->angle-ANGLE_90, FixedDiv(cmd->sidemove*player->mo->scale, player->powers[pw_super] ? 3*FRACUNIT : 5*FRACUNIT)); // -2 while super
-	}
-	// Analog movement control
-	else if (controlstyle == CS_LMAOGALOG)
-	{
-		if (!(player->pflags & PF_GLIDING || player->exiting || P_PlayerInPain(player)))
-		{
-			angle_t controldirection;
-
-			// Calculate the angle at which the controls are pointing
-			// to figure out the proper mforward and mbackward.
-			// (Why was it so complicated before? ~Red)
-			controldirection = R_PointToAngle2(0, 0, cmd->forwardmove*FRACUNIT, -cmd->sidemove*FRACUNIT)+movepushangle;
-
-			movepushforward = FixedHypot(cmd->sidemove, cmd->forwardmove) * acceleration;
-
-			if (player->pflags & PF_STARTDASH)
-				movepushside = 0;
-			else if (spin)
-				movepushside >>= 1;
-
-			movepushsideangle = controldirection;
-
-			movepushforward = FixedMul(movepushforward, player->mo->scale);
-
-			totalthrust.x += P_ReturnThrustX(player->mo, controldirection, movepushforward);
-			totalthrust.y += P_ReturnThrustY(player->mo, controldirection, movepushforward);
-		}
 	}
 	else if (cmd->sidemove && !(player->pflags & PF_GLIDING) && !player->exiting && !P_PlayerInPain(player))
 	{
@@ -6336,12 +6342,21 @@ static void P_3dMovement(player_t *player)
 		{
 			fixed_t newang = ang1;
 			fixed_t turnspd = FixedMul(2<<FRACBITS, player->mo->movefactor);
+			boolean traction = onground;
 
+			if (spin)
+			{
+				turnspd -= FRACUNIT>>2;
+				traction = false;
+			}
+	
 			if (player->powers[pw_justsprung])
 			{
 				turnspd >>= 1;
+				traction = false;
 			}
-			else if (!spin && onground && player->mo->friction <= ORIG_FRICTION)
+
+			if (traction && player->mo->friction <= ORIG_FRICTION)
 			{
 				turnspd += FRACUNIT>>1;
 				if (totalcontrol < 50)
@@ -6350,12 +6365,11 @@ static void P_3dMovement(player_t *player)
 				}
 			}
 
-			turnspd = max(FRACUNIT>>2, turnspd);
-
 			if (angdiff > 0)
 				newang += min(angdiff/2, turnspd);
 			else
 				newang -= min(-angdiff/2, turnspd);
+
 			player->mo->momx = P_ReturnThrustX(player->mo, FixedAngle(newang), player->speed) + player->cmomx;
 			player->mo->momy = P_ReturnThrustY(player->mo, FixedAngle(newang), player->speed) + player->cmomy;
 		}
@@ -6364,7 +6378,7 @@ static void P_3dMovement(player_t *player)
 	if (P_XYFriction(player->mo, oldz))
 	{
 		angle_t moveangle = R_PointToAngle2(0, 0, player->rmomx,  player->rmomy);
-		fixed_t deceleration = FixedMul(FRACUNIT*3/2, player->mo->movefactor);
+		fixed_t deceleration = FixedMul(3*FRACUNIT/2, player->mo->movefactor);
 		fixed_t dx; fixed_t dy;
 
 		if (!onground)
@@ -6392,7 +6406,7 @@ static void P_3dMovement(player_t *player)
 			if (player->speed >= FixedMul(18<<FRACBITS, player->mo->scale) && player->mo->friction <= ORIG_FRICTION)
 				deceleration -= FRACUNIT>>1;
 
-			deceleration = min(deceleration, FixedDiv(player->speed>>1, player->mo->scale));
+			deceleration = min(deceleration, player->speed>>1);
 		}
 
 		//Get deceleration vector
@@ -6417,7 +6431,7 @@ static void P_3dMovement(player_t *player)
 	if (newMagnitude > topspeed)
 	{
 		fixed_t tempmomx, tempmomy;
-		if (oldMagnitude > topspeed && !spin)
+		if (oldMagnitude > topspeed)
 		{
 			if (newMagnitude > oldMagnitude)
 			{
@@ -6436,7 +6450,7 @@ static void P_3dMovement(player_t *player)
 		}
 	}
 	oldz = player->mo->z;
-	player->mo->friction = ORIG_FRICTION; //katsy: reset player friction AFTER movement code
+	player->mo->friction = ORIG_FRICTION;
 }
 
 //
@@ -8140,7 +8154,7 @@ static void P_SkidStuff(player_t *player)
 					P_SpawnSkidDust(player, 0, false);
 			}
 		}
-		else if (FixedHypot(pmx, pmy) >= FixedMul(18<<FRACBITS, player->mo->scale) // if you were moving faster than 18 fracunits per tic
+		else if (FixedHypot(pmx, pmy) >= FixedMul(23<<FRACBITS, player->mo->scale) // if you were moving faster than 23 fracunits per tic
 		&& (player->mo->momx != pmx || player->mo->momy != pmy) // and you are moving differently this frame
 		&& (P_GetPlayerControlDirection(player) == 2) // and your controls are pointing in the opposite direction to your movement
 		&& !player->powers[pw_justsprung]) // and you are not sprung

@@ -40,7 +40,7 @@
 #include "netcode/net_command.h"
 
 static CV_PossibleValue_t CV_BobSpeed[] = {{0, "MIN"}, {4*FRACUNIT, "MAX"}, {0, NULL}};
-consvar_t cv_movebob = CVAR_INIT ("movebob", "0.25", CV_FLOAT|CV_SAVE, CV_BobSpeed, NULL);
+consvar_t cv_movebob = CVAR_INIT ("movebob", "0.5", CV_FLOAT|CV_SAVE, CV_BobSpeed, NULL);
 
 actioncache_t actioncachehead;
 
@@ -368,9 +368,9 @@ static boolean P_SetPlayerMobjState(mobj_t *mobj, statenum_t state)
 					{
 						if (speed >= 23<<FRACBITS)
 							mobj->tics = 2;
-						else if (speed >= 12<<FRACBITS)
+						else if (speed >= 11<<FRACBITS)
 							mobj->tics = 3;
-						else if (speed >= 5<<FRACBITS)
+						else if (speed >= 2<<FRACBITS)
 							mobj->tics = 4;
 						else
 							mobj->tics = 5;
@@ -1535,13 +1535,10 @@ boolean P_XYFriction(mobj_t *mo, fixed_t oldz)
 
 	if (player) // valid only if player avatar
 	{
-		if (player->homing) // no friction for homing
-			return false;
+		if (player->homing || player->powers[pw_carry] == CR_NIGHTSMODE)
+			return false; // no friction for NiGHTS players, homing players, or homing NiGHTS players
 
-		if (player->powers[pw_carry] == CR_NIGHTSMODE)
-			return false; // no friction for NiGHTS players
-
-		if (((player->pflags & PF_GLIDING) && !player->skidtime) || (player->pflags & PF_SPINNING))
+		if (((player->pflags & PF_GLIDING) && !player->skidtime) || (player->pflags & (PF_SPINNING|PF_SLIDING)))
 			return false;
 
 		if (abs(player->rmomx) < FixedMul(STOPSPEED, mo->scale)
