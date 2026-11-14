@@ -55,7 +55,8 @@ typedef enum
 	SF_NOSUPERJUMPBOOST = 1<<18, // Disable the jump boost given while super (i.e. Knuckles)
 	SF_CANBUSTWALLS     = 1<<19, // Can naturally bust walls on contact? (i.e. Knuckles)
 	SF_NOSHIELDABILITY  = 1<<20, // Disable shield abilities
-	SF_TRICKFORBIDDEN   = 1<<21, // i hate frame perfect input conflicts
+	SF_PEELOUT          = 1<<21, // Enables peelout by default, spiral hammer with CA3_HAMMERSPIN, or burnout with CA3_BURNOUT
+	SF_TRICKFORBIDDEN   = 1<<22  // No spring tricks for you
 
 	// free up to and including 1<<31
 } skinflags_t;
@@ -64,9 +65,12 @@ typedef enum
 typedef enum
 {
 	CA_NONE=0,
-	CA_THOK,
+	CA_COMETDASH,
 	CA_FLY,
 	CA_GLIDEANDCLIMB,
+	CA_LOVELYASCENT,
+	CA_BOUNCE,
+	CA_JETBURST,
 	CA_HOMINGTHOK,
 	CA_SWIM,
 	CA_DOUBLEJUMP,
@@ -77,7 +81,7 @@ typedef enum
 	CA_JUMPBOOST,
 	CA_AIRDRILL,
 	CA_JUMPTHOK,
-	CA_BOUNCE,
+	CA_THOK,
 	CA_TWINSPIN
 } charability_t;
 
@@ -87,8 +91,21 @@ typedef enum
 	CA2_NONE=0,
 	CA2_SPINDASH,
 	CA2_GUNSLINGER,
+	CA2_QUICKROLL,
 	CA2_MELEE
 } charability2_t;
+
+typedef enum
+{
+	CA3_NONE=0,
+	CA3_DROPBOOST,
+	CA3_THUNDERSHOOT,
+	CA3_BULLDOZE,
+	CA3_HAMMER,
+	CA3_JERBOATIME,
+	CA3_BURNOUT,
+	CA3_SUPERFLOAT
+} charability3_t;
 
 //
 // Player states.
@@ -487,6 +504,7 @@ typedef struct player_s
 	// See charability_t and charability2_t for more information.
 	UINT8 charability; // Ability definition
 	UINT8 charability2; // Secondary ability definition
+	UINT8 charability3; // Reveries exclusive third ability definition
 
 	UINT32 charflags; // Extra abilities/settings for skins (combinable stuff)
 	                 // See SF_ flags

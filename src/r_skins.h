@@ -43,6 +43,7 @@ typedef struct
 
 	UINT8 ability; // ability definition
 	UINT8 ability2; // secondary ability definition
+	UINT8 ability3; // tertiary ability definition
 	INT32 thokitem;
 	INT32 spinitem;
 	INT32 revitem;

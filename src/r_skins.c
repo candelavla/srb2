@@ -234,6 +234,7 @@ static void Sk_SetDefaultValue(skin_t *skin)
 
 	skin->ability = CA_NONE;
 	skin->ability2 = CA2_SPINDASH;
+	skin->ability3 = CA3_NONE;
 	skin->jumpfactor = FRACUNIT;
 	skin->actionspd = 50<<FRACBITS;
 	skin->mindash = 43<<FRACBITS;
@@ -432,6 +433,7 @@ static void SetSkin(player_t *player, INT32 skinnum)
 
 	player->charability = (UINT8)skin->ability;
 	player->charability2 = (UINT8)skin->ability2;
+	player->charability3 = (UINT8)skin->ability3;
 
 	player->charflags = (UINT32)skin->flags;
 
@@ -665,6 +667,7 @@ static boolean R_ProcessPatchableFields(skin_t *skin, char *stoken, char *value)
 	FULLPROCESS(flags)
 	FULLPROCESS(ability)
 	FULLPROCESS(ability2)
+	FULLPROCESS(ability3)
 
 	FULLPROCESS(thokitem)
 	FULLPROCESS(spinitem)

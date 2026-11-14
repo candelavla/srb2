@@ -123,6 +123,7 @@ enum player_e
 	player_acceleration,
 	player_charability,
 	player_charability2,
+	player_charability3,
 	player_charflags,
 	player_thokitem,
 	player_spinitem,
@@ -274,6 +275,7 @@ static const char *const player_opt[] = {
 	"acceleration",
 	"charability",
 	"charability2",
+	"charability3",
 	"charflags",
 	"thokitem",
 	"spinitem",
@@ -531,6 +533,9 @@ static int player_get(lua_State *L)
 		break;
 	case player_charability2:
 		lua_pushinteger(L, plr->charability2);
+		break;
+	case player_charability3:
+		lua_pushinteger(L, plr->charability3);
 		break;
 	case player_charflags:
 		lua_pushinteger(L, plr->charflags);
@@ -1012,6 +1017,9 @@ static int player_set(lua_State *L)
 		break;
 	case player_charability2:
 		plr->charability2 = (UINT8)luaL_checkinteger(L, 3);
+		break;
+	case player_charability3:
+		plr->charability3 = (UINT8)luaL_checkinteger(L, 3);
 		break;
 	case player_charflags:
 		plr->charflags = (UINT32)luaL_checkinteger(L, 3);

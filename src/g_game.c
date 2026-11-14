@@ -2831,6 +2831,7 @@ void G_PlayerReborn(INT32 player, boolean betweenmaps)
 	fixed_t shieldscale;
 	UINT8 charability;
 	UINT8 charability2;
+	UINT8 charability3;
 	fixed_t normalspeed;
 	fixed_t runspeed;
 	UINT8 thrustfactor;
@@ -2915,6 +2916,7 @@ void G_PlayerReborn(INT32 player, boolean betweenmaps)
 	shieldscale = players[player].shieldscale;
 	charability = players[player].charability;
 	charability2 = players[player].charability2;
+	charability3 = players[player].charability3;
 	normalspeed = players[player].normalspeed;
 	runspeed = players[player].runspeed;
 	thrustfactor = players[player].thrustfactor;
@@ -2981,6 +2983,7 @@ void G_PlayerReborn(INT32 player, boolean betweenmaps)
 	p->shieldscale = shieldscale;
 	p->charability = charability;
 	p->charability2 = charability2;
+	p->charability3 = charability3;
 	p->normalspeed = normalspeed;
 	p->runspeed = runspeed;
 	p->thrustfactor = thrustfactor;

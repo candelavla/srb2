@@ -58,7 +58,6 @@ static UINT8 demoflags;
 UINT16 demoversion;
 boolean singledemo; // quit after playing a demo from cmdline
 boolean demo_start; // don't start playing demo right away
-boolean demo_forwardmove_rng; // old demo backwards compatibility
 boolean demosynced = true; // console warning message
 
 boolean metalrecording; // recording as metal sonic
@@ -100,7 +99,7 @@ demoghost *ghosts = NULL;
 // DEMO RECORDING
 //
 
-#define DEMOVERSION 0x0012
+#define DEMOVERSION 0x0013
 #define DEMOHEADER  "\xF0" "SRB2Replay" "\x0F"
 
 #define DF_GHOST        0x01 // This demo contains ghost data too!
@@ -187,8 +186,6 @@ void G_ReadDemoTiccmd(ticcmd_t *cmd, INT32 playernum)
 	if (ziptic & ZT_BUTTONS)
 	{
 		oldcmd.buttons = (oldcmd.buttons & (BT_CAMLEFT|BT_CAMRIGHT)) | (READUINT16(demo_p) & ~(BT_CAMLEFT|BT_CAMRIGHT));
-		if (demoversion < 0x0012 && oldcmd.buttons & BT_SPIN)
-			oldcmd.buttons |= BT_SHIELD; // Copy BT_SPIN to BT_SHIELD for pre-Shield-button demos
 	}
 	if (ziptic & ZT_AIMING)
 		oldcmd.aiming = READINT16(demo_p);
@@ -566,11 +563,11 @@ void G_ConsGhostTic(void)
 	{
 		if (ziptic & GZT_MOMXY)
 		{
-			oldghost.momx = (demoversion < 0x000e) ? READINT16(demo_p)<<8 : READFIXED(demo_p);
-			oldghost.momy = (demoversion < 0x000e) ? READINT16(demo_p)<<8 : READFIXED(demo_p);
+			oldghost.momx = READFIXED(demo_p);
+			oldghost.momy = READFIXED(demo_p);
 		}
 		if (ziptic & GZT_MOMZ)
-			oldghost.momz = (demoversion < 0x000e) ? READINT16(demo_p)<<8 : READFIXED(demo_p);
+			oldghost.momz = READFIXED(demo_p);
 		oldghost.x += oldghost.momx;
 		oldghost.y += oldghost.momy;
 		oldghost.z += oldghost.momz;
@@ -580,13 +577,13 @@ void G_ConsGhostTic(void)
 	if (ziptic & GZT_FRAME)
 		demo_p++;
 	if (ziptic & GZT_SPR2)
-		demo_p += (demoversion < 0x0011) ? sizeof(UINT8) : sizeof(UINT16);
+		demo_p += sizeof(UINT16);
 
 	if (ziptic & GZT_EXTRA)
 	{ // But wait, there's more!
 		UINT8 xziptic = READUINT8(demo_p);
 		if (xziptic & EZT_COLOR)
-			demo_p += (demoversion==0x000c) ? 1 : sizeof(UINT16);
+			demo_p += sizeof(UINT16);
 		if (xziptic & EZT_SCALE)
 			demo_p += sizeof(fixed_t);
 		if (xziptic & EZT_HIT)
@@ -632,7 +629,7 @@ void G_ConsGhostTic(void)
 		if (xziptic & EZT_SPRITE)
 			demo_p += sizeof(UINT16);
 		if (xziptic & EZT_HEIGHT)
-			demo_p += (demoversion < 0x000e) ? sizeof(INT16) : sizeof(fixed_t);
+			demo_p += sizeof(fixed_t);
 	}
 
 	if (ziptic & GZT_FOLLOW)
@@ -647,12 +644,12 @@ void G_ConsGhostTic(void)
 		if (followtic & FZT_SCALE)
 			demo_p += sizeof(fixed_t);
 		// momx, momy and momz
-		demo_p += (demoversion < 0x000e) ? sizeof(INT16) * 3 : sizeof(fixed_t) * 3;
+		demo_p += sizeof(fixed_t) * 3;
 		if (followtic & FZT_SKIN)
-			demo_p += (demoversion < 0x0011) ? sizeof(UINT8) : sizeof(UINT16);
+			demo_p += sizeof(UINT16);
 		demo_p += sizeof(UINT16);
 		demo_p++;
-		demo_p += (demoversion==0x000c) ? 1 : sizeof(UINT16);
+		demo_p += sizeof(UINT16);
 	}
 
 	// Re-synchronise
@@ -1550,6 +1547,7 @@ void G_BeginRecording(void)
 	// Stats
 	WRITEUINT8(demo_p,player->charability);
 	WRITEUINT8(demo_p,player->charability2);
+	WRITEUINT8(demo_p,player->charability3);
 	WRITEFIXED(demo_p,player->actionspd);
 	WRITEFIXED(demo_p,player->mindash);
 	WRITEFIXED(demo_p,player->maxdash);
@@ -2001,7 +1999,7 @@ void G_DoPlayDemo(char *defdemoname)
 	UINT8 i;
 	lumpnum_t l;
 	char skin[17],color[MAXCOLORNAME+1],*n,*pdemoname;
-	UINT8 version,subversion,charability,charability2,thrustfactor,accelstart,acceleration;
+	UINT8 version,subversion,charability,charability2,charability3,thrustfactor,accelstart,acceleration;
 	pflags_t pflags;
 	UINT32 randseed, followitem;
 	fixed_t camerascale,shieldscale,actionspd,mindash,maxdash,normalspeed,runspeed,jumpfactor,height,spinheight;
@@ -2063,12 +2061,7 @@ void G_DoPlayDemo(char *defdemoname)
 	version = READUINT8(demo_p);
 	subversion = READUINT8(demo_p);
 	demoversion = READUINT16(demo_p);
-	demo_forwardmove_rng = (demoversion < 0x0010);
-#ifdef OLD22DEMOCOMPAT
-	if (demoversion < 0x000c || demoversion > DEMOVERSION)
-#else
-	if (demoversion < 0x000d || demoversion > DEMOVERSION)
-#endif
+	if (demoversion < 0x0012 || demoversion > DEMOVERSION)
 	{
 		// too old (or new), cannot support
 		snprintf(msg, 1024, M_GetText("%s is an incompatible replay format and cannot be played.\n"), pdemoname);
@@ -2197,23 +2190,24 @@ void G_DoPlayDemo(char *defdemoname)
 	demo_p += 16;
 
 	// Color
-	M_Memcpy(color, demo_p, (demoversion < 0x000d) ? 16 : MAXCOLORNAME);
-	demo_p += (demoversion < 0x000d) ? 16 : MAXCOLORNAME;
+	M_Memcpy(color, demo_p, MAXCOLORNAME);
+	demo_p += MAXCOLORNAME;
 
 	charability = READUINT8(demo_p);
 	charability2 = READUINT8(demo_p);
-	actionspd = (demoversion < 0x0010) ? (fixed_t)READUINT8(demo_p)<<FRACBITS : READFIXED(demo_p);
-	mindash = (demoversion < 0x0010) ? (fixed_t)READUINT8(demo_p)<<FRACBITS : READFIXED(demo_p);
-	maxdash = (demoversion < 0x0010) ? (fixed_t)READUINT8(demo_p)<<FRACBITS : READFIXED(demo_p);
-	normalspeed = (demoversion < 0x0010) ? (fixed_t)READUINT8(demo_p)<<FRACBITS : READFIXED(demo_p);
-	runspeed = (demoversion < 0x0010) ? (fixed_t)READUINT8(demo_p)<<FRACBITS : READFIXED(demo_p);
+	charability3 = READUINT8(demo_p);
+	actionspd = READFIXED(demo_p);
+	mindash = READFIXED(demo_p);
+	maxdash = READFIXED(demo_p);
+	normalspeed = READFIXED(demo_p);
+	runspeed = READFIXED(demo_p);
 	thrustfactor = READUINT8(demo_p);
 	accelstart = READUINT8(demo_p);
 	acceleration = READUINT8(demo_p);
-	height = (demoversion < 0x000e) ? (fixed_t)READUINT8(demo_p)<<FRACBITS : READFIXED(demo_p);
-	spinheight = (demoversion < 0x000e) ? (fixed_t)READUINT8(demo_p)<<FRACBITS : READFIXED(demo_p);
-	camerascale = (demoversion < 0x0010) ? (fixed_t)READUINT8(demo_p)<<FRACBITS : READFIXED(demo_p);
-	shieldscale = (demoversion < 0x0010) ? (fixed_t)READUINT8(demo_p)<<FRACBITS : READFIXED(demo_p);
+	height = READFIXED(demo_p);
+	spinheight = READFIXED(demo_p);
+	camerascale = READFIXED(demo_p);
+	shieldscale = READFIXED(demo_p);
 	jumpfactor = READFIXED(demo_p);
 	followitem = READUINT32(demo_p);
 
@@ -2233,18 +2227,6 @@ void G_DoPlayDemo(char *defdemoname)
 	}
 
 	// net var data
-#ifdef OLD22DEMOCOMPAT
-	if (demoversion < 0x000d)
-	{
-		save_t savebuffer;
-		savebuffer.buf = demo_p;
-		savebuffer.size = demoend - demo_p;
-		savebuffer.pos = 0;
-		CV_LoadOldDemoVars(&savebuffer);
-		demo_p = &savebuffer.buf[savebuffer.pos];
-	}
-	else
-#endif
 	{
 		save_t savebuffer;
 		savebuffer.buf = demo_p;
@@ -2312,6 +2294,7 @@ void G_DoPlayDemo(char *defdemoname)
 	players[0].shieldscale = shieldscale;
 	players[0].charability = charability;
 	players[0].charability2 = charability2;
+	players[0].charability3 = charability3;
 	players[0].actionspd = actionspd;
 	players[0].mindash = mindash;
 	players[0].maxdash = maxdash;
@@ -2532,12 +2515,13 @@ void G_AddGhost(char *defdemoname)
 	// Ghosts do not have a player structure to put this in.
 	p++; // charability
 	p++; // charability2
-	p += (ghostversion < 0x0010) ? 5 : 5 * sizeof(fixed_t); // actionspd, mindash, maxdash, normalspeed, and runspeed
+	p++; // charability3
+	p += 5 * sizeof(fixed_t); // actionspd, mindash, maxdash, normalspeed, and runspeed
 	p++; // thrustfactor
 	p++; // accelstart
 	p++; // acceleration
-	p += (ghostversion < 0x000e) ? 2 : 2 * sizeof(fixed_t); // height and spinheight
-	p += (ghostversion < 0x0010) ? 2 : 2 * sizeof(fixed_t); // camerascale and shieldscale
+	p += 2 * sizeof(fixed_t); // height and spinheight
+	p += 2 * sizeof(fixed_t); // camerascale and shieldscale
 	p += 4; // jumpfactor
 	p += 4; // followitem
 

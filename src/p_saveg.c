@@ -591,6 +591,7 @@ static void P_NetArchivePlayers(save_t *save_p)
 
 		P_WriteUINT8(save_p, players[i].charability);
 		P_WriteUINT8(save_p, players[i].charability2);
+		P_WriteUINT8(save_p, players[i].charability3);
 		P_WriteUINT32(save_p, players[i].charflags);
 		P_WriteUINT32(save_p, (UINT32)players[i].thokitem);
 		P_WriteUINT32(save_p, (UINT32)players[i].spinitem);
@@ -811,6 +812,7 @@ static void P_NetUnArchivePlayers(save_t *save_p)
 		//SetPlayerSkinByNum(i, players[i].skin);
 		players[i].charability = P_ReadUINT8(save_p);
 		players[i].charability2 = P_ReadUINT8(save_p);
+		players[i].charability3 = P_ReadUINT8(save_p);
 		players[i].charflags = P_ReadUINT32(save_p);
 		players[i].thokitem = P_ReadUINT32(save_p);
 		players[i].spinitem = P_ReadUINT32(save_p);

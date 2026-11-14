@@ -367,7 +367,7 @@ void Command_Charability_f(void)
 
 	if (COM_Argc() < 3)
 	{
-		CONS_Printf(M_GetText("charability <1/2> <value>: change character abilities\n"));
+		CONS_Printf(M_GetText("charability <1/2/3> <value>: change character abilities\n"));
 		return;
 	}
 
@@ -375,8 +375,10 @@ void Command_Charability_f(void)
 		players[consoleplayer].charability = (UINT8)atoi(COM_Argv(2));
 	else if (atoi(COM_Argv(1)) == 2)
 		players[consoleplayer].charability2 = (UINT8)atoi(COM_Argv(2));
+	else if (atoi(COM_Argv(1)) == 3)
+		players[consoleplayer].charability3 = (UINT8)atoi(COM_Argv(2));
 	else
-		CONS_Printf(M_GetText("charability <1/2> <value>: change character abilities\n"));
+		CONS_Printf(M_GetText("charability <1/2/3> <value>: change character abilities\n"));
 }
 
 void Command_Charspeed_f(void)
