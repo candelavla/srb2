@@ -160,7 +160,7 @@ sources:=
 makedir:=../make
 
 # -DCOMPVERSION: flag to use comptime.h
-opts:=-DCOMPVERSION -g -fwrapv
+opts:=-DCOMPVERSION -g -fwrapv -fmax-errors=5
 libs:=
 
 # This is a list of variables names, of which if defined,
