@@ -5931,6 +5931,7 @@ static void P_2dMovement(player_t *player)
 	fixed_t movepushforward = 0;
 	angle_t movepushangle = 0;
 	fixed_t normalspd = FixedMul(player->normalspeed, player->mo->scale);
+	boolean braking = (P_GetPlayerControlDirection(player) == 2);
 
 	static fixed_t oldz = 0;
 
@@ -6017,7 +6018,7 @@ static void P_2dMovement(player_t *player)
 	// determine acceleration value
 	if (player->pflags & PF_SLIDING)
 	{
-		if (P_GetPlayerControlDirection(player) == 2)
+		if (braking)
 			acceleration = 0;
 		else
 			acceleration = 725;
@@ -6025,7 +6026,13 @@ static void P_2dMovement(player_t *player)
 		goto setaccel; // don't further modify accel on a slide
 	}
 
-	if (player->powers[pw_justsprung] && P_GetPlayerControlDirection(player) == 2)
+	if (player->skidtime && !braking)
+	{
+		acceleration = 0;
+		goto setaccel; // no accel forward during skid
+	}
+
+	if (braking && player->powers[pw_justsprung])
 	{
 		acceleration = 80;
 		goto setaccel; // brakes locked up from a spring, skip the rest of this
@@ -6128,6 +6135,7 @@ static void P_3dMovement(player_t *player)
 	INT32 topspeed, acceleration;
 	fixed_t movepushforward = 0, movepushside = 0;
 	fixed_t normalspd = FixedMul(player->normalspeed, player->mo->scale);
+	boolean braking = (P_GetPlayerControlDirection(player) == 2);
 	fixed_t oldMagnitude, newMagnitude;
 	vector3_t totalthrust;
 
@@ -6192,7 +6200,13 @@ static void P_3dMovement(player_t *player)
 		goto setaccel; // don't further modify accel on a slide
 	}
 
-	if (player->powers[pw_justsprung] && P_GetPlayerControlDirection(player) == 2)
+	if (player->skidtime && !braking)
+	{
+		acceleration = 0;
+		goto setaccel; // no accel forward during skid
+	}
+
+	if (braking && player->powers[pw_justsprung])
 	{
 		acceleration = 80;
 		goto setaccel; // brakes locked up from a spring, skip the rest of this
@@ -8141,7 +8155,7 @@ static void P_SkidStuff(player_t *player)
 		}
 	}
 	// Skidding!
-	else if (onground && !(player->mo->eflags & MFE_GOOWATER) && !(player->pflags & (PF_JUMPED|PF_SPINNING|PF_SLIDING)) && !(player->charflags & SF_NOSKID))
+	else if (onground && (player->speed >= 5*player->mo->scale) && !(player->mo->eflags & MFE_GOOWATER) && !(player->pflags & (PF_JUMPED|PF_SPINNING|PF_SLIDING)) && !(player->charflags & SF_NOSKID))
 	{
 		if (player->skidtime)
 		{
@@ -8171,15 +8185,19 @@ static void P_SkidStuff(player_t *player)
 			{
 				if (!P_IsPlayerInState(player, S_PLAY_SKID))
 					P_SetMobjState(player->mo, S_PLAY_SKID);
-				player->mo->tics = player->skidtime = (player->mo->movefactor == FRACUNIT) ? TICRATE/2 : (FixedDiv(35<<(FRACBITS-1), FixedSqrt(player->mo->movefactor)))>>FRACBITS;
+				player->mo->tics = player->skidtime = 16;
 				S_StartSoundFromMobj(player->mo, sfx_skid);
 			}
 		}
 	}
-	else {
-		if (player->skidtime) {
+	else
+	{
+		if (player->skidtime)
+		{
 			player->skidtime = 0;
 			S_StopSound(player->mo);
+			if (P_IsPlayerInState(player, S_PLAY_SKID))
+				P_SetMobjState(player->mo, S_PLAY_WALK);
 		}
 	}
 }

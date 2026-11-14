@@ -368,12 +368,10 @@ static boolean P_SetPlayerMobjState(mobj_t *mobj, statenum_t state)
 					{
 						if (speed >= 23<<FRACBITS)
 							mobj->tics = 2;
-						else if (speed >= 11<<FRACBITS)
+						else if (speed >= 12<<FRACBITS)
 							mobj->tics = 3;
-						else if (speed >= 2<<FRACBITS)
-							mobj->tics = 4;
 						else
-							mobj->tics = 5;
+							mobj->tics = 4;
 					}
 					else if ((player->panim == PA_RUN) || (player->panim == PA_DASH))
 					{

@@ -527,7 +527,7 @@ void P_TouchSpecialThing(mobj_t *special, mobj_t *toucher, boolean heightcheck)
 					toucher->momx = 7*toucher->momx/8;
 					toucher->momy = 7*toucher->momy/8;
 				}
-				else if (player->charability == CA_GLIDEANDCLIMB && (player->powers[pw_strong] & STR_PUNCH) && (player->panim == PA_RUN || player->panim == PA_DASH))
+				else if (player->charability3 == CA3_BULLDOZE && (player->powers[pw_strong] & STR_PUNCH) && (player->panim == PA_RUN || player->panim == PA_DASH))
 				{
 					toucher->momx /= 2;
 					toucher->momy /= 2;
