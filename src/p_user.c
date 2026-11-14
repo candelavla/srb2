@@ -5992,9 +5992,9 @@ static void P_2dMovement(player_t *player)
 	else if (cmd->sidemove && !(player->climbing) && !P_PlayerInPain(player))
 	{
 		if (cmd->sidemove > 0)
-			player->mo->angle = 0;
+			player->mo->angle = (braking) ? ANGLE_180: 0;
 		else if (cmd->sidemove < 0)
-			player->mo->angle = ANGLE_180;
+			player->mo->angle = (braking) ? 0: ANGLE_180;
 	}
 
 	P_SetPlayerAngle(player, player->mo->angle);
@@ -6023,19 +6023,19 @@ static void P_2dMovement(player_t *player)
 		else
 			acceleration = 725;
 		
-		goto setaccel; // don't further modify accel on a slide
+		goto setaccel2d; // don't further modify accel on a slide
 	}
 
 	if (player->skidtime && !braking)
 	{
-		acceleration = 0;
-		goto setaccel; // no accel forward during skid
+		acceleration = 190;
+		goto setaccel2d; // only allow a small amount of influence forwards
 	}
 
 	if (braking && player->powers[pw_justsprung])
 	{
 		acceleration = 80;
-		goto setaccel; // brakes locked up from a spring, skip the rest of this
+		goto setaccel2d; // brakes locked up from a spring, skip the rest of this
 	}
 
 	if (onground)
@@ -6083,7 +6083,7 @@ static void P_2dMovement(player_t *player)
 		acceleration += 240;
 	}
 		
-setaccel:
+setaccel2d:
 
 	topspeed = normalspd; //set normal top speed
 
@@ -6113,10 +6113,10 @@ setaccel:
 			P_Thrust(player->mo, movepushangle, movepushforward);
 
 		if (P_XYFriction(player->mo, oldz) && (((player->rmomx < 0) && (cmd->sidemove > 0)) || ((player->rmomx > 0) && (cmd->sidemove < 0))))
-			player->mo->momx -= P_ReturnThrustX(player->mo, R_PointToAngle2(0, 0, player->rmomx, player->rmomy), (onground) ? FixedMul(FRACUNIT*3/2, player->mo->scale) : FixedMul(FRACUNIT/2, player->mo->scale));
+			player->mo->momx -= P_ReturnThrustX(player->mo, R_PointToAngle2(0, 0, player->rmomx, player->rmomy), (onground) ? FixedMul(3*FRACUNIT/2, player->mo->scale) : FixedMul(FRACUNIT/2, player->mo->scale));
 	}
 	else if (cmd->sidemove == 0 && player->rmomx && P_XYFriction(player->mo, oldz))
-		player->mo->momx -= P_ReturnThrustX(player->mo, R_PointToAngle2(0, 0, player->rmomx, player->rmomy), (onground && (player->mo->friction <= ORIG_FRICTION)) ? FixedMul(FRACUNIT*3/2, player->mo->scale) : FixedMul(FRACUNIT/2, player->mo->scale));
+		player->mo->momx -= P_ReturnThrustX(player->mo, R_PointToAngle2(0, 0, player->rmomx, player->rmomy), (onground && (player->mo->friction <= ORIG_FRICTION)) ? FixedMul(3*FRACUNIT/2, player->mo->scale) : FixedMul(FRACUNIT/2, player->mo->scale));
 
 	if (player->rmomy && onground)
 	{
@@ -6197,19 +6197,19 @@ static void P_3dMovement(player_t *player)
 		else
 			acceleration = 725;
 		
-		goto setaccel; // don't further modify accel on a slide
+		goto setaccel3d; // don't further modify accel on a slide
 	}
 
 	if (player->skidtime && !braking)
 	{
-		acceleration = 0;
-		goto setaccel; // no accel forward during skid
+		acceleration = 430;
+		goto setaccel3d; // only allow a small amount of influence forwards
 	}
 
 	if (braking && player->powers[pw_justsprung])
 	{
 		acceleration = 80;
-		goto setaccel; // brakes locked up from a spring, skip the rest of this
+		goto setaccel3d; // brakes locked up from a spring, skip the rest of this
 	}
 
 	if (onground)
@@ -6258,7 +6258,7 @@ static void P_3dMovement(player_t *player)
 		acceleration += 240;
 	}
 		
-setaccel:
+setaccel3d:
 
 	topspeed = normalspd; //set normal top speed
 
@@ -6407,7 +6407,7 @@ setaccel:
 
 		if (totalcontrol)
 		{
-			if (P_GetPlayerControlDirection(player) != 2)
+			if (!braking)
 			{
 				if (deceleration >= FixedDiv(player->speed, player->mo->scale))
 					deceleration = 0;
@@ -8167,8 +8167,17 @@ static void P_SkidStuff(player_t *player)
 				else
 					P_SpawnSkidDust(player, 0, false);
 			}
+			if (player->mo->tics < 25 && P_GetPlayerControlDirection(player) != 2)
+			{
+				player->skidtime = 0;
+				S_StopSound(player->mo);
+				if (P_IsPlayerInState(player, S_PLAY_SKID))
+				{
+					P_SetMobjState(player->mo, S_PLAY_WALK);
+				}
+			}
 		}
-		else if (FixedHypot(pmx, pmy) >= FixedMul(23<<FRACBITS, player->mo->scale) // if you were moving faster than 23 fracunits per tic
+		else if (player->speed >= FixedMul(23<<FRACBITS, player->mo->scale) // if you were moving faster than 23 fracunits per tic
 		&& (player->mo->momx != pmx || player->mo->momy != pmy) // and you are moving differently this frame
 		&& (P_GetPlayerControlDirection(player) == 2) // and your controls are pointing in the opposite direction to your movement
 		&& !player->powers[pw_justsprung]) // and you are not sprung
@@ -8185,7 +8194,8 @@ static void P_SkidStuff(player_t *player)
 			{
 				if (!P_IsPlayerInState(player, S_PLAY_SKID))
 					P_SetMobjState(player->mo, S_PLAY_SKID);
-				player->mo->tics = player->skidtime = 16;
+
+				player->mo->tics = player->skidtime = 32;
 				S_StartSoundFromMobj(player->mo, sfx_skid);
 			}
 		}
@@ -8197,7 +8207,10 @@ static void P_SkidStuff(player_t *player)
 			player->skidtime = 0;
 			S_StopSound(player->mo);
 			if (P_IsPlayerInState(player, S_PLAY_SKID))
+			{
 				P_SetMobjState(player->mo, S_PLAY_WALK);
+				player->powers[pw_justsprung] = 7;
+			}
 		}
 	}
 }
@@ -12270,7 +12283,7 @@ void P_PlayerThink(player_t *player)
 					break;
 			}
 		}
-		else if ((player->skidtime > (TICRATE/2 - 2) || ((player->pflags & (PF_SPINNING|PF_STARTDASH)) == PF_SPINNING)) && (abs(player->rmomx) > 5*player->mo->scale || abs(player->rmomy) > 5*player->mo->scale)) // spin/skid force
+		else if ((player->skidtime || ((player->pflags & (PF_SPINNING|PF_STARTDASH)) == PF_SPINNING)) && player->speed) // spin/skid force
 			player->drawangle = R_PointToAngle2(0, 0, player->rmomx, player->rmomy);
 		else if (((player->charability2 == CA2_GUNSLINGER || player->charability2 == CA2_MELEE) && player->panim == PA_ABILITY2) || player->pflags & PF_STASIS || player->skidtime)
 			;

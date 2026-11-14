@@ -447,7 +447,7 @@ static void SetSkin(player_t *player, INT32 skinnum)
 	player->maxdash = (skin->maxdash)-(5<<FRACBITS);
 
 	player->normalspeed = skin->normalspeed;
-	player->runspeed = (skin->runspeed)+(6<<FRACBITS);
+	player->runspeed = (skin->runspeed < skin->normalspeed) ? (skin->normalspeed)-(2<<FRACBITS) : (skin->runspeed)+FRACUNIT;
 	player->thrustfactor = 3;
 	player->accelstart = 230;
 	player->acceleration = 50;
