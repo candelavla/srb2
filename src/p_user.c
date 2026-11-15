@@ -12283,7 +12283,7 @@ void P_PlayerThink(player_t *player)
 					break;
 			}
 		}
-		else if ((player->skidtime || ((player->pflags & (PF_SPINNING|PF_STARTDASH)) == PF_SPINNING)) && player->speed) // spin/skid force
+		else if ((player->skidtime || ((player->pflags & (PF_SPINNING|PF_STARTDASH)) == PF_SPINNING)) && (player->speed >= 5*player->mo->scale)) // spin/skid force
 			player->drawangle = R_PointToAngle2(0, 0, player->rmomx, player->rmomy);
 		else if (((player->charability2 == CA2_GUNSLINGER || player->charability2 == CA2_MELEE) && player->panim == PA_ABILITY2) || player->pflags & PF_STASIS || player->skidtime)
 			;
