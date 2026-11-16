@@ -2483,7 +2483,7 @@ boolean P_PlayerHitFloor(player_t *player, boolean dorollstuff)
 			{
 				if (dorollstuff)
 				{
-					player->skidtime = TICRATE;
+					player->skidtime = 1;
 					P_SetMobjState(player->mo, S_PLAY_GLIDE);
 					P_SpawnSkidDust(player, player->mo->radius, true); // make sure the player knows they landed
 					player->mo->tics = -1;
@@ -2499,8 +2499,6 @@ boolean P_PlayerHitFloor(player_t *player, boolean dorollstuff)
 					P_ResetPlayer(player);
 					P_SetMobjState(player->mo, S_PLAY_GLIDE_LANDING);
 					player->pflags |= PF_STASIS;
-					if (player->speed > FixedMul(player->runspeed, player->mo->scale))
-						player->skidtime += player->mo->tics;
 					if (player->powers[pw_super])
 					{
 						P_Earthquake(player->mo, player->mo, 256*FRACUNIT);
@@ -5969,6 +5967,9 @@ static void P_2dMovement(player_t *player)
 	// calculate player's speed
 	player->speed = abs(player->rmomx);
 
+	if (player->pflags & PF_STARTDASH)
+		goto angleisland; // no changing angle during spindash
+
 	if (player->pflags & PF_GLIDING)
 	{
 		// Angle fix.
@@ -5999,6 +6000,7 @@ static void P_2dMovement(player_t *player)
 
 	P_SetPlayerAngle(player, player->mo->angle);
 
+angleisland:
 	if (player->pflags & PF_GLIDING)
 		movepushangle = player->mo->angle;
 	else
@@ -8145,9 +8147,6 @@ static void P_SkidStuff(player_t *player)
 			if (player->speed > FixedMul(player->runspeed, player->mo->scale))
 				player->skidtime += player->mo->tics;
 		}
-		// Didn't stop yet? Skid FOREVER!
-		else if (player->skidtime == 1)
-			player->skidtime = 3*TICRATE+1;
 		// Spawn a particle every 3 tics.
 		else if (!(player->skidtime % 3) && !(player->charflags & SF_NOSKID))
 		{
@@ -8167,7 +8166,7 @@ static void P_SkidStuff(player_t *player)
 				else
 					P_SpawnSkidDust(player, 0, false);
 			}
-			if (player->mo->tics < 25 && P_GetPlayerControlDirection(player) != 2)
+			if (player->skidtime > 8 && P_GetPlayerControlDirection(player) != 2)
 			{
 				player->skidtime = 0;
 				S_StopSound(player->mo);
@@ -8195,22 +8194,20 @@ static void P_SkidStuff(player_t *player)
 				if (!P_IsPlayerInState(player, S_PLAY_SKID))
 					P_SetMobjState(player->mo, S_PLAY_SKID);
 
-				player->mo->tics = player->skidtime = 32;
+				player->skidtime = 1;
+				player->mo->tics = 32;
 				S_StartSoundFromMobj(player->mo, sfx_skid);
 			}
 		}
 	}
-	else
+	else if (player->skidtime)
 	{
-		if (player->skidtime)
+		player->skidtime = 0;
+		S_StopSound(player->mo);
+		if (P_IsPlayerInState(player, S_PLAY_SKID))
 		{
-			player->skidtime = 0;
-			S_StopSound(player->mo);
-			if (P_IsPlayerInState(player, S_PLAY_SKID))
-			{
-				P_SetMobjState(player->mo, S_PLAY_WALK);
-				player->powers[pw_justsprung] = 7;
-			}
+			P_SetMobjState(player->mo, S_PLAY_WALK);
+			player->powers[pw_justsprung] = 7;
 		}
 	}
 }
@@ -8574,7 +8571,7 @@ void P_MovePlayer(player_t *player)
 			if (player->mo->eflags & MFE_UNDERWATER)
 				timefactor >>= 1;
 
-			if (player->speed > FixedMul(47*player->normalspeed/36, player->mo->scale))
+			if (player->speed > FixedMul(3*player->normalspeed/2, player->mo->scale))
 				timefactor = 0;
 
 			if (in2d)
@@ -8651,7 +8648,7 @@ void P_MovePlayer(player_t *player)
 	if (!player->climbing
 	&& ((!(player->mo->eflags & MFE_VERTICALFLIP) && player->mo->z + player->mo->height >= player->mo->watertop && player->mo->z <= player->mo->watertop)
 		|| (player->mo->eflags & MFE_VERTICALFLIP && player->mo->z + player->mo->height >= player->mo->waterbottom && player->mo->z <= player->mo->waterbottom))
-	&& (player->speed > runspd || (player->pflags & PF_STARTDASH))
+	&& (player->speed >= runspd || (player->pflags & PF_STARTDASH))
 	&& leveltime % (TICRATE/7) == 0 && player->mo->momz == 0 && !(player->pflags & PF_SLIDING) && !player->spectator)
 	{
 		mobjtype_t splishtype = (player->mo->eflags & MFE_TOUCHLAVA) ? MT_LAVASPLISH : MT_SPLISH;
@@ -12556,7 +12553,7 @@ void P_PlayerThink(player_t *player)
 		player->bumpertime--;
 
 	if (player->skidtime)
-		player->skidtime--;
+		player->skidtime++;
 
 	if (player->weapondelay)
 		player->weapondelay--;
