@@ -6023,21 +6023,21 @@ angleisland:
 		if (braking)
 			acceleration = 0;
 		else
-			acceleration = 725;
+			acceleration = 590;
 		
 		goto setaccel2d; // don't further modify accel on a slide
 	}
 
 	if (player->skidtime && !braking)
 	{
-		acceleration = 190;
+		acceleration = 270;
 		goto setaccel2d; // only allow a small amount of influence forwards
 	}
 
 	if (braking && player->powers[pw_justsprung])
 	{
 		acceleration = 80;
-		goto setaccel2d; // brakes locked up from a spring, skip the rest of this
+		goto setaccel2d; // brake won't work well when sprung
 	}
 
 	if (onground)
@@ -6051,14 +6051,14 @@ angleisland:
 	}
 	else
 	{
-		if (P_GetPlayerControlDirection(player) == 2)
+		if (braking)
 			acceleration = 375;
 		else
 			acceleration = 650;
 	}
 
 	if (stricmp(player->mo->skin, "luigi") == 0)
-		acceleration -= (onground) ? 120 : 70;
+		acceleration -= 110;
 
 	if (player->mo->eflags & (MFE_UNDERWATER|MFE_GOOWATER))
 	{
@@ -6071,7 +6071,7 @@ angleisland:
 		if (player->powers[pw_sneakers])
 		{
 			normalspd <<= 1;
-			acceleration += 310;
+			acceleration += 320;
 		}
 		else
 		{
@@ -6194,7 +6194,7 @@ static void P_3dMovement(player_t *player)
 	// determine acceleration value
 	if (player->pflags & PF_SLIDING)
 	{
-		if (P_GetPlayerControlDirection(player) == 2)
+		if (braking)
 			acceleration = 0;
 		else
 			acceleration = 725;
@@ -6211,7 +6211,7 @@ static void P_3dMovement(player_t *player)
 	if (braking && player->powers[pw_justsprung])
 	{
 		acceleration = 80;
-		goto setaccel3d; // brakes locked up from a spring, skip the rest of this
+		goto setaccel3d; // brake won't work well when sprung
 	}
 
 	if (onground)
@@ -6223,8 +6223,8 @@ static void P_3dMovement(player_t *player)
 	}
 	else
 	{
-		if (P_GetPlayerControlDirection(player) == 2)
-			acceleration = 375;
+		if (braking)
+			acceleration = (spin) ? 590 : 375;
 		else
 			acceleration = 650;
 			
@@ -6233,7 +6233,7 @@ static void P_3dMovement(player_t *player)
 	}
 
 	if (stricmp(player->mo->skin, "luigi") == 0)
-		acceleration -= (onground) ? 120 : 70;
+		acceleration -= 110;
 
 	if (player->mo->eflags & (MFE_UNDERWATER|MFE_GOOWATER))
 	{
@@ -6246,7 +6246,7 @@ static void P_3dMovement(player_t *player)
 		if (player->powers[pw_sneakers])
 		{
 			normalspd <<= 1;
-			acceleration += 310;
+			acceleration += 320;
 		}
 		else
 		{
