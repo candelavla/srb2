@@ -55,7 +55,7 @@ typedef enum
 	SF_NOSUPERJUMPBOOST = 1<<18, // Disable the jump boost given while super (i.e. Knuckles)
 	SF_CANBUSTWALLS     = 1<<19, // Can naturally bust walls on contact? (i.e. Knuckles)
 	SF_NOSHIELDABILITY  = 1<<20, // Disable shield abilities
-	SF_PEELOUT          = 1<<21, // Enables peelout by default, spiral hammer with CA3_HAMMERSPIN, or burnout with CA3_BURNOUT
+	SF_PEELOUT          = 1<<21, // Enables peelout by default, hammer twirl with CA3_HAMMERSPIN, or super burnout with CA3_BURNOUT
 	SF_TRICKFORBIDDEN   = 1<<22  // No spring tricks for you
 
 	// free up to and including 1<<31
@@ -104,7 +104,8 @@ typedef enum
 	CA3_HAMMERSPIN,
 	CA3_JERBOATIME,
 	CA3_BURNOUT,
-	CA3_SUPERFLOAT
+	CA3_SUPERFLOAT,
+	CA3_TWINSPIN
 } charability3_t;
 
 //
