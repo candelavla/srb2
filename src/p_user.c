@@ -6028,11 +6028,9 @@ angleisland:
 
 	if (onground)
 	{
-		acceleration = 700;
+		acceleration = 725;
 
-		if (player->mo->friction > ORIG_FRICTION) // friction scaled acceleration
-			acceleration += 125;
-		else if (player->mo->friction < ORIG_FRICTION)
+		if (player->mo->friction > ORIG_FRICTION) // less acceleration on ice
 			acceleration -= 175;
 	}
 	else
@@ -6204,7 +6202,7 @@ static void P_3dMovement(player_t *player)
 	{
 		acceleration = 1400;
 
-		if (player->mo->friction > ORIG_FRICTION) // friction scaled acceleration
+		if (player->mo->friction != ORIG_FRICTION) // less acceleration on ice
 			acceleration >>= 1;
 	}
 	else
@@ -8520,7 +8518,7 @@ void P_MovePlayer(player_t *player)
 		fixed_t glidespeed = player->actionspd;
 		fixed_t momx = mo->momx - player->cmomx, momy = mo->momy - player->cmomy;
 		angle_t angle, moveangle = R_PointToAngle2(0, 0, momx, momy);
-		boolean in2d = mo->flags2 & MF2_TWOD || twodlevel;
+		boolean in2d = (mo->flags2 & MF2_TWOD) || twodlevel;
 
 		if (player->powers[pw_sneakers])
 			glidespeed = (player->powers[pw_super]) ? FixedMul(player->actionspd, 8*FRACUNIT/3) : FixedMul(player->actionspd, 20*FRACUNIT/9);
@@ -8569,7 +8567,10 @@ void P_MovePlayer(player_t *player)
 			if (in2d)
 			{
 				speed = FixedMul(glidespeed + timefactor, scale);
-				P_InstaThrust(mo, angle, speed);
+				if (wideturn)
+					P_InstaThrust(mo, angle, speed);
+				else
+					P_InstaThrust(mo, angle, max(speed, player->speed));
 			}
 			else
 			{
