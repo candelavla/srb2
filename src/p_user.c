@@ -6202,7 +6202,7 @@ static void P_3dMovement(player_t *player)
 	{
 		acceleration = 1400;
 
-		if (player->mo->friction != ORIG_FRICTION) // less acceleration on ice
+		if (player->mo->friction > ORIG_FRICTION) // less acceleration on ice
 			acceleration >>= 1;
 	}
 	else
