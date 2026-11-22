@@ -5984,10 +5984,10 @@ static void P_2dMovement(player_t *player)
 	else if (cmd->sidemove && !player->skidtime && !player->climbing && !(player->pflags & (PF_SPINNING|PF_STARTDASH)) && !player->powers[pw_justsprung] && !P_PlayerInPain(player)
 	&& (!onground || (player->charflags & SF_NOSKID) || player->speed < FixedMul(23<<FRACBITS, player->mo->scale)))
 	{
-		if (cmd->sidemove > 0)
-			player->mo->angle = 0;
-		else if (cmd->sidemove < 0)
+		if (cmd->sidemove < 0)
 			player->mo->angle = ANGLE_180;
+		else
+			player->mo->angle = 0;
 	}
 
 	if (player->mo->angle != 0 && player->mo->angle != ANGLE_180)
