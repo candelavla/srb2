@@ -5607,7 +5607,7 @@ static void P_DoJumpStuff(player_t *player, ticcmd_t *cmd, boolean spinshieldhac
 					{
 						P_SetMobjState(player->mo, S_PLAY_FLY); // Change to the flying animation
 
-						player->powers[pw_tailsfly] = TICRATE*24/7; // Set the fly timer
+						player->powers[pw_tailsfly] = 4*TICRATE; // Set the fly timer
 
 						player->pflags &= ~(PF_JUMPED|PF_NOJUMPDAMAGE|PF_SPINNING|PF_STARTDASH);
 						if (player->bot == BOT_2PAI)
@@ -8720,10 +8720,7 @@ void P_MovePlayer(player_t *player)
 				else
 					player->flycmd = 1;
 
-				if (player->fly1)
-					player->fly1 = max(player->fly1, 3);
-				else
-					player->fly1 = 12;
+				player->fly1 = 12;
 			}
 			if (player->fly1)
 			{
@@ -8759,8 +8756,12 @@ void P_MovePlayer(player_t *player)
 				}
 				player->fly1--;
 			}
-			if (!player->powers[pw_super] && (player->fly1 || (P_MobjFlip(player->mo))*(player->mo->momz) > FixedMul(3<<FRACBITS, player->mo->scale)))
+			if (!player->powers[pw_super] && player->fly1)
+			{
 				player->powers[pw_tailsfly]--;
+				if (player->fly1 == 1) // extra penalty for fly ending to make tapping and holding equally viable
+					player->powers[pw_tailsfly] = (player->powers[pw_tailsfly] > 8) ? player->powers[pw_tailsfly]-8 : 0;
+			}
 
 			// Tails Put-Put noise
 			if (player->charability == CA_FLY
