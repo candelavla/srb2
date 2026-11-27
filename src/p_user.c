@@ -5850,6 +5850,8 @@ INT32 P_GetPlayerControlDirection(player_t *player)
 
 		if (player->awayviewtics)
 			origtempangle = tempangle = player->awayviewmobj->angle;
+ 		else if (P_ControlStyle(player) == CS_SIMPLE)
+			origtempangle = tempangle = (cmd->angleturn << 16);
 		else
 			origtempangle = tempangle = player->mo->angle;
 
@@ -8527,7 +8529,7 @@ void P_MovePlayer(player_t *player)
 		}
 
 		// Strafing while gliding.
-		if (in2d)
+		if ((P_ControlStyle(player) == CS_SIMPLE) || in2d)
 			angle = mo->angle;
 		else
 			angle = mo->angle + R_PointToAngle2(0, 0, cmd->forwardmove<<FRACBITS, -cmd->sidemove<<FRACBITS);
