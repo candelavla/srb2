@@ -3804,7 +3804,7 @@ static void P_DoClimbing(player_t *player)
 	}
 
 #define CLIMBCONEMAX FixedAngle(90*FRACUNIT)
-	if (!demoplayback || P_ControlStyle(player) == CS_LMAOGALOG)
+	if (!demoplayback)
 	{
 		angle_t angdiff = P_GetLocalAngle(player) - player->mo->angle;
 		if (angdiff < ANGLE_180 && angdiff > CLIMBCONEMAX)
@@ -4536,7 +4536,7 @@ void P_DoJump(player_t *player, boolean soundandstate, boolean allowflip)
 
 		player->drawangle = player->mo->angle = player->mo->angle - ANGLE_180; // Turn around from the wall you were climbing.
 
-		if (!demoplayback || P_ControlStyle(player) == CS_LMAOGALOG)
+		if (!demoplayback)
 			P_SetPlayerAngle(player, player->mo->angle);
 
 		player->climbing = 0; // Stop climbing, duh!
@@ -4915,7 +4915,7 @@ static void P_DoSpinAbility(player_t *player, ticcmd_t *cmd)
 						{
 							player->mo->angle = R_PointToAngle2(player->mo->x, player->mo->y, lockon->x, lockon->y);
 							bullet = P_SpawnPointMissile(player->mo, lockon->x, lockon->y, zpos(lockon), player->revitem, player->mo->x, player->mo->y, zpos(player->mo));
-							if (!demoplayback || P_ControlStyle(player) == CS_LMAOGALOG)
+							if (!demoplayback)
 								P_SetPlayerAngle(player, player->mo->angle);
 						}
 						else
@@ -5543,8 +5543,6 @@ static void P_DoJumpStuff(player_t *player, ticcmd_t *cmd, boolean spinshieldhac
 			{
 				case CA_THOK:
 				case CA_HOMINGTHOK:
-					// Now it's Sonic's abilities turn!
-					// THOK!
 					if (!(player->pflags & PF_THOKKED) || (player->charflags & SF_MULTIABILITY))
 					{
 						// Catapult the player
@@ -5582,8 +5580,7 @@ static void P_DoJumpStuff(player_t *player, ticcmd_t *cmd, boolean spinshieldhac
 						player->pflags |= PF_THOKKED;
 					}
 					break;
-
-				case CA_JUMPTHOK: //jumpthok
+				case CA_JUMPTHOK:
 					if (!player->secondjump)
 					{
 						player->pflags &= ~PF_JUMPED;
@@ -5596,18 +5593,16 @@ static void P_DoJumpStuff(player_t *player, ticcmd_t *cmd, boolean spinshieldhac
 						player->secondjump = 2;
 					}
 					break;
-
 				case CA_FLY:
 				case CA_SWIM:
-					// If currently in the air from a jump, and you pressed the
-					// button again and have the ability to fly, do so!
-					if (player->charability == CA_SWIM && !(player->mo->eflags & MFE_UNDERWATER))
-						; // Can't do anything if you're a fish out of water!
-					else if (!(player->pflags & PF_THOKKED) && !(player->powers[pw_tailsfly]))
+					if (!(player->pflags & PF_THOKKED) && !(player->powers[pw_tailsfly]))
 					{
-						P_SetMobjState(player->mo, S_PLAY_FLY); // Change to the flying animation
+						if (player->charability == CA_SWIM && !(player->mo->eflags & MFE_UNDERWATER))
+						{
+							break; // Can't do anything if you're a fish out of water!
+						}
 
-						player->powers[pw_tailsfly] = 4*TICRATE; // Set the fly timer
+						player->powers[pw_tailsfly] = 4*TICRATE; // set the active flight timer
 
 						player->pflags &= ~(PF_JUMPED|PF_NOJUMPDAMAGE|PF_SPINNING|PF_STARTDASH);
 						if (player->bot == BOT_2PAI)
@@ -5617,12 +5612,11 @@ static void P_DoJumpStuff(player_t *player, ticcmd_t *cmd, boolean spinshieldhac
 
 						if (P_MobjFlip(player->mo)*player->mo->momz < FixedMul(6<<FRACBITS, player->mo->scale))
 							P_SetObjectMomZ(player->mo, FRACUNIT, true);
-						player->fly1 = 12;
+						player->fly1 = 13; // effectively 12 tics since it's cleared after reaching 1
 						player->powers[pw_strong] = STR_FLY;
 					}
 					break;
 				case CA_GLIDEANDCLIMB:
-					// Now Knuckles-type abilities are checked.
 					if (!(player->pflags & PF_THOKKED) || player->charflags & SF_MULTIABILITY)
 					{
 						fixed_t glidespeed = FixedMul(player->actionspd+(FRACUNIT>>1), player->mo->scale);
@@ -5638,7 +5632,7 @@ static void P_DoJumpStuff(player_t *player, ticcmd_t *cmd, boolean spinshieldhac
 						player->powers[pw_strong] = STR_GLIDE;
 					}
 					break;
-				case CA_DOUBLEJUMP: // Double-Jump
+				case CA_DOUBLEJUMP:
 					if (!(player->pflags & PF_THOKKED) || ((player->charflags & SF_MULTIABILITY) && (player->secondjump < (player->actionspd >> FRACBITS))))
 					{
 						player->pflags |= PF_THOKKED;
@@ -5647,8 +5641,8 @@ static void P_DoJumpStuff(player_t *player, ticcmd_t *cmd, boolean spinshieldhac
 						player->secondjump++;
 					}
 					break;
-				case CA_FLOAT: // Float
-				case CA_SLOWFALL: // Slow descent hover
+				case CA_FLOAT:
+				case CA_SLOWFALL:
 					if (!(player->pflags & PF_THOKKED) || player->charflags & SF_MULTIABILITY)
 					{
 						if (player->charflags & SF_DASHMODE && player->dashmode >= DASHMODE_THRESHOLD)
@@ -5837,12 +5831,6 @@ INT32 P_GetPlayerControlDirection(player_t *player)
 	fixed_t tempx = 0, tempy = 0;
 	angle_t tempangle, origtempangle;
 
-	if (!cmd->forwardmove && !cmd->sidemove)
-		return 0;
-
-	if (!player->mo->momx && !player->mo->momy)
-		return 0;
-
 	if (twodlevel || player->mo->flags2 & MF2_TWOD)
 	{
 		if (!cmd->sidemove)
@@ -5854,10 +5842,14 @@ INT32 P_GetPlayerControlDirection(player_t *player)
 	}
 	else
 	{
+		if (!cmd->forwardmove && !cmd->sidemove)
+			return 0;
+
+		if (!player->mo->momx && !player->mo->momy)
+			return 0;
+
 		if (player->awayviewtics)
 			origtempangle = tempangle = player->awayviewmobj->angle;
-		else if (P_ControlStyle(player) & CS_LMAOGALOG)
-			origtempangle = tempangle = (cmd->angleturn << 16);
 		else
 			origtempangle = tempangle = player->mo->angle;
 
@@ -8373,27 +8365,24 @@ void P_MovePlayer(player_t *player)
 		{
 			switch (P_ControlStyle(player))
 			{
-			case CS_LEGACY:
-			case CS_STANDARD:
-				player->mo->angle = (cmd->angleturn<<16 /* not FRACBITS */);
-				break;
-
-			case CS_LMAOGALOG:
-				break; // handled elsewhere
-
-			case CS_SIMPLE:
-				if (cmd->forwardmove || cmd->sidemove)
-				{
-					angle_t controlangle = R_PointToAngle2(0, 0, cmd->forwardmove << FRACBITS, -cmd->sidemove << FRACBITS);
-					player->mo->angle = (cmd->angleturn<<16 /* not FRACBITS */) + controlangle;
-				}
-				else
-				{
-					angle_t drawangleoffset = (player->powers[pw_carry] == CR_ROLLOUT) ? ANGLE_180 : 0;
-					player->mo->angle = player->drawangle + drawangleoffset;
-				}
-
-				break;
+				case CS_LEGACY:
+				case CS_STANDARD:
+					player->mo->angle = (cmd->angleturn<<16 /* not FRACBITS */);
+					break;
+				case CS_SIMPLE:
+					if (cmd->forwardmove || cmd->sidemove)
+					{
+						angle_t controlangle = R_PointToAngle2(0, 0, cmd->forwardmove << FRACBITS, -cmd->sidemove << FRACBITS);
+						player->mo->angle = (cmd->angleturn<<16 /* not FRACBITS */) + controlangle;
+					}
+					else
+					{
+						angle_t drawangleoffset = (player->powers[pw_carry] == CR_ROLLOUT) ? ANGLE_180 : 0;
+						player->mo->angle = player->drawangle + drawangleoffset;
+					}
+					break;
+				default:
+					break;
 			}
 		}
 
@@ -8542,7 +8531,7 @@ void P_MovePlayer(player_t *player)
 		}
 
 		// Strafing while gliding.
-		if ((P_ControlStyle(player) & CS_LMAOGALOG) || in2d)
+		if (in2d)
 			angle = mo->angle;
 		else
 			angle = mo->angle + R_PointToAngle2(0, 0, cmd->forwardmove<<FRACBITS, -cmd->sidemove<<FRACBITS);
@@ -8720,7 +8709,7 @@ void P_MovePlayer(player_t *player)
 				else
 					player->flycmd = 1;
 
-				player->fly1 = 12;
+				player->fly1 = 13; // effectively 12 tics since it's cleared after reaching 1
 			}
 			if (player->fly1)
 			{
@@ -8759,8 +8748,11 @@ void P_MovePlayer(player_t *player)
 			if (!player->powers[pw_super] && player->fly1)
 			{
 				player->powers[pw_tailsfly]--;
-				if (player->fly1 == 1) // extra penalty for fly ending to make tapping and holding equally viable
+				if (player->fly1 == 1) // extra penalty for fly ending keeps tapping and horizontal coverage in check
+				{
 					player->powers[pw_tailsfly] = (player->powers[pw_tailsfly] > 8) ? player->powers[pw_tailsfly]-8 : 0;
+					player->fly1 = 0;
+				}
 			}
 
 			// Tails Put-Put noise
@@ -8831,60 +8823,6 @@ void P_MovePlayer(player_t *player)
 	// If you're not spinning, you'd better not be spindashing!
 	if (!(player->pflags & PF_SPINNING) && player->panim != PA_ABILITY2 && player->powers[pw_carry] != CR_NIGHTSMODE)
 		player->pflags &= ~PF_STARTDASH;
-
-	//////////////////
-	//ANALOG CONTROL//
-	//////////////////
-
-	// This really looks like it should be moved to P_3dMovement. -Red
-	if (P_ControlStyle(player) == CS_LMAOGALOG
-		&& (cmd->forwardmove != 0 || cmd->sidemove != 0) && !player->climbing && !twodlevel && !(player->mo->flags2 & MF2_TWOD))
-	{
-		// If travelling slow enough, face the way the controls
-		// point and not your direction of movement.
-		if (player->speed < FixedMul(5*FRACUNIT, player->mo->scale) || player->pflags & PF_GLIDING || !onground)
-		{
-			angle_t tempangle;
-
-			tempangle = (cmd->angleturn << 16);
-
-#ifdef REDSANALOG // Ease to it. Chillax. ~Red
-			tempangle += R_PointToAngle2(0, 0, cmd->forwardmove*FRACUNIT, -cmd->sidemove*FRACUNIT);
-			{
-				fixed_t tweenvalue = max(abs(cmd->forwardmove), abs(cmd->sidemove));
-
-				if (tweenvalue < 10 && (cmd->buttons & (BT_CAMLEFT|BT_CAMRIGHT)) == (BT_CAMLEFT|BT_CAMRIGHT)) {
-					tempangle = (cmd->angleturn << 16);
-					tweenvalue = 16;
-				}
-
-				tweenvalue *= tweenvalue*tweenvalue*1536;
-
-				//if (player->pflags & PF_GLIDING)
-					//tweenvalue >>= 1;
-
-				tempangle -= player->mo->angle;
-
-				if (tempangle < ANGLE_180 && tempangle > tweenvalue)
-					player->mo->angle += tweenvalue;
-				else if (tempangle >= ANGLE_180 && InvAngle(tempangle) > tweenvalue)
-					player->mo->angle -= tweenvalue;
-				else
-					player->mo->angle += tempangle;
-			}
-#else
-			// Less math this way ~Red
-			player->mo->angle = R_PointToAngle2(0, 0, cmd->forwardmove*FRACUNIT, -cmd->sidemove*FRACUNIT)+tempangle;
-#endif
-		}
-		// Otherwise, face the direction you're travelling.
-		else if (player->panim == PA_WALK || player->panim == PA_RUN || player->panim == PA_DASH || player->panim == PA_ROLL || player->panim == PA_JUMP
-		|| (player->panim == PA_ABILITY && P_IsPlayerInState(player, S_PLAY_GLIDE)))
-			player->mo->angle = R_PointToAngle2(0, 0, player->rmomx, player->rmomy);
-
-		// Update the local angle control.
-		P_SetPlayerAngle(player, player->mo->angle);
-	}
 
 	if (player->climbing == 1)
 		P_DoClimbing(player);
@@ -9586,7 +9524,7 @@ boolean P_HomingAttack(mobj_t *source, mobj_t *enemy) // Home in on your target
 	if (source->player)
 	{
 		source->player->drawangle = source->angle;
-		if (!demoplayback || P_ControlStyle(source->player) == CS_LMAOGALOG)
+		if (!demoplayback)
 			P_SetPlayerAngle(source->player, source->angle);
 	}
 
@@ -10226,8 +10164,6 @@ boolean P_MoveChaseCamera(player_t *player, camera_t *thiscam, boolean resetcall
 				angle = R_PointToAngle2(mo->x, mo->y, mo->target->x, mo->target->y);
 		}
 	}
-	else if (P_ControlStyle(player) == CS_LMAOGALOG && !sign) // Analog
-		angle = R_PointToAngle2(thiscam->x, thiscam->y, mo->x, mo->y);
 	else if (demoplayback)
 	{
 		angle = focusangle;
@@ -11194,7 +11130,7 @@ static void P_MinecartThink(player_t *player)
 		else if (angdiff > ANGLE_180 && angdiff < InvAngle(MINECARTCONEMAX))
 			player->mo->angle = minecart->angle - MINECARTCONEMAX;
 
-		if (angdiff + minecart->angle != player->mo->angle && (!demoplayback || P_ControlStyle(player) == CS_LMAOGALOG))
+		if ((angdiff + minecart->angle != player->mo->angle) && !demoplayback)
 		{
 			angdiff = P_GetLocalAngle(player) - minecart->angle;
 			if (angdiff < ANGLE_180 && angdiff > MINECARTCONEMAX)
@@ -11276,7 +11212,7 @@ static void P_MinecartThink(player_t *player)
 			else
 				minecart->angle = targetangle + ANGLE_180;
 			angdiff = (minecart->angle - prevangle);
-			if (angdiff && (!demoplayback || P_ControlStyle(player) == CS_LMAOGALOG))  // maintain relative angle on turns
+			if (angdiff && !demoplayback)  // maintain relative angle on turns
 			{
 				player->mo->angle += angdiff;
 				P_SetPlayerAngle(player, (angle_t)(player->angleturn << 16) + angdiff);
@@ -12170,8 +12106,7 @@ void P_PlayerThink(player_t *player)
 		player->mo->reactiontime--;
 	else if (player->powers[pw_carry] == CR_MINECART)
 	{
-		if (P_ControlStyle(player) != CS_LMAOGALOG)
-			player->mo->angle = (cmd->angleturn << 16 /* not FRACBITS */);
+		player->mo->angle = (cmd->angleturn << 16 /* not FRACBITS */);
 
 		ticruned++;
 		if ((cmd->angleturn & TICCMD_RECEIVED) == 0)
@@ -12183,8 +12118,7 @@ void P_PlayerThink(player_t *player)
 	{
 		if (player->powers[pw_carry] == CR_ROPEHANG)
 		{
-			if (P_ControlStyle(player) != CS_LMAOGALOG)
-				player->mo->angle = (cmd->angleturn<<16 /* not FRACBITS */);
+			player->mo->angle = (cmd->angleturn<<16 /* not FRACBITS */);
 
 			ticruned++;
 			if ((cmd->angleturn & TICCMD_RECEIVED) == 0)
@@ -13033,7 +12967,7 @@ void P_PlayerAfterThink(player_t *player)
 						macecenter->angle += cmd->sidemove<<ANGLETOFINESHIFT;
 						player->mo->angle += cmd->sidemove<<ANGLETOFINESHIFT; // 2048 --> ANGLE_MAX
 
-						if (!demoplayback || P_ControlStyle(player) == CS_LMAOGALOG)
+						if (!demoplayback)
 							P_SetPlayerAngle(player, player->mo->angle);
 					}
 				}

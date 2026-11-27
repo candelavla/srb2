@@ -1810,16 +1810,6 @@ void G_BuildTiccmd(ticcmd_t *cmd, INT32 realtics, UINT8 ssplayer)
 
 	if ((!demoplayback && (player->pflags & PF_SLIDING))) // Analog for mouse
 		side += mdx*2;
-	else if (controlstyle == CS_LMAOGALOG)
-	{
-		if (mdx)
-		{
-			if (mdx > 0)
-				cmd->buttons |= BT_CAMRIGHT;
-			else
-				cmd->buttons |= BT_CAMLEFT;
-		}
-	}
 	else
 		cmd->angleturn = (INT16)(cmd->angleturn - (mdx*8));
 
@@ -2684,10 +2674,7 @@ void G_Ticker(boolean run)
 			// Do angle adjustments.
 			players[i].angleturn += players[i].cmd.angleturn - players[i].oldrelangleturn;
 			players[i].oldrelangleturn = players[i].cmd.angleturn;
-			if (P_ControlStyle(&players[i]) == CS_LMAOGALOG)
-				P_ForceLocalAngle(&players[i], players[i].angleturn << 16);
-			else
-				players[i].cmd.angleturn = (players[i].angleturn & ~TICCMD_RECEIVED) | (players[i].cmd.angleturn & TICCMD_RECEIVED);
+			players[i].cmd.angleturn = (players[i].angleturn & ~TICCMD_RECEIVED) | (players[i].cmd.angleturn & TICCMD_RECEIVED);
 		}
 	}
 #undef ISHUMAN
