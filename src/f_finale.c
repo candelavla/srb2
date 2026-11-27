@@ -1100,6 +1100,7 @@ static const char *credits[] = {
 	"Ikaro \"Tatsuru\" Vinhas",
 	"Ben \"Cue\" Woodford",
 	"Lachlan \"Lach\" Wright",
+	"\"Xian\"", // virtual notches
 	"Marco \"mazmazz\" Zafra",
 	"\"Zwip-Zwap Zapony\"",
 	"",

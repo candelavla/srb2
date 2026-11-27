@@ -59,6 +59,8 @@ extern consvar_t cv_invertmouse2, cv_alwaysfreelook2, cv_chasefreelook2, cv_mous
 
 extern consvar_t cv_useranalog[2], cv_analog[2];
 extern consvar_t cv_directionchar[2];
+extern consvar_t cv_vn_width[2];
+extern consvar_t cv_vn_depth[2];
 
 typedef enum {
 	CS_LEGACY,

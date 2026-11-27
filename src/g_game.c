@@ -351,12 +351,12 @@ consvar_t cv_mousemove2 = CVAR_INIT ("mousemove2", "Off", CV_SAVE, CV_OnOff, NUL
 // previously "analog", "analog2", "useranalog", and "useranalog2", invalidating 2.1-era copies of config.cfg
 // changed because it'd be nice to see people try out our actually good controls with gamepads now autobrake exists
 consvar_t cv_analog[2] = {
-	CVAR_INIT ("sessionanalog", "Off", CV_CALL|CV_NOSHOWHELP, CV_OnOff, Analog_OnChange),
-	CVAR_INIT ("sessionanalog2", "Off", CV_CALL|CV_NOSHOWHELP, CV_OnOff, Analog2_OnChange),
+	CVAR_INIT ("sessionanalog", "On", CV_CALL|CV_NOSHOWHELP, CV_OnOff, Analog_OnChange),
+	CVAR_INIT ("sessionanalog2", "On", CV_CALL|CV_NOSHOWHELP, CV_OnOff, Analog2_OnChange),
 };
 consvar_t cv_useranalog[2] = {
-	CVAR_INIT ("configanalog", "On", CV_SAVE|CV_CALL|CV_NOSHOWHELP, CV_OnOff, UserAnalog_OnChange),
-	CVAR_INIT ("configanalog2", "On", CV_SAVE|CV_CALL|CV_NOSHOWHELP, CV_OnOff, UserAnalog2_OnChange),
+	CVAR_INIT ("analog", "On", CV_SAVE|CV_CALL|CV_NOSHOWHELP, CV_OnOff, UserAnalog_OnChange),
+	CVAR_INIT ("analog2", "On", CV_SAVE|CV_CALL|CV_NOSHOWHELP, CV_OnOff, UserAnalog2_OnChange),
 };
 
 // deez New User eXperiences
@@ -366,27 +366,37 @@ consvar_t cv_directionchar[2] = {
 	CVAR_INIT ("directionchar2", "Movement", CV_SAVE|CV_CALL, directionchar_cons_t, DirectionChar2_OnChange),
 };
 
+static CV_PossibleValue_t virtualnotch_cons_t[] = {{0, "MIN"}, {25, "MAX"}, {0, NULL}};
+consvar_t cv_vn_width[2] = {
+	CVAR_INIT ("vn_width", "8", CV_SAVE, virtualnotch_cons_t, NULL),
+	CVAR_INIT ("vn_width2", "8", CV_SAVE, virtualnotch_cons_t, NULL),
+};
+consvar_t cv_vn_depth[2] = {
+	CVAR_INIT ("vn_depth", "8", CV_SAVE, virtualnotch_cons_t, NULL),
+	CVAR_INIT ("vn_depth2", "8", CV_SAVE, virtualnotch_cons_t, NULL),
+};
+
 // hi here's some new controls
 static CV_PossibleValue_t zerotoone_cons_t[] = {{0, "MIN"}, {FRACUNIT, "MAX"}, {0, NULL}};
 consvar_t cv_cam_turntospindash[2] = {
-	CVAR_INIT ("cam_turntospindash", "0.439972", CV_FLOAT|CV_SAVE|CV_ALLOWLUA, zerotoone_cons_t, NULL),
-	CVAR_INIT ("cam2_turntospindash", "0.439972", CV_FLOAT|CV_SAVE|CV_ALLOWLUA, zerotoone_cons_t, NULL),
+	CVAR_INIT ("cam_turntospindash", "0.439972", CV_FLOAT|CV_SAVE, zerotoone_cons_t, NULL),
+	CVAR_INIT ("cam2_turntospindash", "0.439972", CV_FLOAT|CV_SAVE, zerotoone_cons_t, NULL),
 };
 consvar_t cv_cam_turntoinput[2] = {
-	CVAR_INIT ("cam_turntoinput", "0.5", CV_FLOAT|CV_SAVE|CV_ALLOWLUA, zerotoone_cons_t, NULL),
-	CVAR_INIT ("cam2_turntoinput", "0.5", CV_FLOAT|CV_SAVE|CV_ALLOWLUA, zerotoone_cons_t, NULL),
+	CVAR_INIT ("cam_turntoinput", "0.5", CV_FLOAT|CV_SAVE, zerotoone_cons_t, NULL),
+	CVAR_INIT ("cam2_turntoinput", "0.5", CV_FLOAT|CV_SAVE, zerotoone_cons_t, NULL),
 };
 
 static CV_PossibleValue_t centertoggle_cons_t[] = {{0, "Hold"}, {1, "Toggle"}, {2, "Sticky Hold"}, {0, NULL}};
 consvar_t cv_cam_centertoggle[2] = {
-	CVAR_INIT ("cam_centertoggle", "Sticky Hold", CV_SAVE|CV_ALLOWLUA, centertoggle_cons_t, NULL),
-	CVAR_INIT ("cam2_centertoggle", "Sticky Hold", CV_SAVE|CV_ALLOWLUA, centertoggle_cons_t, NULL),
+	CVAR_INIT ("cam_centertoggle", "Sticky Hold", CV_SAVE, centertoggle_cons_t, NULL),
+	CVAR_INIT ("cam2_centertoggle", "Sticky Hold", CV_SAVE, centertoggle_cons_t, NULL),
 };
 
 static CV_PossibleValue_t lockedinput_cons_t[] = {{0, "Strafe"}, {1, "Turn"}, {0, NULL}};
 consvar_t cv_cam_lockedinput[2] = {
-	CVAR_INIT ("cam_lockedinput", "Strafe", CV_SAVE|CV_ALLOWLUA, lockedinput_cons_t, NULL),
-	CVAR_INIT ("cam2_lockedinput", "Strafe", CV_SAVE|CV_ALLOWLUA, lockedinput_cons_t, NULL),
+	CVAR_INIT ("cam_lockedinput", "Strafe", CV_SAVE, lockedinput_cons_t, NULL),
+	CVAR_INIT ("cam2_lockedinput", "Strafe", CV_SAVE, lockedinput_cons_t, NULL),
 };
 
 static CV_PossibleValue_t lockedassist_cons_t[] = {
@@ -398,8 +408,8 @@ static CV_PossibleValue_t lockedassist_cons_t[] = {
 	{0, NULL}
 };
 consvar_t cv_cam_lockonboss[2] = {
-	CVAR_INIT ("cam_lockaimassist", "Bosses", CV_SAVE|CV_ALLOWLUA, lockedassist_cons_t, NULL),
-	CVAR_INIT ("cam2_lockaimassist", "Bosses", CV_SAVE|CV_ALLOWLUA, lockedassist_cons_t, NULL),
+	CVAR_INIT ("cam_lockaimassist", "Bosses", CV_SAVE, lockedassist_cons_t, NULL),
+	CVAR_INIT ("cam2_lockaimassist", "Bosses", CV_SAVE, lockedassist_cons_t, NULL),
 };
 
 consvar_t cv_moveaxis[2] = {
@@ -1845,16 +1855,29 @@ void G_BuildTiccmd(ticcmd_t *cmd, INT32 realtics, UINT8 ssplayer)
 	cmd->sidemove = (SINT8)(cmd->sidemove + side);
 
 	// Note: Majority of botstuffs are handled in G_Ticker now.
-	if (player->bot == BOT_2PAI
-		&& !player->powers[pw_tailsfly]
-		&& (cmd->forwardmove || cmd->sidemove || cmd->buttons))
+	if (player->bot)
 	{
-		player->bot = BOT_2PHUMAN; // A player-controlled bot. Returns to AI when it respawns.
-		CV_SetValue(&cv_analog[1], true);
+		if (player->bot == BOT_2PAI && !player->powers[pw_tailsfly] && (cmd->forwardmove || cmd->sidemove || cmd->buttons))
+		{
+			player->bot = BOT_2PHUMAN; // A player-controlled bot. Returns to AI when it respawns.
+			CV_SetValue(&cv_analog[1], true);
+		}
+		else if (player->bot == BOT_2PHUMAN)
+		{
+			cmd->angleturn = (INT16)((localangle - *myangle) >> 16);
+		}
 	}
 
-	if (player->bot == BOT_2PHUMAN)
-		cmd->angleturn = (INT16)((localangle - *myangle) >> 16);
+	// virtual notches! credit xian for original lua script
+	UINT8 notch = cv_vn_width[forplayer].value;
+	UINT8 minecraft = cv_vn_depth[forplayer].value<<1;
+	if (notch && minecraft)
+	{
+		if (abs(cmd->forwardmove) > (50-minecraft) && abs(cmd->sidemove) < notch)
+			cmd->sidemove = 0;
+		if (abs(cmd->sidemove) > (50-minecraft) && abs(cmd->forwardmove) < notch)
+			cmd->forwardmove = 0;
+	}
 
 	*myangle += (cmd->angleturn<<16);
 

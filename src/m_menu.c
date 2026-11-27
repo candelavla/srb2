@@ -1143,10 +1143,12 @@ static menuitem_t OP_Gamepad1Menu[] =
 	{IT_STRING | IT_CVAR,  NULL, "Camera \x17 Axis"  , &cv_lookaxis[0]      , 70},
 	{IT_STRING | IT_CVAR,  NULL, "Camera \x18 Axis"  , &cv_turnaxis[0]      , 80},
 
-	{IT_STRING | IT_CVAR, NULL, "First-Person Vert-Look", &cv_alwaysfreelook, 100},
-	{IT_STRING | IT_CVAR, NULL, "Third-Person Vert-Look", &cv_chasefreelook,  110},
+	{IT_STRING | IT_CVAR, NULL, "First-Person Free Look", &cv_alwaysfreelook, 100},
+	{IT_STRING | IT_CVAR, NULL, "Third-Person Free Look", &cv_chasefreelook,  110},
 	{IT_STRING | IT_CVAR | IT_CV_FLOATSLIDER, NULL, "Analog Deadzone", &cv_deadzone[0], 120},
 	{IT_STRING | IT_CVAR | IT_CV_FLOATSLIDER, NULL, "Digital Deadzone", &cv_digitaldeadzone[0], 130},
+	{IT_STRING | IT_CVAR | IT_CV_SLIDER, NULL, "V-Notch Width", &cv_vn_width[0], 140},
+	{IT_STRING | IT_CVAR | IT_CV_SLIDER, NULL, "V-Notch Depth", &cv_vn_depth[0], 150},
 };
 
 static menuitem_t OP_Gamepad2Menu[] =
@@ -1157,10 +1159,12 @@ static menuitem_t OP_Gamepad2Menu[] =
 	{IT_STRING | IT_CVAR,  NULL, "Camera \x17 Axis"  , &cv_lookaxis[1]      , 50},
 	{IT_STRING | IT_CVAR,  NULL, "Camera \x18 Axis"  , &cv_turnaxis[1]      , 60},
 
-	{IT_STRING | IT_CVAR, NULL, "First-Person Vert-Look", &cv_alwaysfreelook2,80},
-	{IT_STRING | IT_CVAR, NULL, "Third-Person Vert-Look", &cv_chasefreelook2, 90},
+	{IT_STRING | IT_CVAR, NULL, "First-Person Free Look", &cv_alwaysfreelook2,80},
+	{IT_STRING | IT_CVAR, NULL, "Third-Person Free Look", &cv_chasefreelook2, 90},
 	{IT_STRING | IT_CVAR | IT_CV_FLOATSLIDER, NULL, "Analog Deadzone", &cv_deadzone[1],100},
 	{IT_STRING | IT_CVAR | IT_CV_FLOATSLIDER, NULL, "Digital Deadzone", &cv_digitaldeadzone[1],110},
+	{IT_STRING | IT_CVAR | IT_CV_SLIDER, NULL, "V-Notch Width", &cv_vn_width[1], 120},
+	{IT_STRING | IT_CVAR | IT_CV_SLIDER, NULL, "V-Notch Depth", &cv_vn_depth[1], 130},
 };
 
 static menuitem_t OP_GamepadSetMenu[MAX_CONNECTED_GAMEPADS + 1];

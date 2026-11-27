@@ -907,6 +907,10 @@ void D_RegisterClientCommands(void)
 	// deez New User eXperiences
 	CV_RegisterVar(&cv_directionchar[0]);
 	CV_RegisterVar(&cv_directionchar[1]);
+	CV_RegisterVar(&cv_vn_width[0]);
+	CV_RegisterVar(&cv_vn_width[1]);
+	CV_RegisterVar(&cv_vn_depth[0]);
+	CV_RegisterVar(&cv_vn_depth[1]);
 
 	// hi here's some new controls
 	CV_RegisterVar(&cv_cam_turntospindash[0]);
