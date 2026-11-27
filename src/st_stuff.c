@@ -1214,28 +1214,28 @@ static void ST_drawInput(void)
 	{
 		switch (P_ControlStyle(stplyr))
 		{
-		case CS_LMAOGALOG:
-			V_DrawThinString(x, y, flags, "BAD TIME");
-			y -= 8;
-			break;
+			case CS_LMAOGALOG:
+				V_DrawThinString(x, y, flags, "EANUAL");
+				y -= 8;
+				break;
 
-		case CS_SIMPLE:
-			V_DrawThinString(x, y, flags, "AUTOMATIC");
-			y -= 8;
-			break;
+			case CS_SIMPLE:
+				V_DrawThinString(x, y, flags, "AUTOMATIC");
+				y -= 8;
+				break;
 
-		case CS_STANDARD:
-			V_DrawThinString(x, y, flags, "WANUAL");
-			y -= 8;
-			break;
+			case CS_STANDARD:
+				V_DrawThinString(x, y, flags, "WANUAL");
+				y -= 8;
+				break;
 
-		case CS_LEGACY:
-			V_DrawThinString(x, y, flags, "MANUAL");
-			y -= 8;
-			break;
+			case CS_LEGACY:
+				V_DrawThinString(x, y, flags, "MANUAL");
+				y -= 8;
+				break;
 
-		default:
-			break;
+			default:
+				break;
 		}
 	}
 	if (!demosynced) // should always be last, so it doesn't push anything else around

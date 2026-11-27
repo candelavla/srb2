@@ -8363,26 +8363,22 @@ void P_MovePlayer(player_t *player)
 	{
 		if (!player->climbing)
 		{
-			switch (P_ControlStyle(player))
+			if (P_ControlStyle(player) == CS_SIMPLE)
 			{
-				case CS_LEGACY:
-				case CS_STANDARD:
-					player->mo->angle = (cmd->angleturn<<16 /* not FRACBITS */);
-					break;
-				case CS_SIMPLE:
-					if (cmd->forwardmove || cmd->sidemove)
-					{
-						angle_t controlangle = R_PointToAngle2(0, 0, cmd->forwardmove << FRACBITS, -cmd->sidemove << FRACBITS);
-						player->mo->angle = (cmd->angleturn<<16 /* not FRACBITS */) + controlangle;
-					}
-					else
-					{
-						angle_t drawangleoffset = (player->powers[pw_carry] == CR_ROLLOUT) ? ANGLE_180 : 0;
-						player->mo->angle = player->drawangle + drawangleoffset;
-					}
-					break;
-				default:
-					break;
+				if (cmd->forwardmove || cmd->sidemove)
+				{
+					angle_t controlangle = R_PointToAngle2(0, 0, cmd->forwardmove << FRACBITS, -cmd->sidemove << FRACBITS);
+					player->mo->angle = (cmd->angleturn<<16 /* not FRACBITS */) + controlangle;
+				}
+				else
+				{
+					angle_t drawangleoffset = (player->powers[pw_carry] == CR_ROLLOUT) ? ANGLE_180 : 0;
+					player->mo->angle = player->drawangle + drawangleoffset;
+				}
+			}
+			else
+			{
+				player->mo->angle = (cmd->angleturn<<16 /* not FRACBITS */);
 			}
 		}
 

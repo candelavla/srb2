@@ -4507,7 +4507,7 @@ static void M_DrawGenericMenu(void)
 	}
 }
 
-const char *PlaystyleNames[4] = {"Manual", "\x86Wanual\x80", "Automatic", "Bad Time"};
+const char *PlaystyleNames[4] = {"Manual", "\x86Wanual\x80", "Automatic", "\x86¿Eanual?\x80"};
 const char *PlaystyleDesc[4] = {
 	// Manual
 	"A full control play style, best\n"
@@ -4544,13 +4544,13 @@ const char *PlaystyleDesc[4] = {
 	"This can also lock-on to bosses!"
 	,
 
-	// Old Analog
+	// ¿Eanual?
 	"\n"
 	"\n"
-	"Not supported!"
+	"Old Analog has been removed."
 	"\n"
 	"\n"
-	"Expect things to be broken."
+	"Please change to another style."
 };
 
 static UINT8 playstyle_activeplayer = 0, playstyle_currentchoice = 0;
