@@ -470,7 +470,7 @@ boolean P_DoSpring(mobj_t *spring, mobj_t *object)
 		&& object->tracer->player
 		&& object->tracer->player->powers[pw_carry] != CR_NONE
 		&& object->tracer->tracer == object
-		&& (!demoplayback || P_ControlStyle(object->tracer->player) == CS_LMAOGALOG))
+		&& (!demoplayback)
 			P_SetPlayerAngle(object->tracer->player, spring->angle);
 
 	object->standingslope = NULL; // And again.
@@ -1349,7 +1349,7 @@ static unsigned PIT_DoCheckThing(mobj_t *thing)
 
 			thing->angle = tmthing->angle;
 
-			if (!demoplayback || P_ControlStyle(thing->player) == CS_LMAOGALOG)
+			if (!demoplayback)
 				P_SetPlayerAngle(thing->player, thing->angle);
 
 			return CHECKTHING_COLLIDE;
@@ -3562,7 +3562,7 @@ static void PTR_GlideClimbTraverse(line_t *li)
 			&& canclimb)
 		{
 			slidemo->angle = climbangle;
-			/*if (!demoplayback || P_ControlStyle(slidemo->player) == CS_LMAOGALOG)
+			/*if (!demoplayback)
 				P_SetPlayerAngle(slidemo->player, slidemo->angle);*/
 
 			if (!slidemo->player->climbing)

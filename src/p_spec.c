@@ -4450,7 +4450,7 @@ static void P_ProcessSpeedPad(player_t *player, sector_t *sector, sector_t *rove
 
 	player->mo->angle = player->drawangle = lineangle;
 
-	if (!demoplayback || P_ControlStyle(player) == CS_LMAOGALOG)
+	if (!demoplayback)
 		P_SetPlayerAngle(player, player->mo->angle);
 
 	if (!(lines[lineindex].args[1] & TMSP_NOTELEPORT))
@@ -8944,7 +8944,7 @@ void T_Pusher(pusher_t *p)
 				thing->player->pflags |= PF_SLIDING;
 				thing->angle = R_PointToAngle2(0, 0, xspeed, yspeed);
 
-				if (!demoplayback || P_ControlStyle(thing->player) == CS_LMAOGALOG)
+				if (!demoplayback)
 				{
 					angle_t angle = thing->player->angleturn << 16;
 					if (thing->angle - angle > ANGLE_180)

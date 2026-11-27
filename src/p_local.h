@@ -207,7 +207,6 @@ boolean P_HomingAttack(mobj_t *source, mobj_t *enemy); /// \todo doesn't belong 
 boolean P_SuperReady(player_t *player);
 void P_DoJump(player_t *player, boolean soundandstate, boolean allowflip);
 void P_DoSpinDashDust(player_t *player);
-#define P_AnalogMove(player) (P_ControlStyle(player) == CS_LMAOGALOG)
 boolean P_TransferToNextMare(player_t *player);
 UINT8 P_FindLowestMare(void);
 void P_FindEmerald(void);
