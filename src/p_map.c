@@ -470,7 +470,7 @@ boolean P_DoSpring(mobj_t *spring, mobj_t *object)
 		&& object->tracer->player
 		&& object->tracer->player->powers[pw_carry] != CR_NONE
 		&& object->tracer->tracer == object
-		&& (!demoplayback)
+		&& !demoplayback)
 			P_SetPlayerAngle(object->tracer->player, spring->angle);
 
 	object->standingslope = NULL; // And again.

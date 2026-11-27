@@ -1479,10 +1479,9 @@ void G_BuildTiccmd(ticcmd_t *cmd, INT32 realtics, UINT8 ssplayer)
 		tspeed = speed;
 
 	// let movement keys cancel each other out
-	if (twodlevel
-		|| (player->mo && (player->mo->flags2 & MF2_TWOD))
-		|| (!demoplayback && (player->pflags & PF_SLIDING)))
-			forcefullinput = true;
+	if (twodlevel || (player->mo && (player->mo->flags2 & MF2_TWOD)))
+		forcefullinput = true;
+
 	if (twodlevel
 		|| (player->mo && (player->mo->flags2 & MF2_TWOD))
 		|| (!demoplayback && ((player->powers[pw_carry] == CR_NIGHTSMODE)
@@ -1818,10 +1817,7 @@ void G_BuildTiccmd(ticcmd_t *cmd, INT32 realtics, UINT8 ssplayer)
 	if (!mouseaiming && mousemove)
 		forward += mdy;
 
-	if ((!demoplayback && (player->pflags & PF_SLIDING))) // Analog for mouse
-		side += mdx*2;
-	else
-		cmd->angleturn = (INT16)(cmd->angleturn - (mdx*8));
+	cmd->angleturn = (INT16)(cmd->angleturn - (mdx*8));
 
 	if (forward > MAXPLMOVE)
 		forward = MAXPLMOVE;

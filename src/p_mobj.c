@@ -1531,7 +1531,7 @@ boolean P_XYFriction(mobj_t *mo, fixed_t oldz)
 	if (mo->flags & MF_NOCLIPHEIGHT)
 		return false; // no frictions for objects that can pass through floors
 
-	if (player) // valid only if player avatar
+	if (player) // valid only if player
 	{
 		if (player->homing || player->powers[pw_carry] == CR_NIGHTSMODE)
 			return false; // no friction for NiGHTS players, homing players, or homing NiGHTS players
@@ -3150,16 +3150,20 @@ boolean P_SceneryZMovement(mobj_t *mo)
 //
 boolean P_CanRunOnWater(player_t *player, ffloor_t *rover)
 {
+	if (!(rover->fofflags & FOF_SWIMMABLE) || (player->panim != PA_RUN && !(player->pflags & PF_BOUNCING) && player->panim != PA_DASH) || (player->pflags & (PF_SPINNING|PF_SLIDING)) || player->powers[pw_carry])
+		return false;
+
+	if ((player->charflags & SF_RUNONWATER) && player->speed >= FixedMul(player->runspeed, player->mo->scale))
+		; // go on
+	else if (!player->powers[pw_super] && !(player->pflags & PF_BOUNCING) && player->speed < FixedMul(54<<FRACBITS, player->mo->scale) && player->dashmode < DASHMODE_THRESHOLD)
+		return false;
+
 	boolean flip = player->mo->eflags & MFE_VERTICALFLIP;
 	fixed_t surfaceheight = flip ? P_GetFFloorBottomZAt(rover, player->mo->x, player->mo->y) : P_GetFFloorTopZAt(rover, player->mo->x, player->mo->y);
 	fixed_t playerbottom = flip ? (player->mo->z + player->mo->height) : player->mo->z;
 	boolean doifit = flip ? (surfaceheight - player->mo->floorz >= player->mo->height) : (player->mo->ceilingz - surfaceheight >= player->mo->height);
 
-	if (!player->powers[pw_carry] && !player->homing
-		&& ((player->powers[pw_super] || (player->charflags & SF_RUNONWATER) || player->dashmode >= DASHMODE_THRESHOLD || player->speed >= FixedMul(54<<FRACBITS, player->mo->scale)) && doifit)
-		&& (rover->fofflags & FOF_SWIMMABLE) && !(player->pflags & PF_SPINNING) && player->speed > FixedMul(player->runspeed, player->mo->scale)
-		&& !(player->pflags & PF_SLIDING)
-		&& abs(playerbottom - surfaceheight) < FixedMul(30*FRACUNIT, player->mo->scale))
+	if (doifit && (abs(playerbottom - surfaceheight) < FixedMul(30*FRACUNIT, player->mo->scale)))
 		return true;
 
 	return false;

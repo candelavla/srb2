@@ -94,7 +94,6 @@ jingle_t jingleinfo[NUMJINGLES] = {
 #define MAXBOB (0x10 << FRACBITS)
 
 static boolean onground;
-static boolean spin;
 
 //
 // P_Thrust
@@ -224,7 +223,7 @@ void P_CalcHeight(player_t *player)
 	if (player->bob > FixedMul(cv_movebob.value, FixedMul(MAXBOB, mo->scale)))
 		player->bob = FixedMul(cv_movebob.value, FixedMul(MAXBOB, mo->scale));
 
-	if (!P_IsObjectOnGround(mo))
+	if (!onground)
 	{
 		if (mo->eflags & MFE_VERTICALFLIP)
 		{
@@ -3816,7 +3815,7 @@ static void P_DoClimbing(player_t *player)
 	if (player->climbing == 0)
 		P_SetMobjState(player->mo, S_PLAY_JUMP);
 
-	if (player->climbing && P_IsObjectOnGround(player->mo))
+	if (player->climbing && onground)
 	{
 		P_ResetPlayer(player);
 		P_SetMobjState(player->mo, S_PLAY_STND);
@@ -5206,7 +5205,7 @@ static void P_DoShieldAbility(player_t *player, boolean spinshieldhack)
 	if (!spinshieldhack && LUA_HookPlayer(player, HOOK(ShieldButtonSpecial)))
 		return;
 
-	if (player->powers[pw_super] || !(player->powers[pw_shield] & SH_NOSTACK) || (player->pflags & (PF_THOKKED|PF_SHIELDABILITY)) || (!(player->pflags & PF_JUMPED) && (((player->powers[pw_shield] & SH_NOSTACK) != SH_WHIRLWIND) || P_IsObjectOnGround(player->mo))) || (player->charflags & SF_NOSHIELDABILITY))
+	if (player->powers[pw_super] || !(player->powers[pw_shield] & SH_NOSTACK) || (player->pflags & (PF_THOKKED|PF_SHIELDABILITY)) || (!(player->pflags & PF_JUMPED) && (((player->powers[pw_shield] & SH_NOSTACK) != SH_WHIRLWIND) || (onground))) || (player->charflags & SF_NOSHIELDABILITY))
 		return;
 
 	if (LUA_HookPlayer(player, HOOK(ShieldSpecial)))
@@ -5366,11 +5365,7 @@ static void P_DoJumpStuff(player_t *player, ticcmd_t *cmd, boolean spinshieldhac
 
 	if (player->pflags & PF_JUMPED)
 	{
-		if (onground || player->exiting || player->climbing || player->powers[pw_carry] || P_PlayerInPain(player))
-			;
-		else if ((gametyperules & GTR_TEAMFLAGS) && player->gotflag)
-			;
-		else if (player->pflags & (PF_GLIDING|PF_SLIDING|PF_SHIELDABILITY)) // If the player has used an ability previously
+		if (onground || player->exiting || player->climbing || player->powers[pw_carry] || P_PlayerInPain(player) || (player->pflags & (PF_GLIDING|PF_SLIDING|PF_SHIELDABILITY)) || player->gotflag)
 			;
 		else if (P_PlayerShieldThink(player, cmd, lockonthok, visual, spinshieldhack))
 			;
@@ -5499,7 +5494,7 @@ static void P_DoJumpStuff(player_t *player, ticcmd_t *cmd, boolean spinshieldhac
 				player->pflags &= ~PF_THOKKED;
 			}
 		}
-		else if (player->pflags & PF_SLIDING || ((gametyperules & GTR_TEAMFLAGS) && player->gotflag) || player->pflags & PF_SHIELDABILITY)
+		else if (player->gotflag || (player->pflags & PF_SLIDING) || player->pflags & PF_SHIELDABILITY)
 			;
 		else if ((player->rsprung == 4 || (player->pflags & PF_JUMPED)) && !onground)
 		{
@@ -5899,7 +5894,7 @@ static boolean P_ShouldResetConveyorMomentum(player_t *player)
 		default:
 			return true;
 		case 4: // Actual conveyor belt
-			return !P_IsObjectOnGround(player->mo);
+			return !onground;
 	}
 }
 
@@ -5917,7 +5912,7 @@ static void P_2dMovement(player_t *player)
 
 	cmd = &player->cmd;
 
-	if (player->exiting || player->pflags & PF_STASIS || player->powers[pw_springlock])
+	if (player->exiting || (player->pflags & PF_STASIS) || player->powers[pw_springlock])
 	{
 		cmd->forwardmove = cmd->sidemove = 0;
 		if (player->pflags & PF_GLIDING)
@@ -5951,9 +5946,13 @@ static void P_2dMovement(player_t *player)
 
 	player->aiming = cmd->aiming<<FRACBITS;
 
+	// set bools
 	onground = P_IsObjectOnGround(player->mo);
 
-	if (player->pflags & PF_GLIDING)
+	boolean climb = player->climbing;
+	boolean glide = (player->pflags & PF_GLIDING);
+
+	if (glide)
 	{
 		if (player->mo->angle < ANGLE_180 && player->mo->angle > ANGLE_90)
 			player->mo->angle = ANGLE_180;
@@ -5977,7 +5976,7 @@ static void P_2dMovement(player_t *player)
 		movepushangle = player->mo->angle;
 		goto angleisland;
 	}
-	else if (cmd->sidemove && !player->skidtime && !player->climbing && !(player->pflags & (PF_SPINNING|PF_STARTDASH)) && !player->powers[pw_justsprung] && !P_PlayerInPain(player)
+	else if (cmd->sidemove && !player->skidtime && !climb && !(player->pflags & (PF_SPINNING|PF_STARTDASH)) && !player->powers[pw_justsprung] && !P_PlayerInPain(player)
 	&& (!onground || (player->charflags & SF_NOSKID) || player->speed < FixedMul(23<<FRACBITS, player->mo->scale)))
 	{
 		if (cmd->sidemove < 0)
@@ -6077,15 +6076,14 @@ setaccel2d:
 	if (player->fly1)
 		topspeed = FixedMul(topspeed, 11*FRACUNIT/16);
 
-	if (player->climbing)
+	if (climb)
 	{
 		if (cmd->forwardmove != 0)
 			P_SetObjectMomZ(player->mo, FixedDiv(cmd->forwardmove*FRACUNIT, player->powers[pw_super] ? 6*FRACUNIT : 8*FRACUNIT), false); // -2 while super
 
 		player->mo->momx = 0;
 	}
-	else if (cmd->sidemove != 0 && !(player->pflags & PF_GLIDING || player->exiting
-		|| (P_PlayerInPain(player) && !onground)))
+	else if (cmd->sidemove != 0 && !(glide || player->exiting || (P_PlayerInPain(player) && !onground)))
 	{
 		movepushforward = abs(cmd->sidemove * acceleration);
 
@@ -6173,11 +6171,17 @@ static void P_3dMovement(player_t *player)
 
 	player->aiming = cmd->aiming<<FRACBITS;
 
+	// set bools
 	onground = P_IsObjectOnGround(player->mo);
-	spin = (player->pflags & PF_SPINNING);
+
+	boolean spin = (player->pflags & PF_SPINNING);
+	boolean slide = (player->pflags & PF_SLIDING);
+	boolean climb = player->climbing;
+	boolean glide = (player->pflags & PF_GLIDING);
+	boolean startdash = (player->pflags & PF_STARTDASH);
 
 	// determine acceleration value
-	if (player->pflags & PF_SLIDING)
+	if (slide)
 	{
 		if (braking)
 			acceleration = 0;
@@ -6252,11 +6256,11 @@ setaccel3d:
 	if (player->fly1)
 		topspeed = FixedMul(topspeed, 11*FRACUNIT/16);
 
-	if (spin && onground) // Prevent gaining speed whilst rolling!
+	if ((spin && onground) || slide) // Prevent gaining speed whilst rolling!
 		topspeed = oldMagnitude;
 
 	// Forward movement
-	if (player->climbing)
+	if (climb)
 	{
 		if (cmd->forwardmove)
 		{
@@ -6266,13 +6270,12 @@ setaccel3d:
 				P_SetObjectMomZ(player->mo, FixedDiv(cmd->forwardmove*FRACUNIT, player->powers[pw_super] ? 6*FRACUNIT : 8*FRACUNIT), false); // -2 while super
 		}
 	}
-	else if ((cmd->forwardmove != 0 || (player->pflags & PF_STARTDASH)) && !(player->pflags & PF_GLIDING || player->exiting
-		|| (P_PlayerInPain(player) && !onground)))
+	else if ((cmd->forwardmove || startdash) && !(glide || player->exiting || (P_PlayerInPain(player) && !onground)))
 	{
 		movepushforward = cmd->forwardmove * acceleration;
 
 		// Allow a bit of no forward movement, as a treat
-		if (player->pflags & PF_STARTDASH)
+		if (startdash)
 			movepushforward = 0;
 		else if (spin)
 			movepushforward >>= 1;
@@ -6283,18 +6286,18 @@ setaccel3d:
 		totalthrust.y += P_ReturnThrustY(player->mo, movepushangle, movepushforward);
 	}
 	// Sideways movement
-	if (player->climbing)
+	if (climb)
 	{
 		if (player->mo->eflags & MFE_UNDERWATER)
 			P_InstaThrust(player->mo, player->mo->angle-ANGLE_90, FixedDiv(cmd->sidemove*player->mo->scale, player->powers[pw_super] ? 5*FRACUNIT : 7*FRACUNIT)); // -2 while super
 		else
 			P_InstaThrust(player->mo, player->mo->angle-ANGLE_90, FixedDiv(cmd->sidemove*player->mo->scale, player->powers[pw_super] ? 3*FRACUNIT : 5*FRACUNIT)); // -2 while super
 	}
-	else if (cmd->sidemove && !(player->pflags & PF_GLIDING) && !player->exiting && !P_PlayerInPain(player))
+	else if (cmd->sidemove && !glide && !player->exiting && !P_PlayerInPain(player))
 	{
 		movepushside = cmd->sidemove * acceleration;
 
-		if (player->pflags & PF_STARTDASH)
+		if (startdash)
 			movepushside = 0;
 		else if (spin)
 			movepushside >>= 1;
@@ -6350,12 +6353,18 @@ setaccel3d:
 				turnspd -= FRACUNIT>>3;
 				traction = false;
 			}
+			else if (slide)
+			{
+				turnspd <<= 2;
+				traction = false;
+			}
 
 			if (player->powers[pw_justsprung])
 			{
 				turnspd >>= 1;
 				traction = false;
 			}
+
 
 			if (traction && player->mo->friction <= ORIG_FRICTION)
 			{
@@ -8225,7 +8234,7 @@ void P_MovePlayer(player_t *player)
 	if ((player->powers[pw_carry] == CR_BRAKGOOP)
 	|| (player->pflags & PF_GLIDING && player->skidtime)
 	|| (player->charability2 == CA2_GUNSLINGER && player->panim == PA_ABILITY2)
-	|| (player->charability2 == CA2_MELEE && P_IsPlayerInState(player, S_PLAY_MELEE_LANDING) && P_IsObjectOnGround(player->mo)))
+	|| (player->charability2 == CA2_MELEE && P_IsPlayerInState(player, S_PLAY_MELEE_LANDING) && onground))
 		player->pflags |= PF_FULLSTASIS;
 	else if (player->powers[pw_nocontrol])
 	{
@@ -8335,7 +8344,7 @@ void P_MovePlayer(player_t *player)
 				P_CheckQuicksand(player);
 			return;
 		}
-		else if (player->powers[pw_carry] == CR_NIGHTSFALL && P_IsObjectOnGround(player->mo))
+		else if (player->powers[pw_carry] == CR_NIGHTSFALL && onground)
 		{
 			if (G_IsSpecialStage(gamemap))
 			{
@@ -8747,7 +8756,9 @@ void P_MovePlayer(player_t *player)
 			}
 			if (!player->powers[pw_super] && player->fly1)
 			{
-				player->powers[pw_tailsfly]--;
+				if (!(player->mo->eflags & MFE_UNDERWATER) || leveltime%2 == 0) // drains half as slowly underwater
+					player->powers[pw_tailsfly]--;
+
 				if (player->fly1 == 1) // extra penalty for fly ending keeps tapping and horizontal coverage in check
 				{
 					player->powers[pw_tailsfly] = (player->powers[pw_tailsfly] > 8) ? player->powers[pw_tailsfly]-8 : 0;
@@ -8954,7 +8965,7 @@ void P_MovePlayer(player_t *player)
 	if (CheckForQuicksand)
 		P_CheckQuicksand(player);
 
-	if (P_IsObjectOnGround(player->mo))
+	if (onground)
 		player->mo->pmomz = 0;
 }
 
@@ -10287,7 +10298,7 @@ boolean P_MoveChaseCamera(player_t *player, camera_t *thiscam, boolean resetcall
 	{
 		if (!resetcalled && ((thiscam == &camera && cv_cam_adjust.value) || (thiscam == &camera2 && cv_cam2_adjust.value)))
 		{
-			if (!(mo->eflags & MFE_JUSTHITFLOOR) && (P_IsObjectOnGround(mo)) // Check that player is grounded
+			if (!(mo->eflags & MFE_JUSTHITFLOOR) && onground // Check that player is grounded
 			&& thiscam->ceilingz - thiscam->floorz >= P_GetPlayerHeight(player)) // Check that camera's sector is large enough for the player to fit into, at least
 			{
 				if (mo->eflags & MFE_VERTICALFLIP) // if player is upside-down
@@ -11991,7 +12002,7 @@ void P_PlayerThink(player_t *player)
 	P_MobjCheckWater(player->mo);
 
 #ifndef SECTORSPECIALSAFTERTHINK
-	if (player->onconveyor != 1 || !P_IsObjectOnGround(player->mo))
+	if (player->onconveyor != 1 || !onground)
 		player->onconveyor = 0;
 	// check special sectors : damage & secrets
 
@@ -12294,9 +12305,7 @@ void P_PlayerThink(player_t *player)
 
 		// aerial speed degredation! ignore the power name, autobrake is NOT ALLOWED!
 		{
-			boolean currentlyonground = P_IsObjectOnGround(player->mo);
-
-			if (currentlyonground || player->powers[pw_noautobrake])
+			if (onground || player->powers[pw_noautobrake])
 				;
 			else if (!player->powers[pw_carry] && !player->powers[pw_nocontrol]
 			&& (player->rmomx || player->rmomy)
@@ -12529,7 +12538,7 @@ void P_PlayerThink(player_t *player)
 	{
 		tic_t prevdashmode = dashmode;
 		boolean above = (player->speed >= FixedMul(skins[player->skin]->normalspeed>>1, player->mo->scale)) || (player->pflags & PF_STARTDASH);
-		boolean notfloating = (P_IsObjectOnGround(player->mo) || (player->mo->eflags & MFE_JUSTHITFLOOR));
+		boolean notfloating = (onground || (player->mo->eflags & MFE_JUSTHITFLOOR));
 
 		if (above && notfloating)
 		{
@@ -12695,7 +12704,7 @@ void P_PlayerAfterThink(player_t *player)
 	cmd = &player->cmd;
 
 #ifdef SECTORSPECIALSAFTERTHINK
-	if (player->onconveyor != 1 || !P_IsObjectOnGround(player->mo))
+	if (player->onconveyor != 1 || !onground)
 		player->onconveyor = 0;
 	// check special sectors : damage & secrets
 
