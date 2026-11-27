@@ -5602,6 +5602,8 @@ static void P_DoJumpStuff(player_t *player, ticcmd_t *cmd, boolean spinshieldhac
 							break; // Can't do anything if you're a fish out of water!
 						}
 
+ 						P_SetMobjState(player->mo, S_PLAY_FLY); // enter flying animation
+
 						player->powers[pw_tailsfly] = 4*TICRATE; // set the active flight timer
 
 						player->pflags &= ~(PF_JUMPED|PF_NOJUMPDAMAGE|PF_SPINNING|PF_STARTDASH);
