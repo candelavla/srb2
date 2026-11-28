@@ -3153,9 +3153,7 @@ boolean P_CanRunOnWater(player_t *player, ffloor_t *rover)
 	if (!(rover->fofflags & FOF_SWIMMABLE) || (player->panim != PA_RUN && !(player->pflags & PF_BOUNCING) && player->panim != PA_DASH) || (player->pflags & (PF_SPINNING|PF_SLIDING)) || player->powers[pw_carry])
 		return false;
 
-	if ((player->charflags & SF_RUNONWATER) && player->speed >= FixedMul(player->runspeed, player->mo->scale))
-		; // go on
-	else if (!player->powers[pw_super] && !(player->pflags & PF_BOUNCING) && player->speed < FixedMul(54<<FRACBITS, player->mo->scale) && player->dashmode < DASHMODE_THRESHOLD)
+	if (!player->powers[pw_super] && !(player->pflags & PF_BOUNCING) && !(player->charflags & SF_RUNONWATER) && player->speed < FixedMul(54<<FRACBITS, player->mo->scale) && player->dashmode < DASHMODE_THRESHOLD)
 		return false;
 
 	boolean flip = player->mo->eflags & MFE_VERTICALFLIP;
