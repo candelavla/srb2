@@ -3150,10 +3150,12 @@ boolean P_SceneryZMovement(mobj_t *mo)
 //
 boolean P_CanRunOnWater(player_t *player, ffloor_t *rover)
 {
-	if (!(rover->fofflags & FOF_SWIMMABLE) || (player->panim != PA_RUN && !(player->pflags & PF_BOUNCING) && player->panim != PA_DASH) || (player->pflags & (PF_SPINNING|PF_SLIDING)) || player->powers[pw_carry])
+	if (!(rover->fofflags & FOF_SWIMMABLE) || ((player->mo->eflags & MFE_UNDERWATER) || !(player->mo->eflags & MFE_TOUCHWATER)) || (player->pflags & (PF_SPINNING|PF_SLIDING)) || player->powers[pw_carry] || player->panim == PA_PAIN)
 		return false;
 
-	if (!player->powers[pw_super] && !(player->pflags & PF_BOUNCING) && !(player->charflags & SF_RUNONWATER) && player->speed < FixedMul(54<<FRACBITS, player->mo->scale) && player->dashmode < DASHMODE_THRESHOLD)
+	if ((player->powers[pw_super] || (player->charflags & SF_RUNONWATER) || player->dashmode >= DASHMODE_THRESHOLD) && player->speed >= FixedMul(player->runspeed, player->mo->scale))
+		; // you may pass
+	else if (!(player->pflags & PF_BOUNCING) && player->speed < FixedMul(54<<FRACBITS, player->mo->scale))
 		return false;
 
 	boolean flip = player->mo->eflags & MFE_VERTICALFLIP;
